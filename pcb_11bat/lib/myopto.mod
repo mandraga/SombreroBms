@@ -1,0 +1,50 @@
+PCBNEW-LibModule-V1  lun. 28 sept. 2015 19:27:39 CEST
+# encoding utf-8
+Units mm
+$INDEX
+OPTO_CMS
+$EndINDEX
+$MODULE OPTO_CMS
+Po 0 0 0 15 5609784E 00000000 ~~
+Li OPTO_CMS
+Sc 0
+AR 
+Op 0 0 0
+T0 2.6 3.2 1 1 0 0.15 N V 21 N "OPTO_CMS"
+T1 1 -3.6 1 1 0 0.15 N V 21 N "VAL**"
+DA 2.6 -2.7 3.1 -2.7 900 0.15 21
+DA 2.6 -2.7 2.6 -2.2 900 0.15 21
+DS 1.1 -2.7 1.1 2 0.15 21
+DS 1.1 2 8.8 2 0.15 21
+DS 8.8 2 8.8 -2.7 0.15 21
+DS 8.8 -2.7 1.1 -2.7 0.15 21
+$PAD
+Sh "3" R 1.7 1.7 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 9.9 0.9
+$EndPAD
+$PAD
+Sh "4" R 1.7 1.7 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 9.9 -1.6
+$EndPAD
+$PAD
+Sh "1" R 1.7 1.7 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 0 -1.6
+$EndPAD
+$PAD
+Sh "2" R 1.7 1.7 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 0 0.9
+$EndPAD
+$EndMODULE OPTO_CMS
+$EndLIBRARY
