@@ -29,7 +29,6 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
-LIBS:max3311e
 LIBS:ltc2630
 LIBS:lt3010-5
 LIBS:ad7280a
@@ -37,6 +36,7 @@ LIBS:myopto
 LIBS:ina197
 LIBS:hrs1k
 LIBS:ftdichip
+LIBS:ntd5867nl
 LIBS:bms-cache
 EELAYER 27 0
 EELAYER END
@@ -44,7 +44,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 6 9
 Title ""
-Date "18 nov 2015"
+Date "3 jan 2016"
 Rev ""
 Comp ""
 Comment1 ""

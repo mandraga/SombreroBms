@@ -29,7 +29,6 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
-LIBS:max3311e
 LIBS:ltc2630
 LIBS:lt3010-5
 LIBS:ad7280a
@@ -37,6 +36,7 @@ LIBS:myopto
 LIBS:ina197
 LIBS:hrs1k
 LIBS:ftdichip
+LIBS:ntd5867nl
 LIBS:bms-cache
 EELAYER 27 0
 EELAYER END
@@ -44,7 +44,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 9
 Title ""
-Date "18 nov 2015"
+Date "3 jan 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -529,7 +529,7 @@ L R R4
 U 1 1 56029A46
 P 2550 5550
 F 0 "R4" V 2630 5550 40  0000 C CNN
-F 1 "5K" V 2557 5551 40  0000 C CNN
+F 1 "4.7K" V 2557 5551 40  0000 C CNN
 F 2 "~" V 2480 5550 30  0000 C CNN
 F 3 "~" H 2550 5550 30  0000 C CNN
 	1    2550 5550

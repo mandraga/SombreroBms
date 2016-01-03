@@ -1,11 +1,11 @@
-PCBNEW-LibModule-V1  dim. 03 janv. 2016 17:30:08 CET
+PCBNEW-LibModule-V1  dim. 03 janv. 2016 19:13:25 CET
 # encoding utf-8
 Units mm
 $INDEX
 POW_RES
 $EndINDEX
 $MODULE POW_RES
-Po 0 0 0 15 56894C86 00000000 ~~
+Po 0 0 0 15 568964C1 00000000 ~~
 Li POW_RES
 Sc 0
 AR 
@@ -23,7 +23,7 @@ Sh "2" C 2.54 2.54 0 0 0
 Dr 1 0 0
 At STD N 00E0FFFF
 Ne 0 ""
-Po 64 -6.5
+Po 39 -4.5
 $EndPAD
 $PAD
 Sh "1" C 2.54 2.54 0 0 0
