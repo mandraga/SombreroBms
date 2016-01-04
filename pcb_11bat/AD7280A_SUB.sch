@@ -44,7 +44,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 4 9
 Title ""
-Date "3 jan 2016"
+Date "4 jan 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -945,8 +945,6 @@ Wire Wire Line
 Wire Wire Line
 	1200 5700 1200 5750
 Wire Wire Line
-	1200 6150 1200 6200
-Wire Wire Line
 	1500 5950 1600 5950
 Wire Wire Line
 	1800 5400 2450 5400
@@ -1038,8 +1036,6 @@ Text HLabel 900  6200 0    60   Input ~ 0
 LOBAT
 Connection ~ 8900 4600
 Wire Wire Line
-	900  6200 2450 6200
-Wire Wire Line
 	5050 2950 4750 2950
 Text Label 2450 6200 0    60   ~ 0
 VIN0
@@ -1065,8 +1061,6 @@ Wire Wire Line
 Wire Wire Line
 	2950 1500 3300 1500
 Text Label 3300 1500 2    60   ~ 0
-LOBAT
-Text Label 2000 6200 2    60   ~ 0
 LOBAT
 Text Label 4600 4250 0    60   ~ 0
 VSS
@@ -1180,4 +1174,23 @@ F 3 "~" H 1300 1450 60  0000 C CNN
 	1    1300 1450
 	-1   0    0    -1  
 $EndComp
+$Comp
+L R R65
+U 1 1 568A6269
+P 1550 6200
+AR Path="/55E8A312/55E8BE17/568A6269" Ref="R65"  Part="1" 
+AR Path="/55E8A312/55EA30DE/568A6269" Ref="R66"  Part="1" 
+F 0 "R66" V 1630 6200 40  0000 C CNN
+F 1 "10K" V 1557 6201 40  0000 C CNN
+F 2 "~" V 1480 6200 30  0000 C CNN
+F 3 "~" H 1550 6200 30  0000 C CNN
+	1    1550 6200
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	1800 6200 2450 6200
+Wire Wire Line
+	1300 6200 900  6200
+Wire Wire Line
+	1200 6200 1200 6150
 $EndSCHEMATC
