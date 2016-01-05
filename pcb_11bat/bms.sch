@@ -44,7 +44,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 9
 Title ""
-Date "4 jan 2016"
+Date "5 jan 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -210,7 +210,7 @@ Text Label 4950 4050 2    60   ~ 0
 RXD
 Text Label 4950 4150 2    60   ~ 0
 TXD
-Text Label 4950 2450 0    60   ~ 0
+Text Label 4950 4350 0    60   ~ 0
 CSBAT/
 Text Label 9000 2150 2    60   ~ 0
 CSBAT/
@@ -218,9 +218,9 @@ Text Label 9000 2300 2    60   ~ 0
 PD/
 Text Label 9000 2400 2    60   ~ 0
 CNVSTART/
-Text Label 4950 2650 0    60   ~ 0
+Text Label 4950 4450 0    60   ~ 0
 PD/
-Text Label 4950 3300 0    60   ~ 0
+Text Label 4950 3800 0    60   ~ 0
 CNVSTART/
 Text Label 6600 3350 0    60   ~ 0
 GND
@@ -228,9 +228,9 @@ Text Label 6800 3900 0    60   ~ 0
 GND
 Text Label 6300 4500 0    60   ~ 0
 5V
-Text Label 4950 4650 0    60   ~ 0
+Text Label 4950 4550 0    60   ~ 0
 LEDBALANCING
-Text Label 4950 4750 0    60   ~ 0
+Text Label 4950 4650 0    60   ~ 0
 LEDERROR
 Text Label 8100 4200 0    60   ~ 0
 5V
@@ -238,9 +238,9 @@ Text Label 8050 5400 0    60   ~ 0
 LEDBALANCING
 Text Label 8050 5500 0    60   ~ 0
 LEDERROR
-Text Label 4950 4350 0    60   ~ 0
-CHARGER_ON/
 Text Label 4950 2550 0    60   ~ 0
+CHARGER_ON/
+Text Label 4950 4750 0    60   ~ 0
 BUZZER
 $Comp
 L R R8
@@ -386,7 +386,7 @@ Text Label 5550 7050 0    60   ~ 0
 5V
 Text Label 5000 6000 0    60   ~ 0
 GND
-Text Label 4950 4550 0    60   ~ 0
+Text Label 4950 2450 0    60   ~ 0
 STOP_CHARGER
 Text Label 5700 5550 0    60   ~ 0
 STOP_CHARGER
@@ -423,7 +423,7 @@ F4 "CSDAC/" I L 9000 850 60
 F5 "SCLK" I L 9000 1000 60 
 F6 "SDI" I L 9000 1100 60 
 $EndSheet
-Text Label 4950 4450 0    60   ~ 0
+Text Label 4950 3400 0    60   ~ 0
 CSDAC/
 Text Label 8550 850  0    60   ~ 0
 CSDAC/
@@ -522,7 +522,7 @@ F 3 "" H 6200 1250 60  0000 C CNN
 	1    6200 1250
 	1    0    0    -1  
 $EndComp
-Text Notes 5500 2500 0    60   ~ 0
+Text Notes 5700 2600 0    60   ~ 0
 3.6864Mhz ref farnell 1538732\n\n\n
 $Comp
 L R R4
@@ -606,9 +606,7 @@ Wire Wire Line
 Wire Wire Line
 	9450 2400 9000 2400
 Wire Wire Line
-	4650 2650 4950 2650
-Wire Wire Line
-	4650 3600 4950 3600
+	4650 3500 4950 3500
 Wire Wire Line
 	4650 3050 5550 3050
 Wire Wire Line
@@ -766,8 +764,6 @@ Wire Wire Line
 Wire Wire Line
 	4650 5550 4800 5550
 Wire Wire Line
-	4650 3300 4950 3300
-Wire Wire Line
 	10500 950  10950 950 
 Wire Wire Line
 	10500 850  10950 850 
@@ -879,11 +875,9 @@ Text Label 6100 2100 0    60   ~ 0
 GND
 Text Label 6100 1750 0    60   ~ 0
 5V
-Wire Wire Line
-	4650 3800 4950 3800
 Text Label 6100 1900 0    60   ~ 0
 RELON
-Text Label 4950 3800 0    60   ~ 0
+Text Label 4950 2650 0    60   ~ 0
 RELON
 $Sheet
 S 9850 5600 950  1100
@@ -897,11 +891,11 @@ F5 "REQUESTTOSEND" O L 9850 6050 60
 F6 "CLEARTOSEND" I L 9850 6200 60 
 $EndSheet
 Wire Wire Line
-	4650 3700 4950 3700
-NoConn ~ 4650 3500
-Text Label 4950 3600 0    60   ~ 0
+	4650 3600 4950 3600
+NoConn ~ 4650 3700
+Text Label 4950 3500 0    60   ~ 0
 RTS
-Text Label 4950 3700 0    60   ~ 0
+Text Label 4950 3600 0    60   ~ 0
 CTS
 Text Label 9450 6050 2    60   ~ 0
 RTS
@@ -983,7 +977,7 @@ Wire Wire Line
 	2000 3550 2000 3800
 Wire Wire Line
 	600  3800 2100 3800
-NoConn ~ 4650 3400
+NoConn ~ 4650 3300
 $Comp
 L R R3
 U 1 1 561C5618
@@ -1002,4 +996,12 @@ Wire Wire Line
 	2750 3900 2600 3900
 Wire Wire Line
 	2600 3900 2600 4100
+Wire Wire Line
+	4650 3400 4950 3400
+Wire Wire Line
+	4650 2650 4950 2650
+Wire Wire Line
+	4950 3800 4650 3800
+Text Notes 7350 3400 0    60   ~ 0
+FIXME ADD A FUSE!!!!!!!!!!!!!!!\n
 $EndSCHEMATC

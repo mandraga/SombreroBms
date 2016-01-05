@@ -44,7 +44,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 6 9
 Title ""
-Date "4 jan 2016"
+Date "5 jan 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -73,22 +73,6 @@ Text HLabel 4950 3000 0    60   Input ~ 0
 SCLK
 Text HLabel 4950 3100 0    60   Input ~ 0
 SDI
-Wire Wire Line
-	8100 2900 6750 2900
-Wire Wire Line
-	6750 3100 8100 3100
-Wire Wire Line
-	6750 3000 7050 3000
-Wire Wire Line
-	5600 2900 4950 2900
-Wire Wire Line
-	4950 3000 5600 3000
-Wire Wire Line
-	5600 3100 4950 3100
-Wire Wire Line
-	4950 2350 5450 2350
-Wire Wire Line
-	4950 1750 5450 1750
 Text Label 5450 2350 0    60   ~ 0
 GND
 Text Label 5450 1750 0    60   ~ 0
@@ -106,12 +90,6 @@ F 3 "~" H 5250 2050 60  0000 C CNN
 	1    5250 2050
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	5250 2250 5250 2350
-Connection ~ 5250 2350
-Wire Wire Line
-	5250 1850 5250 1750
-Connection ~ 5250 1750
 Text Label 7450 3100 0    60   ~ 0
 GND
 $Comp
@@ -127,4 +105,26 @@ F 3 "~" H 6200 3150 60  0000 C CNN
 $EndComp
 Text Label 7450 2900 0    60   ~ 0
 GaugeValue
+Wire Wire Line
+	8100 2900 6750 2900
+Wire Wire Line
+	6750 3100 8100 3100
+Wire Wire Line
+	6750 3000 7050 3000
+Wire Wire Line
+	5600 2900 4950 2900
+Wire Wire Line
+	4950 3000 5600 3000
+Wire Wire Line
+	5600 3100 4950 3100
+Wire Wire Line
+	4950 2350 5450 2350
+Wire Wire Line
+	4950 1750 5450 1750
+Wire Wire Line
+	5250 2250 5250 2350
+Connection ~ 5250 2350
+Wire Wire Line
+	5250 1850 5250 1750
+Connection ~ 5250 1750
 $EndSCHEMATC

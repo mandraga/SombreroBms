@@ -44,7 +44,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 9 9
 Title ""
-Date "4 jan 2016"
+Date "5 jan 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -165,8 +165,6 @@ F 3 "~" H 3650 4000 60  0000 C CNN
 $EndComp
 Text Label 3300 2550 0    60   ~ 0
 GND
-Text Label 750  3300 0    60   ~ 0
-SHELL
 $Comp
 L C C51
 U 1 1 56142B92
@@ -230,9 +228,7 @@ Wire Wire Line
 Wire Wire Line
 	1300 2550 1100 2550
 Wire Wire Line
-	1100 2550 1100 3300
-Wire Wire Line
-	1100 3300 750  3300
+	1100 2550 1100 3600
 Wire Wire Line
 	1300 3150 1100 3150
 Connection ~ 1100 3150
@@ -329,9 +325,6 @@ Wire Wire Line
 Wire Wire Line
 	6200 1150 6200 2200
 Connection ~ 6400 1350
-Wire Wire Line
-	2550 2700 2400 2700
-Connection ~ 3150 2550
 $Comp
 L C C50
 U 1 1 5613B92E
@@ -399,30 +392,10 @@ F 3 "" H 6200 1150 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Connection ~ 6200 1350
-$Comp
-L PWR_FLAG #FLG04
-U 1 1 56145185
-P 3150 2350
-F 0 "#FLG04" H 3150 2445 30  0001 C CNN
-F 1 "PWR_FLAG" H 3150 2530 30  0000 C CNN
-F 2 "" H 3150 2350 60  0000 C CNN
-F 3 "" H 3150 2350 60  0000 C CNN
-	1    3150 2350
-	1    0    0    -1  
-$EndComp
-$Comp
-L R R61
-U 1 1 56894476
-P 2800 2700
-F 0 "R61" V 2880 2700 40  0000 C CNN
-F 1 "0R" V 2807 2701 40  0000 C CNN
-F 2 "~" V 2730 2700 30  0000 C CNN
-F 3 "~" H 2800 2700 30  0000 C CNN
-	1    2800 2700
-	0    -1   -1   0   
-$EndComp
 Wire Wire Line
-	3150 2350 3150 2700
+	1950 4700 1950 3600
 Wire Wire Line
-	3150 2700 3050 2700
+	1950 3600 1100 3600
+Connection ~ 1950 4700
+NoConn ~ 2400 2700
 $EndSCHEMATC
