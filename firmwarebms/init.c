@@ -105,5 +105,8 @@ void init(t_vbat *pvbat)
       while (1);
     }
 
-  // Interrupts
+  // Interrupt
+  // One interrupt routine must be installed to handle the UART input commands
+  
+
 }

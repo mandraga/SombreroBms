@@ -39,6 +39,7 @@
 #define STATE_RUN      4  // Run, the current is beingused and state of charge updated
 #define STATE_RELAPSE  5  // After run, wait for the battery voltage to spatbilise (lithium behaviour)
 #define STATE_SECURITY 6  // Undervoltage or overvoltage or error like trying to start when charging
+#define STATE_CRITICAL_FAILURE  7  // Stops here, no way to get out but a reset
 
 #define BAUDRATE       9600
 #indef F_CPU
@@ -47,17 +48,48 @@
 
 void _delay_ms_S(int millisecond);
 
-#define MAXBATTERY 18
-
-typedef struct s_vbat
-{
-  int          vbat[MAXBATTERY];
-  int          batnum;
-}              t_vbat;
-
 typedef struct s_ibat
 {
   int          ibat;
   int          timeslice_ms;
 }              t_ibat;
 
+// EEPROM data
+typedef struct  s_eeprom_data
+{
+  char          install_date_year;
+  char          install_date_month;
+  char          install_date_day;
+  unsigned long bat_maxv;            // mili volts
+  unsigned long bat_minv;
+  unsigned long bat_tmax;            // temperature
+  unsigned long bat_tmin;
+  char          bat_elements;
+  char          serial_number[8];
+  char          client[32];          // Client name
+  int           charge_cycles;
+  unsigned long charge_time_minutes; // Total charging time
+}               t_eeprom_data;
+
+// Per battery eeprom information
+typedef struct  s_eeprom_battery
+{
+  unsigned long lowestV;
+  int           lowVevents; // times vbat whent under the treshold before a charge
+  unsigned long cap;        // More or less the capacity, or charge speed...
+}               t_eeprom_battery;
+
+// Ram data
+typedef struct  s_pack_variable_data
+{
+  unsigned int  uptime_days;
+  unsigned int  uptime_minutes;
+  unsigned int  tseconds;                 // Tenth of seconds
+  unsigned long average_discharge;
+  unsigned long c_discharge;              // Discharge, last value
+  unsigned long max_discharge;            // Discharge current in Amperes
+  unsigned long state_of_charge;          // mili Ampere Hour
+  unsigned long vbat[MAXBATTERY];         // Batterey milivolts, last value
+  unsigned long tempereature[MAXMODULES];
+  char          app_state;                // State machine variable
+}               t_pack_variable_data;

@@ -345,7 +345,7 @@ int ad7280_get_VBAT(t_ad7280_state *st, unsigned long *pvbat, unsigned long *pte
 	      if (chan == 7)
 		{
 		  cnv = varray[i];
-		  cnv = ((cnv * 122) / 1000);  // 1,22mV / LSB, 0V offset
+		  cnv = ((cnv * 122) / 100);  // 1,22mV / LSB, 0V offset
 		  ptemp[module] = cnv;
 		}
 	    }

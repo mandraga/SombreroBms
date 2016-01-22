@@ -1,6 +1,12 @@
 
 // All the custom values are here
 
+#define MAXBATTERY 18
+#define MAXMODULES  3
+
+// Max channels for a 3 modules board
+#define MAX_CHANNELS  ((6 + 3) * MAXMODULES)
+
 // Number of monitored cells
 #define CFGBATNUMBER     11
 
@@ -26,6 +32,4 @@
 #define CFGAD728AMODULES  3
 #endif
 
-// Max channels for a 3 modules board
-#define MAX_CHANNELS  ((6 + 3) * 3)
 
