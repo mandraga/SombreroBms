@@ -24,6 +24,9 @@
 #include "main.h"
 #include "env.h"
 
+t_pack_variable_data g_appdata;
+t_eeprom_data        g_edat;
+
 void setled_balancing(char state)
 {
   if (state)
@@ -50,8 +53,6 @@ void uart1_send_bytes(unsigned char *pdat, int len)
     }
 }
 
-t_pack_variable_data g_appdata;
-
 int main(void)
 {
   int    i;
@@ -65,6 +66,7 @@ int main(void)
   g_appdata.tseconds = 0;
   g_appdata.average_discharge = 0;
   g_appdata.c_discharge = 0;
+  g_appdata.c_discharge_accumulator = 0;
   g_appdata.state_of_charge = 0; // empty
   for (i = 0; i < MAXBATTERY; i++)
     g_appdata.vbat[i] = 0;
@@ -72,6 +74,7 @@ int main(void)
     g_appdata.tempereature[i] = 0;
   // Start point
   g_appdata.app_state = STATE_START;
+  g_appdata.charging_started = 0;
   setled_balancing(0);
   led_toggle = 0;
   // Enter here and stay in int for many years
@@ -84,4 +87,3 @@ int main(void)
       led_toggle = led_toggle ^ 1;
     }
 }
-

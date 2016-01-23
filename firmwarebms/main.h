@@ -62,11 +62,13 @@ typedef struct  s_eeprom_data
   char          install_date_day;
   unsigned long bat_maxv;            // mili volts
   unsigned long bat_minv;
-  unsigned long bat_tmax;            // temperature
-  unsigned long bat_tmin;
+  long          bat_tmax;            // temperature
+  long          bat_tmin;
   char          bat_elements;
-  char          serial_number[8];
-  char          client[32];          // Client name
+  unsigned long full_charge;         // AH
+  char          serial_number[9];    //  8 bytes             plus 0 end of string
+  char          client[33];          // 32 bytes Client name plus 0 end of string
+  // These 2 are set to 0 when first programmed
   int           charge_cycles;
   unsigned long charge_time_minutes; // Total charging time
 }               t_eeprom_data;
@@ -87,9 +89,13 @@ typedef struct  s_pack_variable_data
   unsigned int  tseconds;                 // Tenth of seconds
   unsigned long average_discharge;
   unsigned long c_discharge;              // Discharge, last value
-  unsigned long max_discharge;            // Discharge current in Amperes
+  unsigned long c_discharge_accumulator;  // Accumulates mA per hour
+  int           max_discharge;            // Discharge current in Amperes
   unsigned long state_of_charge;          // mili Ampere Hour
   unsigned long vbat[MAXBATTERY];         // Batterey milivolts, last value
+  unsigned long total_vbat;               // Pack voltage in mv
   unsigned long tempereature[MAXMODULES];
   char          app_state;                // State machine variable
+  char          charging_started;         // Once started it must finish
+  int           idle_counter;
 }               t_pack_variable_data;

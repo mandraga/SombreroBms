@@ -1,3 +1,71 @@
+#include <avr/eeprom.h>
+
+#include "eeprom.h"
+#include "main.h"
+#include "env.h"
+
+void set_install_date_EEPROM(char *str)
+{
+  char          install_date_year;
+  char          install_date_month;
+  char          install_date_day;
+
+  write_cfg_to_EEPROM();
+}
+
+void set_min_Vbat_EEPROM(char *str)
+{
+  g_edat.bat_minv = string_to_long(str);
+  write_cfg_to_EEPROM();
+}
+
+void set_max_Vbat_EEPROM(char *str)
+{
+  g_edat.bat_maxv = string_to_long(str);
+  write_cfg_to_EEPROM();
+}
+
+void set_min_temperature_EEPROM(char *str)
+{
+  g_edat.bat_tmin = string_to_long(str);
+  write_cfg_to_EEPROM();
+}
+
+void set_max_temperature_EEPROM(char *str)
+{
+  g_edat.bat_tmax = string_to_long(str);
+  write_cfg_to_EEPROM();
+}
+
+void set_full_charge_value_mAH_EEPROM(char *str)
+{
+  g_edat.full_charge = string_to_long(str);
+  write_cfg_to_EEPROM();
+}
+
+void set_serial_number_EEPROM(char *str)
+{
+  char i;
+
+  for (i = 0; i < 9; i++)
+    g_edat.serial_number[i] = 0;
+  while (i < 8 && str[i] != 0)
+    g_edat.serial_number[i] = str[i];
+  write_cfg_to_EEPROM();
+}
+
+void set_client_name_EEPROM(char *str)
+{
+  char i;
+
+  if (*str == '"')
+    str++;
+  for (i = 0; i < 33; i++)
+    g_edat.client[i] = 0;
+  while (i < 32 && str[i] != 0)
+    g_edat.client[i] = str[i];
+  write_cfg_to_EEPROM(); // Only writes what's different
+}
 
 void read_cfg_from_EEPROM(void)
 {
@@ -10,34 +78,12 @@ void read_cfg_from_EEPROM(void)
   c = eeprom_read_byte((uint8_t*)0x00);
   if (c == 0xFF)
     {
-      memset(&g_c, 0, sizeof(g_c));
-      for (alarm_number = 0; alarm_number < 4; alarm_number++)
-	{
-#if 0
-	  g_c.alrm[alarm_number].begin.h = 21;
-	  g_c.alrm[alarm_number].end.h = 9;
-#else
-	  g_c.alrm[alarm_number].begin.h = 0xFF;
-#endif
-	}
-      // 0033609001390    Leclerc Mobile sms center
-      g_c.sms_center[0] = 0;
-      g_c.sms_center[1] = 0;
-      g_c.sms_center[2] = 3;
-      g_c.sms_center[3] = 3;
-      g_c.sms_center[4] = 6;
-      g_c.sms_center[5] = 0;
-      g_c.sms_center[6] = 9;
-      g_c.sms_center[7] = 0;
-      g_c.sms_center[8] = 0;
-      g_c.sms_center[9] = 1;
-      g_c.sms_center[10] = 3;
-      g_c.sms_center[11] = 9;
-      g_c.sms_center[12] = 0;
+      // Default values to make the buzer scream
+      memset(&g_edat, 0, sizeof(g_edat));
       return ;
     }
   // Read a block @ 0x01
-  eeprom_read_block(&g_c, (uint8_t*)0x01, sizeof(g_c));
+  eeprom_read_block(&g_edat, (uint8_t*)0x01, sizeof(g_edat));
 }
 
 void write_cfg_to_EEPROM(void)
@@ -46,17 +92,17 @@ void write_cfg_to_EEPROM(void)
   unsigned char c;
   unsigned char *ptr;
   
-  ptr = (unsigned char*)&g_c;
+  ptr = (unsigned char*)&g_edat;
 #if 1
-  for (i = 0; i < sizeof(g_c); i++)
+  for (i = 0; i < sizeof(g_edat); i++)
     {
       c = eeprom_read_byte((uint8_t*)0x01 + i);
       if (c != ptr[i])
 	eeprom_write_byte((uint8_t*)0x01 + i, ptr[i]);
     }
 #else
-  eeprom_write_block(&g_c, (uint8_t*)0x01, sizeof(g_c));
+  eeprom_write_block(&g_edat, (uint8_t*)0x01, sizeof(g_edat));
 #endif
-  eeprom_write_byte((uint8_t*)0x00, 0x00);
+  eeprom_write_byte((uint8_t*)0x00, 0x00); // indicates the first write
 }
 
