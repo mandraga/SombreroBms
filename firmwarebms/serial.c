@@ -1,9 +1,11 @@
 #include "env.h"
 #include "main.h"
+#include "eeprom.h"
 #include "serial.h"
 
 extern t_pack_variable_data g_appdata;
 extern t_eeprom_data        g_edat;
+extern t_eeprom_battery     g_bat[MAXBATTERY];
 
 t_serialport g_serial;
 
@@ -41,6 +43,9 @@ void replace_char(char a, char b, char *str)
       str[i] = b;
 }
 
+// It starts at the '-' of "set_param -valuename value" and checks if valuename is
+// refvalue. Returns 0 if not. And if equal it fills the pointer to the argument in
+// *pstr and returns 1.
 char check_valuename(char *refvalue, char *command_buffer, char index, char **pstr)
 {
   char reflen;
@@ -92,7 +97,7 @@ void execute_config_command(char *command_buffer, char size)
 	}
       if (check_valuename("batVmin", command_buffer, i, &str))
 	{
-	  set_min_Vbat_EEPROM(str);	  
+	  set_min_Vbat_EEPROM(str);
 	}
       if (check_valuename("batVmax", command_buffer, i, &str))
 	{
@@ -100,7 +105,7 @@ void execute_config_command(char *command_buffer, char size)
 	}
       if (check_valuename("tmin", command_buffer, i, &str))
 	{
-	  set_min_temperature_EEPROM(str);	  
+	  set_min_temperature_EEPROM(str);
 	}
       if (check_valuename("tmax", command_buffer, i, &str))
 	{
@@ -139,7 +144,7 @@ void process_serial_command()
     }
   if (strcmp("get_params", g_serial.inbuffer) == 0)
     {
-      snprintf(g_serial.outbuffer, TRSTRINGSZ, "Date: %d/%d/%d\n",
+      snprintf(g_serial.outbuffer, TRSTRINGSZ, "setup date: %d/%d/%d\n",
 	       g_edat.install_date_day,
 	       g_edat.install_date_month,
 	       g_edat.install_date_day);
@@ -161,20 +166,70 @@ ISR(USART_RXC_vect, ISR_BLOCK)
 
   received = UDR0;
   g_serial.RXstate = SER_STATE_RECEIVE;
-  g_serial.inbuffer[g_serial.inindex] = received;
-  g_serial.inindex++;
+  g_serial.inbuffer[g_serial.inindex++] = received;
   if (received == '\n' ||
       g_serial.inindex >= g_serial.insize ||
       g_serial.inindex >= RCVSTRINGSZ)
     {
       g_serial.RXstate = SER_STATE_IDLE;
-      if (received == '\n' && g_serial.inindex < RCVSTRINGSZ - 1) // Otherwise there is an error somewhere
+      if (received == '\n' && g_serial.inindex < RCVSTRINGSZ) // Otherwise there is an error somewhere
 	{
-	  g_serial.inbuffer[g_serial.inindex + 1] = 0; // Add an end to form a string
+	  g_serial.inbuffer[g_serial.inindex] = 0; // Add an end to form a string
 	  process_serial_command();
 	}
       g_serial.RXstate = SER_STATE_IDLE;
     }
+}
+
+int get_undervoltage_event_count(char bat)
+{
+  if (bat >= g_edat.bat_elements)
+    return 0;
+  return g_bat[bat].lowVevents;
+}
+
+int get_total_undervoltage_event_count()
+{
+  int  sum;
+  char i;
+
+  sum = 0;
+  for (i = 0; i < g_edat.bat_elements; i++)
+    {
+      sum += get_undervoltage_event_count(i);
+    }
+  return sum;
+}
+
+unsigned long get_charge_speed(char bat)
+{
+  if (bat >= g_edat.bat_elements)
+    return 0;
+  return g_bat[bat].cap;  
+}
+	
+void get_element_vbat(char bat, int *pvbat, int *pmvbat)
+{
+  if (bat >= g_edat.bat_elements)
+    {
+      *pvbat  = 0;
+      *pmvbat = 0;
+      return ;
+    }
+  *pvbat  = g_appdata.vbat[bat] / 1000L;
+  *pmvbat = (g_appdata.vbat[bat] % 1000L) / 100;
+}
+
+void get_element_vbat_lowest(char bat, int *pvbat, int *pmvbat)
+{
+  if (bat >= g_edat.bat_elements)
+    {
+      *pvbat  = 0;
+      *pmvbat = 0;
+      return ;
+    }
+  *pvbat  = g_bat[bat].lowestV / 1000L;
+  *pmvbat = (g_bat[bat].lowestV % 1000L) / 100;
 }
 
 char change_TX_state(char TXstate)
@@ -310,22 +365,19 @@ char change_TX_state(char TXstate)
 	unsigned long charge_percent;
 
 	charge_percent = 100L * g_appdata.state_of_charge / g_edat.full_charge;
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "chrg: %d\n", g_appdata.charge_percent);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "chrg: %d\n", charge_percent);
 	nextState = SER_STATE_SEND_REPORT_CHRGMA;
       }
       break;
     case SER_STATE_SEND_REPORT_CHRGMA:
       {
-	unsigned long charge_percent;
-
-	charge_percent = 100L * g_appdata.state_of_charge / g_edat.full_charge;
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "chrg: %d\n", charge_percent);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "chrgmAH: %d\n", g_appdata.state_of_charge);
 	nextState = SER_STATE_SEND_REPORT_CHRGMA;
       }
       break;
     case SER_STATE_SEND_REPORT_IMA:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "chrgmAH: %d\n", g_appdata.state_of_charge);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "ImAH: %d\n", g_appdata.c_discharge);
 	nextState = SER_STATE_SEND_REPORT_STATE;
       }
       break;
@@ -378,9 +430,19 @@ char change_TX_state(char TXstate)
     case SER_STATE_SEND_REPORT_BATVB:
       {
 	unsigned int vbat, mvbat;
-	
+
 	get_element_vbat(g_serial.batcounter, &vbat, &mvbat);
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Vb: %d,%d\n", vbat, mvbat);
+	g_serial.batcounter = 0;
+	nextState = SER_STATE_SEND_REPORT_BATVLOW;
+      }
+      break;
+    case SER_STATE_SEND_REPORT_BATVLOW:
+      {
+	unsigned int vbat, mvbat;
+
+	get_element_vbat_lowest(g_serial.batcounter, &vbat, &mvbat);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "VLowest: %d,%d\n", vbat, mvbat);
 	g_serial.batcounter = 0;
 	nextState = SER_STATE_SEND_REPORT_BATEVT;
       }
@@ -389,7 +451,7 @@ char change_TX_state(char TXstate)
       {
 	int underflow_events;
 
-	underflow_events = get_underflow_events(g_serial.outbuffer);
+	underflow_events = get_undervoltage_event_count(g_serial.batcounter);
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, "evt: %d\n", underflow_events);
 	nextState = SER_STATE_SEND_REPORT_BATAVG;
       }
@@ -398,8 +460,7 @@ char change_TX_state(char TXstate)
       {
 	int average_charge_time; // Charge speed or whatever
 
-	average_charge_time = get_charge_speed(g_serial.outbuffer);
-	underflow_events = get_underflow_events(g_serial.outbuffer);
+	average_charge_time = get_charge_speed(g_serial.batcounter);
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, "avgchgt: %d\n", average_charge_time);
 	g_serial.outbuffer++;
 	if (g_serial.outbuffer >= g_edat.bat_elements)

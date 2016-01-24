@@ -57,7 +57,7 @@ typedef struct s_ibat
 // EEPROM data
 typedef struct  s_eeprom_data
 {
-  char          install_date_year;
+  int           install_date_year;
   char          install_date_month;
   char          install_date_day;
   unsigned long bat_maxv;            // mili volts

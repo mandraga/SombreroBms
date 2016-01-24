@@ -67,12 +67,14 @@
 // Elts: 11
 // batbegin  1
 // Vb: 3,230                     // V
+// Lowest: 2,83                   // V
 // evt: 2                        // undervoltage events
 // avgchgt: 4567                 // charge time average in seconds more = more capacity
 // batbegin 2
 // ....
 // batbegin 11
 // Vb: 3,210
+// Lowest: 2,92                   // V
 // evt: 0
 // avgchgt: 4643
 // bmsReportEnd
@@ -113,9 +115,10 @@
 #define SER_STATE_SEND_REPORT_ELTS      56
 #define SER_STATE_SEND_REPORT_BATBEGIN  57
 #define SER_STATE_SEND_REPORT_BATVB     58
-#define SER_STATE_SEND_REPORT_BATEVT    59
-#define SER_STATE_SEND_REPORT_BATAVGT   60
-#define SER_STATE_SEND_REPORT_END       61
+#define SER_STATE_SEND_REPORT_BATVLOW   59
+#define SER_STATE_SEND_REPORT_BATEVT    60
+#define SER_STATE_SEND_REPORT_BATAVGT   61
+#define SER_STATE_SEND_REPORT_END       62
 
 
 /*  Taken from Peter Fleury code, (it was too tigh here to use his library)

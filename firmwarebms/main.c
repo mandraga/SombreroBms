@@ -26,6 +26,7 @@
 
 t_pack_variable_data g_appdata;
 t_eeprom_data        g_edat;
+t_eeprom_battery     g_bat[MAXBATTERY];
 
 void setled_balancing(char state)
 {
@@ -82,7 +83,7 @@ int main(void)
     {
       State_machine(&vbat);
       // Sleep 100ms
-      _delay_ms(100);
+      _delay_ms(1000 / SAMPLING_PER_SECOND);
       setled_error(led_toggle);
       led_toggle = led_toggle ^ 1;
     }
