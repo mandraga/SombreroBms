@@ -1,9 +1,19 @@
 
+#include "serial.h"
+#include "adc.h"
+#include "spi.h"
+#include "AD7280A.h"
+#include "init.h"
+#include "main.h"
+#include "env.h"
+
 extern t_pack_variable_data g_appdata;
 extern t_eeprom_data        g_edat;
+extern t_eeprom_battery     g_bat[MAXBATTERY];
+//extern t_ad7280_state       g_ad7280;
 
-// Checks that every voltage is under a value, like 15% under the max value
-char all_under_threshold()
+// Checks that every voltage is over a value, like 15% under the max value
+char all_over_threshold()
 {
   unsigned long threshold;
   int           i, ret;
@@ -13,7 +23,7 @@ char all_under_threshold()
   threshold -= (g_edat.bat_maxv * 10) / 100; // 10%
   for (i = 0; i < g_edat.bat_elements; i++)
     {
-      if (g_appdata.vbat[i] > threshold)
+      if (g_appdata.vbat[i] <= threshold)
 	{
 	  ret = 0;
 	}
@@ -37,7 +47,7 @@ char battery_full()
   return ret;
 }
 
-// Returns 1 if a battery element is under the minimu voltage
+// Returns 1 if a battery element is under the minimum voltage
 char check_VBAT()
 {
   int i, ret;
@@ -72,6 +82,41 @@ void change_state_of_charge()
   g_appdata.average_discharge = (g_appdata.average_discharge * 63 + g_appdata.c_discharge) >> 6;
 }
 
+// Check everything else, and store min and max and events in the eeprom
+void check_everything_else(void)
+{
+  int  i;
+
+  //---------------------------------------
+  // App data
+  //---------------------------------------
+  g_appdata.tseconds++;              // Tenth of seconds or 100ms
+  if (g_appdata.tseconds >= 600)
+    {
+      g_appdata.tseconds = 0;
+      g_appdata.uptime_minutes++;
+      if (g_appdata.uptime_minutes >= 60 * 24)
+	{
+	  g_appdata.uptime_minutes = 0;
+	  g_appdata.uptime_days++;
+	}
+    }
+  //---------------------------------------
+  // EEprom data
+  //---------------------------------------
+  update_temperature_extremes_EEPROM(g_appdata.tempereature);
+}
+
+void update_local_charging_time(void)
+{
+  g_appdata.charge_time_count_tenth++;
+  if (g_appdata.charge_time_count_tenth >= 600)
+    {
+      g_appdata.charge_time_count_tenth = 0;
+      g_appdata.charge_time_count++;
+    }
+}
+
 void State_machine(t_eeprom_data *pedat)
 {
   char chargeron;
@@ -90,6 +135,10 @@ void State_machine(t_eeprom_data *pedat)
   // Check for undervoltage
   VBAT_low = check_VBAT();
   //
+  check_everything_else();
+  // If a battery went deeper than previously, then store the value
+  update_battery_low_values_EEPROM();
+  //
   switch (g_appdata.app_state)
     {
     case STATE_START:
@@ -107,9 +156,11 @@ void State_machine(t_eeprom_data *pedat)
 	  }
 	else
 	  {
-	    if (all_under_threshold())
+	    if (!all_over_threshold()) // If a battery is low, go to CHARGING
 	      {
 		g_appdata.charging_started = 1; // Used ot display a progress animation on the gauge
+		inc_charge_cylces_EEPROM();
+                g_appdata.charge_time_count_tenth = g_appdata.charge_time_count = 0;
 		g_appdata.app_state = STATE_CHARGING;
 	      }
 	  }
@@ -117,9 +168,12 @@ void State_machine(t_eeprom_data *pedat)
       break;
     case STATE_CHARGING:
       {
+	update_local_charging_time();
+	update_battery_charge_values_EEPROM(); // When a battey is at Vmax, store the charging time
 	if (chargeron == 0)
 	  {
 	    // FIXME state of charge problem
+	    update_charge_time_minutes_EEPROM(g_appdata.charge_time_count);
 	    g_appdata.idle_counter = 0;
 	    g_appdata.app_state = STATE_RELAPSE;
 	  }
@@ -127,6 +181,7 @@ void State_machine(t_eeprom_data *pedat)
 	  {
 	    if (battery_full())
 	      {
+		update_charge_time_minutes_EEPROM(g_appdata.charge_time_count);
 		g_appdata.charging_started = 0;
 		g_appdata.average_discharge = 0;
 		g_appdata.c_discharge = 0;
@@ -144,7 +199,10 @@ void State_machine(t_eeprom_data *pedat)
 	else
 	  {
 	    if (VBAT_low)
-	      g_appdata.app_state = STATE_SECURITY;
+	      {
+		update_battery_low_events_EEPROM();
+		g_appdata.app_state = STATE_SECURITY;
+	      }
 	    else
 	      if (g_appdata.c_discharge > DISCHARGE_THRESHOLD)
 		g_appdata.app_state = STATE_RUN;
@@ -156,6 +214,7 @@ void State_machine(t_eeprom_data *pedat)
 	change_state_of_charge();
 	if (VBAT_low || chargeron)
 	  {
+	    update_battery_low_events_EEPROM();
 	    g_appdata.app_state = STATE_SECURITY;
 	  }
 	else
@@ -177,6 +236,7 @@ void State_machine(t_eeprom_data *pedat)
 	else
 	  if (VBAT_low)
 	    {
+	      update_battery_low_events_EEPROM();
 	      g_appdata.app_state = STATE_SECURITY;
 	    }
 	  else
@@ -238,7 +298,7 @@ void State_machine(t_eeprom_data *pedat)
   set_charger_disabled(charger_off);
   setled_error(lederror);
   // Outputs a signal for the gauge chip on one wire. 0 or VBAT, signal time is the value
-  output_gauge(&g_appdata);
+  output_gauge(g_appdata.state_of_charge, g_edat.full_charge,
+	       VBAT_low, (g_appdata.app_state == STATE_CHARGING));
 }
-
 

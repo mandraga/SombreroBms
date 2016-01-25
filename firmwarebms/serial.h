@@ -103,8 +103,6 @@
 #define SER_STATE_SEND_CLIENT           14
 #define SER_STATE_SEND_UPTIME           15
 
-#define SER_STATE_RECEIVE              100
-
 // A battery element counter is also used on top of the state
 #define SER_STATE_SEND_REPORT_START     50
 #define SER_STATE_SEND_REPORT_VB        51
@@ -119,7 +117,10 @@
 #define SER_STATE_SEND_REPORT_BATEVT    60
 #define SER_STATE_SEND_REPORT_BATAVGT   61
 #define SER_STATE_SEND_REPORT_END       62
+#define SER_STATE_SEND_REPORT_FINISHED  63
 
+#define SER_STATE_SEND_DEBUG            99
+#define SER_STATE_RECEIVE              100
 
 /*  Taken from Peter Fleury code, (it was too tigh here to use his library)
  *  @brief  UART Baudrate Expression
@@ -139,3 +140,6 @@ typedef struct s_serialport
   char         outindex;
   char         batcounter;
 }              t_serialport;
+
+void uart_puts(char *str);
+void uart_init(unsigned int baudrate);

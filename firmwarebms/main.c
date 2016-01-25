@@ -27,6 +27,7 @@
 t_pack_variable_data g_appdata;
 t_eeprom_data        g_edat;
 t_eeprom_battery     g_bat[MAXBATTERY];
+t_ad7280_state       g_ad7280;
 
 void setled_balancing(char state)
 {

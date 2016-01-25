@@ -9,7 +9,24 @@ extern t_eeprom_battery     g_bat[MAXBATTERY];
 
 t_serialport g_serial;
 
-void init_serial_vars()
+// Only used for debug purposes
+void uart_puts(char *str)
+{
+  if (g_serial.RXstate == SER_STATE_IDLE)
+    {
+      snprintf(g_serial.outbuffer, TRSTRINGSZ, "%s", str);
+      g_serial.TXstate = SER_STATE_SEND_DEBUG;
+      g_serial.outsize = strlen(g_serial.outbuffer);
+      g_serial.outindex = 0;
+      // Start the transmission
+      if (g_serial.outindex < g_serial.outsize)
+	{
+	  UDR0 = g_serial.outbuffer[g_serial.outindex++];
+	}
+    }
+}
+
+void init_serial_vars(void)
 {
   g_serial.RXstate = SER_STATE_IDLE;
   g_serial.TXstate = SER_STATE_IDLE;
@@ -30,6 +47,7 @@ void uart_init(unsigned int baudrate)
   UCSR0B = (1 << RXCIE0) | (1 << TXCIE0) | (1 << RXEN0) | (1 << TXEN0);
   // Set frame format: asynchronous, 8data, no parity, 1 stop bit
   UCSR0C = (3 << UCSZ00);
+  init_serial_vars();
 }
 
 void replace_char(char a, char b, char *str)
@@ -134,13 +152,11 @@ void process_serial_command()
     {
       snprintf(g_serial.outbuffer, TRSTRINGSZ, "bmsReportBegin\n");
       g_serial.TXstate = SER_STATE_SEND_REPORT_VB;
-      return;
     }
   if (strcmp("ping", g_serial.inbuffer) == 0)
     {
       snprintf(g_serial.outbuffer, TRSTRINGSZ, "Sombrero BMS C2015-2016 Vreemdelabs.com\n");
       g_serial.TXstate = SER_STATE_SEND_PING1;
-      return;
     }
   if (strcmp("get_params", g_serial.inbuffer) == 0)
     {
@@ -149,13 +165,18 @@ void process_serial_command()
 	       g_edat.install_date_month,
 	       g_edat.install_date_day);
       g_serial.TXstate = SER_STATE_SEND_DATE;
-      return;
     }
   // This is a configuration command
   if (strcmp("set_param", g_serial.inbuffer) == 0)
     {
       execute_config_command(g_serial.inbuffer, g_serial.insize);
-      return;
+    }
+  g_serial.outsize = strlen(g_serial.outbuffer);
+  g_serial.outindex = 0;
+  // Start the transmission
+  if (g_serial.outindex < g_serial.outsize)
+    {
+      UDR0 = g_serial.outbuffer[g_serial.outindex++];
     }
 }
 
@@ -207,7 +228,7 @@ unsigned long get_charge_speed(char bat)
     return 0;
   return g_bat[bat].cap;  
 }
-	
+
 void get_element_vbat(char bat, int *pvbat, int *pmvbat)
 {
   if (bat >= g_edat.bat_elements)
@@ -241,6 +262,9 @@ char change_TX_state(char TXstate)
   switch (TXstate)
     {
     case SER_STATE_IDLE:
+      nextState = SER_STATE_IDLE;
+      break;
+    case SER_STATE_SEND_DEBUG;
       nextState = SER_STATE_IDLE;
       break;
       //-----------------------------------------------------------------------------
@@ -349,6 +373,7 @@ char change_TX_state(char TXstate)
       break;
     case SER_STATE_SEND_UPTIME:
       {
+	g_serial.outsize = 0;
 	nextState = SER_STATE_IDLE; // Finished
       }
       break;
@@ -472,10 +497,17 @@ char change_TX_state(char TXstate)
     case SER_STATE_SEND_REPORT_END:
       {
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, "bmsReportEnd\n");
+	nextState = SER_STATE_SEND_REPORT_FINISHED;
+      }
+      break;
+    case SER_STATE_SEND_REPORT_FINISHED:
+      {
+	g_serial.outsize = 0;
 	nextState = SER_STATE_IDLE;
       }
       break;
-  default:
+    default:
+      g_serial.outsize = 0;
       nextState = SER_STATE_IDLE;
     }
   g_serial.outsize = strlen(g_serial.outbuffer);

@@ -133,11 +133,12 @@ struct           s_ad7280_state
   unsigned char	 cell_threshlow;
   unsigned char	 aux_threshhigh;  // Temperature limits
   unsigned char	 aux_threshlow;
-  unsigned char  chan_cnt[CFGAD728AMODULES]; // Channel count
-  unsigned char	 cb_mask[CFGAD728AMODULES];  // Cell balance masks
+  unsigned char  chan_cnt[MAXMODULES]; // Channel count
+  unsigned char	 cb_mask[MAXMODULES];  // Cell balance masks
 }                t_ad7280_state;
 
-void Configure_AD7280A(void);
+void init_AD7820A(t_ad7280_state *st);
+int  ad7280_get_VBAT(t_ad7280_state *st, unsigned long *pvbat, unsigned long *ptemp);
 
 #endif /* IIO_ADC_AD7280_H_ */
 

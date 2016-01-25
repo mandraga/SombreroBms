@@ -48,7 +48,7 @@ unsigned char ad7280_crc8_table(unsigned char index)
 }
 
 // Val is the 32bit command
-unsigned char ad7280_calc_crc8(unsigned char *crc_tab, unsigned long val)
+unsigned char ad7280_calc_crc8(unsigned long val)
 {
   unsigned char crc;
   unsigned char index;
@@ -61,11 +61,11 @@ unsigned char ad7280_calc_crc8(unsigned char *crc_tab, unsigned long val)
 }
 
 // Note that the first 10bits are omited
-char ad7280_check_crc(t_ad7280_state *st, unsigned long val)
+char ad7280_check_crc(unsigned long val)
 {
   unsigned char crc;
 
-  car = ad7280_calc_crc8(st->crc_tab, val >> 10);
+  car = ad7280_calc_crc8(val >> 10);
   if (crc != ((val >> 2) & 0xFF))
     return 1;
   return 0;
@@ -84,7 +84,7 @@ void ad7280_delay()
 }
 
 // SPI read a command from the device 32bits
-int __ad7280_read32(t_ad7280_state *st, unsigned long *val)
+char __ad7280_read32(unsigned long *val)
 {
   unsigned long ret;
 
@@ -99,8 +99,7 @@ int __ad7280_read32(t_ad7280_state *st, unsigned long *val)
 }
 
 // SPI write a command 32bits
-int ad7280_write(t_ad7280_state *st,
-		 unsigned char  devaddr,
+int ad7280_write(unsigned char  devaddr,
 		 unsigned char  addr,
 		 unsigned char  all,
 		 unsigned char  val)
@@ -116,7 +115,7 @@ int ad7280_write(t_ad7280_state *st,
   // All bit
   reg = reg | ((unsigned long)all) << 12;
   // CRC from all this + b010
-  reg |= ad7280_calc_crc8(st->crc_tab, reg >> 11) << 3 | 0x2;
+  reg |= ad7280_calc_crc8(reg >> 11) << 3 | 0x2;
   // Send the 32bits through SPI, MSB first
   select_device(CS7280A);
   SPI_Master_write(reg >> 24);
@@ -132,23 +131,23 @@ int ad7280_read(t_ad7280_state *st, unsigned char devaddr, unsigned char addr)
   unsigned long tmp;
 
   // turns off the read operation on all parts
-  ad7280_write(st, AD7280A_DEVADDR_MASTER, 
+  ad7280_write(AD7280A_DEVADDR_MASTER, 
 	       AD7280A_CONTROL_HB, 1,
 	       AD7280A_CTRL_HB_CONV_INPUT_ALL |
 	       AD7280A_CTRL_HB_CONV_RES_READ_NO |
 	       st->ctrl_hb);
   // turns on the read operation on the addressed part
-  ad7280_write(st, devaddr,
+  ad7280_write(devaddr,
 	       AD7280A_CONTROL_HB, 0,
 	       AD7280A_CTRL_HB_CONV_INPUT_ALL |
 	       AD7280A_CTRL_HB_CONV_RES_READ_ALL |
 	       st->ctrl_hb);
   // Set register address on the part to be read from
-  ad7280_write(st, devaddr, AD7280A_READ, 0, addr << 2);
+  ad7280_write(devaddr, AD7280A_READ, 0, addr << 2);
   // Read the shit
-  __ad7280_read32(st, &tmp);
+  __ad7280_read32(&tmp);
   // Check the transfer CRC
-  if (ad7280_check_crc(st, tmp))
+  if (ad7280_check_crc(tmp))
     return 1;
   // Check return command register and address
   if (((tmp >> 27) != devaddr) || (((tmp >> 21) & 0x3F) != addr))
@@ -162,14 +161,14 @@ int ad7280_read_channel(t_ad7280_state *st, unsigned devaddr, unsigned addr)
 {
   unsigned long tmp;
 
-  ad7280_write(st, devaddr, AD7280A_READ, 0, addr << 2);
+  ad7280_write(devaddr, AD7280A_READ, 0, addr << 2);
   // turns off the read operation on all parts
-  ad7280_write(st, AD7280A_DEVADDR_MASTER, AD7280A_CONTROL_HB, 1,
+  ad7280_write(AD7280A_DEVADDR_MASTER, AD7280A_CONTROL_HB, 1,
 	       AD7280A_CTRL_HB_CONV_INPUT_ALL |
 	       AD7280A_CTRL_HB_CONV_RES_READ_NO |
 	       st->ctrl_hb);
   // turns on the read operation on the addressed part
-  ad7280_write(st, devaddr, AD7280A_CONTROL_HB, 0,
+  ad7280_write(devaddr, AD7280A_CONTROL_HB, 0,
 	       AD7280A_CTRL_HB_CONV_INPUT_ALL |
 	       AD7280A_CTRL_HB_CONV_RES_READ_ALL |
 	       AD7280A_CTRL_HB_CONV_START_CS |
@@ -177,9 +176,9 @@ int ad7280_read_channel(t_ad7280_state *st, unsigned devaddr, unsigned addr)
   // Wait for the conversion
   ad7280_delay();
   // Read the channels
-  __ad7280_read32(st, &tmp);
+  __ad7280_read32(&tmp);
   // Check the CRC
-  if (ad7280_check_crc(st, tmp))
+  if (ad7280_check_crc(tmp))
     return 1;
   // Check the returned command addresses
   if (((tmp >> 27) != devaddr) || (((tmp >> 23) & 0xF) != addr))
@@ -194,9 +193,9 @@ void ad7280_read_all_channels(t_ad7280_state *st, unsigned int cnt, unsigned int
   int           i;
   unsigned long tmp;
 
-  ad7280_write(st, AD7280A_DEVADDR_MASTER, AD7280A_READ, 1, AD7280A_CELL_VOLTAGE_1 << 2);
+  ad7280_write(AD7280A_DEVADDR_MASTER, AD7280A_READ, 1, AD7280A_CELL_VOLTAGE_1 << 2);
   // Read all and start conversion
-  ad7280_write(st, AD7280A_DEVADDR_MASTER, AD7280A_CONTROL_HB, 1,
+  ad7280_write(AD7280A_DEVADDR_MASTER, AD7280A_CONTROL_HB, 1,
 	       AD7280A_CTRL_HB_CONV_INPUT_ALL |
 	       AD7280A_CTRL_HB_CONV_RES_READ_ALL |
 	       AD7280A_CTRL_HB_CONV_START_CS |
@@ -207,9 +206,9 @@ void ad7280_read_all_channels(t_ad7280_state *st, unsigned int cnt, unsigned int
   sum = 0;
   for (i = 0; i < cnt; i++)
     {
-      __ad7280_read32(st, &tmp);
+      __ad7280_read32(&tmp);
       // Check the message CRC
-      if (ad7280_check_crc(st, tmp))
+      if (ad7280_check_crc(tmp))
 	return 1;
       // Save the value
       ptype[i] = (((tmp >> 23) & 0xF) <= AD7280A_CELL_VOLTAGE_6)? 1 : 0; 
@@ -226,27 +225,27 @@ int ad7280_chain_setup(t_ad7280_state *st)
   int      ret;
 
   // Initialise the addresses on the chain and lock them
-  ad7280_write(st, AD7280A_DEVADDR_MASTER, AD7280A_CONTROL_LB, 1,
+  ad7280_write(AD7280A_DEVADDR_MASTER, AD7280A_CONTROL_LB, 1,
 	       AD7280A_CTRL_LB_DAISY_CHAIN_RB_EN |
 	       AD7280A_CTRL_LB_LOCK_DEV_ADDR |
 	       AD7280A_CTRL_LB_MUST_SET |
 	       AD7280A_CTRL_LB_SWRST |    // Software Reset
 	       st->ctrl_lb);
   // Lock
-  ad7280_write(st, AD7280A_DEVADDR_MASTER, AD7280A_CONTROL_LB, 1,
+  ad7280_write(AD7280A_DEVADDR_MASTER, AD7280A_CONTROL_LB, 1,
 	       AD7280A_CTRL_LB_DAISY_CHAIN_RB_EN |
 	       AD7280A_CTRL_LB_LOCK_DEV_ADDR |
 	       AD7280A_CTRL_LB_MUST_SET |
 	       st->ctrl_lb);
   // Control read of all the devices in the chain
-  ad7280_write(st, AD7280A_DEVADDR_MASTER, AD7280A_READ, 1, AD7280A_CONTROL_LB << 2);
+  ad7280_write(AD7280A_DEVADDR_MASTER, AD7280A_READ, 1, AD7280A_CONTROL_LB << 2);
   // Read once to check if it works
   for (n = 0; n <= AD7280A_MAX_CHAIN; n++)
     {
-      __ad7280_read32(st, &val);
+      __ad7280_read32(&val);
       if (val == 0) // Finished, return the number of devices in the dasy chain
 	return n - 1;
-      if (ad7280_check_crc(st, val)) // Error
+      if (ad7280_check_crc(val)) // Error
 	return -1;
       if (n != AD7280A_DEVADDR(val >> 27))
 	return -1;
@@ -254,7 +253,7 @@ int ad7280_chain_setup(t_ad7280_state *st)
   return -1;
 }
 
-int ad7280_initialise(t_ad7280_state *st)
+int init_AD7820A(t_ad7280_state *st)
 {
   int  ret;
   char acquisition_time     = AD7280A_ACQ_TIME_1200ns;
@@ -266,7 +265,7 @@ int ad7280_initialise(t_ad7280_state *st)
   // - 6 cell + 3 AUX
   st->ctrl_hb = AD7280A_CTRL_LB_ACQ_TIME(acquisition_time & 0x3) | AD7280A_CTRL_HB_CONV_RES_READ_6CELL_AUX1_3_4;
   st->ctrl_lb = AD7280A_CTRL_HB_CONV_AVG(conversion_averaging & 0x3) | (thermistor_term_en != 0 ? AD7280A_CTRL_LB_THERMISTOR_EN : 0);
-
+  //
   // Initialise the daisy chain addresses and check if it transmits
   ret = ad7280_chain_setup(st);
   if (ret < 0)
@@ -310,51 +309,60 @@ int ad7280_initialise(t_ad7280_state *st)
 /*    break; */
 /*  case AD7280A_AUX_ADC_UNDERVOLTAGE: */
 /*    val = (st->aux_threshlow * 196) / 10; */
-
+  //
+  // Setup the channels per module count
+  //
+  st->chan_cnt[0] = CFGAD728AMODULE_0_CHAN;
+  st->chan_cnt[1] = CFGAD728AMODULE_1_CHAN;
+  st->chan_cnt[2] = CFGAD728AMODULE_2_CHAN;
+  // Cell balance masks to all MosFets disabled.
+  st->cb_mask[0] = st->cb_mask[1] = st->cb_mask[2] = 0;
   // Ready for use
   return 0;
 }
 
-int ad7280_get_VBAT(t_ad7280_state *st, unsigned long *pvbat, unsigned long *ptemp)
+int ad7280_get_VBAT(t_ad7280_state *st, unsigned long *pvbat, int *ptemp)
 {
   int           i, ret;
   unsigned int  varray[MAX_CHANNELS];
-  char          type[MAX_CHANNELS];
   unsigned int  cnt;
-  int           chan, module;
+  int           chan, module, Vchan;
   unsigned long cnv;
 
-  cnt = (6 + 3) * CFGAD728AMODULES;
-  ret = ad7280_read_all_channels(st, cnt, varray, type);
+  ret = ad7280_read_all_channels(cnt, varray);
   if (!ret)
     {
-      for (i = 0; i < cnt; i++)
+      chan = Vchan = 0;
+      for (module = 0; module < MAXMODULES; module++)
 	{
-	  chan = i % 9;
-	  module = (i / 9);
-	  if (chan < 6)
+	  if (st->chan_count[module] > 0)
 	    {
-	      if (type[i]) // Check the type
-		ret = 1;
-	      cnv = varray[i];
-	      cnv = ((cnv * 976) / 1000) + 1000; // 976,A5(BV / LSB, 1V offset
-	      pvbat[module * 6 + i] = cnv; // mV
-	    }
-	  else
-	    {
-	      if (chan == 7)
+	      for (i = 0; i < st->chan_count[module]; i++)
 		{
-		  cnv = varray[i];
-		  cnv = ((cnv * 122) / 100);  // 1,22mV / LSB, 0V offset
-		  ptemp[module] = cnv;
+		  // In 5 battery configuration, pass the 5th element Vin value.
+		  if (!(i == 4 && st->chan_count[module] == 5))
+		    {
+		      cnv = varray[chan];
+		      cnv = ((cnv * 976L) / 1000L) + 1000L; // 976,A5(BV / LSB, 1V offset
+		      pvbat[Vchan] = cnv; // mV
+		    }
+		  Vchan++;
+		  chan++;
 		}
+	      // Temperature
+	      cnv = varray[chan];
+	      cnv = ((cnv * 122) / 100);  // 1,22mV / LSB, 0V offset
+	      // Fixme convert it to ,A0(BC
+	      zfvzef
+	      ptemp[module] = cnv;
+	      chan += 3; // Hardcoded shit, it retuns only 3 aux temperatures 1, 3 and 5
 	    }
 	}
     }
   return ret;
 }
 
-int ad7280_set_balance(t_ad7280_state *st, unsigned char *pbal)
+int ad7280_set_balance(char *pchan_count, unsigned long balancing)
 {
   // Set the values per module
   

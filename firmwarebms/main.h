@@ -48,11 +48,11 @@
 
 void _delay_ms_S(int millisecond);
 
-typedef struct s_ibat
+typedef struct  s_ibat
 {
-  int          ibat;
-  int          timeslice_ms;
-}              t_ibat;
+  unsigned long ibat; // milliAmps
+  int           timeslice_ms;
+}               t_ibat;
 
 // EEPROM data
 typedef struct  s_eeprom_data
@@ -68,9 +68,11 @@ typedef struct  s_eeprom_data
   unsigned long full_charge;         // AH
   char          serial_number[9];    //  8 bytes             plus 0 end of string
   char          client[33];          // 32 bytes Client name plus 0 end of string
-  // These 2 are set to 0 when first programmed
+  // These are often programmed
   int           charge_cycles;
   unsigned long charge_time_minutes; // Total charging time
+  int           min_temperature;     // Extreme temperatures
+  int           max_temperature;
 }               t_eeprom_data;
 
 // Per battery eeprom information
@@ -88,14 +90,17 @@ typedef struct  s_pack_variable_data
   unsigned int  uptime_minutes;
   unsigned int  tseconds;                 // Tenth of seconds
   unsigned long average_discharge;
-  unsigned long c_discharge;              // Discharge, last value
+  unsigned long c_discharge;              // Discharge, last value mA
   unsigned long c_discharge_accumulator;  // Accumulates mA per hour
   int           max_discharge;            // Discharge current in Amperes
   unsigned long state_of_charge;          // mili Ampere Hour
   unsigned long vbat[MAXBATTERY];         // Batterey milivolts, last value
   unsigned long total_vbat;               // Pack voltage in mv
-  unsigned long tempereature[MAXMODULES];
+  int           tempereature[MAXMODULES]; // °C
   char          app_state;                // State machine variable
+  // Internal variables
   char          charging_started;         // Once started it must finish
-  int           idle_counter;
+  int           charge_time_count_tenth;  // 1/10 second
+  int           charge_time_count;        // Minutes
+  int           idle_counter;             // Used to get out of the relapse state
 }               t_pack_variable_data;

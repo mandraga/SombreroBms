@@ -3,6 +3,12 @@
 #include "eeprom.h"
 #include "main.h"
 #include "env.h"
+#include "AD7280A.h"
+
+extern t_pack_variable_data g_appdata;
+extern t_eeprom_data        g_edat;
+extern t_eeprom_battery     g_bat[MAXBATTERY];
+//extern t_ad7280_state       g_ad7280;
 
 unsigned long string_to_long(char *str)
 {
@@ -92,22 +98,94 @@ void set_client_name_EEPROM(char *str)
   write_cfg_to_EEPROM(); // Only writes what's different
 }
 
-void set_charge_cycles_count_EEPROM(int charge_cycles)
+void inc_charge_cylces_EEPROM(void)
 {
-  g_edat.charge_cycles = charge_cycles;
+  g_edat.charge_cycles++;
   write_cfg_to_EEPROM();
 }
 
-void set_charge_time_minutes_EEPROM(unsigned long charge_time_minutes)
+void update_charge_time_minutes_EEPROM(unsigned long additional_charge_time_minutes)
 {
-  g_edat.charge_time_minutes = charge_time_minutes;
+  g_edat.charge_time_minutes += additional_charge_time_minutes;
   write_cfg_to_EEPROM();
 }
+
+void update_temperature_extremes_EEPROM(int *ptempereatures)
+{
+  int  tavg;
+  char i;
+
+  for (i = 0, tavg = 0; i < CFGAD728AMODULES; i++)
+    {
+      tavg += ptempereatures[i];
+    }
+  tavg = tavg / CFGAD728AMODULES;
+  g_edat.min_temperature = g_edat.min_temperature < tavg? g_edat.min_temperature : tavg;
+  g_edat.max_temperature = g_edat.max_temperature > tavg? g_edat.max_temperature : tavg;
+  write_cfg_to_EEPROM();
+}
+
+//---------------------------------------
+// Battery data
+//---------------------------------------
+void update_battery_low_events_EEPROM(void)
+{
+  char i, chg;
+  
+  for (i = 0, chg = 0; i < g_edat.bat_elements; i++)
+    {
+      if (g_appdata.vbat[i] < g_edata.bat_minv)
+	{
+	  g_bat[i].lowestV = lowVevents;
+	  chg = 1;
+	}
+    }
+  if (chg)
+    write_bat_values_to_EEPROM(g_bat, g_edat.bat_elements);
+}
+
+void update_battery_low_values_EEPROM(void)
+{
+  char i, chg;
+
+  for (i = 0, chg = 0; i < g_edat.bat_elements; i++)
+    {
+      if (g_bat[i].lowestV > g_appdata.vbat[i])
+	{
+	  g_bat[i].lowestV = g_appdata.vbat[i];
+	  chg = 1;
+	}
+    }
+  if (chg)
+    write_bat_values_to_EEPROM(g_bat, g_edat.bat_elements);
+}
+
+void update_battery_charge_values_EEPROM(void)
+{
+  char i, chg;
+  
+  for (i = 0, chg = 0; i < g_edat.bat_elements; i++)
+    {
+      // Test if charged
+      if (g_appdata.vbat[i] > g_edata.bat_maxv + 10L
+	  fixme a state must be used) // 10mV threshold
+	{
+	  // Charging time for the battery
+	  g_bat[i].cap = g_appdata.charge_time_count * 60L + charge_time_count_tenth / 10L;
+	  chg = 1;
+	}
+    }
+  if (chg)
+    write_bat_values_to_EEPROM(g_bat, g_edat.bat_elements);
+}
+
+//---------------------------------------
+// Read all, Write all
+//---------------------------------------
 
 void read_cfg_from_EEPROM(void)
 {
   unsigned char c;
-  int           alarm_number;
   
   // Read the first byte,
   // if it is 0xFF then the EEPROM is unprogramed: set to default values and return
@@ -121,6 +199,23 @@ void read_cfg_from_EEPROM(void)
     }
   // Read a block @ 0x01
   eeprom_read_block(&g_edat, (uint8_t*)0x01, sizeof(g_edat));
+}
+
+void read_bat_values_from_EEPROM(t_eeprom_battery *pbats, int elements)
+{
+  unsigned char c;
+  int           offset;
+
+  // Read the first byte,
+  // if it is 0xFF then the EEPROM is unprogramed: set to default values and return
+  // else read the data
+  c = eeprom_read_byte((uint8_t*)0x00);
+  if (c == 0xFF)
+    {
+      return ;
+    }
+  offset = 0x01 + sizeof(g_edat) + 4 + i ;
+  eeprom_read_block(pbats, offset, elements * sizeof(t_eeprom_battery));  
 }
 
 void write_cfg_to_EEPROM(void)

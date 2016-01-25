@@ -17,11 +17,18 @@
 #define __DELAY_BACKWARD_COMPATIBLE__ 
 #include <util/delay.h>
 
-#include "uart.h"
+#include "serial.h"
+#include "adc.h"
 #include "spi.h"
+#include "AD7280A.h"
 #include "init.h"
 #include "main.h"
 #include "env.h"
+
+extern t_pack_variable_data g_appdata;
+extern t_eeprom_data        g_edat;
+extern t_eeprom_battery     g_bat[MAXBATTERY];
+extern t_ad7280_state g_ad7280;
 
 void INT0_init(void)
 {
@@ -62,11 +69,6 @@ void enter_idle_mode(void)
   sleep_disable();
 }
 
-void test_uart(char *str)
-{
-  uart_puts(str);
-}
-
 // Called at start, sets the IO port direction, defaults the variables, 
 // Initialises the SPI devices and configures the interrupts
 void init(t_vbat *pvbat)
@@ -93,20 +95,18 @@ void init(t_vbat *pvbat)
 
   // Init UART
   uart_init(UART_BAUD_SELECT(BAUDRATE, F_CPU));
-  test_uart("startig the shit\n");
+  uart_puts("startig the shit\n");
 
   // Init SPI
   init_spi_master();
 
   // Init the SPI device AD7820A
-  if (!init_AD7820A())
+  if (!init_AD7820A(&g_ad7280))
     {
       uart_puts("AD7820A failed\n");
       while (1);
     }
-
-  // Interrupt
-  // One interrupt routine must be installed to handle the UART input commands
-  
-
+  // Initialises the ADC channel 7
+  init_adc();
 }
+

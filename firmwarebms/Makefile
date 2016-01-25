@@ -41,7 +41,7 @@
 
 
 # MCU name
-MCU = atmega128
+MCU = atmega168pa
 
 # Processor frequency.
 #     This will define a symbol, F_CPU, in all source code files equal to the 
@@ -62,8 +62,7 @@ MCU = atmega128
 #         F_CPU = 18432000
 #         F_CPU = 20000000
 # 44,1khz audio
-#F_CPU =  16000000
-F_CPU =  7372800
+F_CPU = 3686400
 
 # Output format. (can be srec, ihex, binary)
 FORMAT = ihex
@@ -80,8 +79,7 @@ OBJDIR = .
 
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = $(TARGET).c barometre.c spi.c LT330LD.c MMA7455L.c uart.c adc.c
-
+SRC = $(TARGET).c AD7280A.c serial.c state_machine.c init.c adc.c inout.c eeprom.c
 
 # List C++ source files here. (C dependencies are automatically generated.)
 CPPSRC = 
@@ -94,7 +92,7 @@ CPPSRC =
 #     Even though the DOS/Win* filesystem matches both .s and .S the same,
 #     it will preserve the spelling of the filenames, and gcc itself does
 #     care about how the name is spelled on its command-line.
-ASRC = i2cmaster.S
+#ASRC = i2cmaster.S
 
 
 # Optimization level, can be [0, 1, 2, 3, s]. 
