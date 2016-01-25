@@ -28,6 +28,8 @@
 // Number of current measures for one hour, 10 per second
 #define INTERVALS_PER_HOUR (60L * 60L * SAMPLING_PER_SECOND)
 
+#define TEMPERATURE_HISTERESIS 15L   // °C
+
 #if CFGBATNUMBER==10
 #define CFGAD728AMODULE_0_CHAN 5
 #define CFGAD728AMODULE_1_CHAN 5

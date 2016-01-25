@@ -32,6 +32,9 @@
 // serial number: 12345678
 // client: "golf des paquerettes"       // 32 chars maximum
 // uptime: 0years 3days 5h
+// mintemperature: -20
+// maxtemperature: 60
+// temperature: 23°C
 //
 //-------------------------------------------------------------------------------------
 // set_param -valuename value
@@ -65,11 +68,13 @@
 // ImA: 56323
 // state: RUN
 // Elts: 11
+// temp: 23
 // batbegin  1
 // Vb: 3,230                     // V
-// Lowest: 2,83                   // V
+// Lowest: 2,83                  // V
 // evt: 2                        // undervoltage events
 // avgchgt: 4567                 // charge time average in seconds more = more capacity
+// balan: 1
 // batbegin 2
 // ....
 // batbegin 11
@@ -77,6 +82,7 @@
 // Lowest: 2,92                   // V
 // evt: 0
 // avgchgt: 4643
+// balan: 0
 // bmsReportEnd
 //
 //

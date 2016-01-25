@@ -21,6 +21,7 @@
 #include "uart.h"
 #include "spi.h"
 #include "init.h"
+#include "AD7280A.h"
 #include "main.h"
 #include "env.h"
 
