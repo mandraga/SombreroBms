@@ -4,19 +4,29 @@
 #define FIRMWARE_VERSION    0
 #define FIRMWARE_SUBVERSION 1
 
-#define MAXBATTERY 18
-#define MAXMODULES  3
-
-// Max channels for a 3 modules board
-#define MAX_CHANNELS  ((6 + 3) * MAXMODULES)
-
+//----------------------------------------------------------
 // Value in mHom of the current measurement shunt
+//----------------------------------------------------------
 #define SHUNT_VAL    250L // µhoms
 #define INA197GAIN    50L
 #define DACREFV     5000L // 5V
 
+//----------------------------------------------------------
 // Number of monitored cells
+//----------------------------------------------------------
 #define CFGBATNUMBER     11
+
+//----------------------------------------------------------
+// Maximum peak current
+//----------------------------------------------------------
+#define MAXP_CURRENT     300L  // Amp
+#define MAXC_CURRENT     180L  // Amp
+
+#define MAXBATTERY 18
+#define MAXMODULES  3
+
+// Max AD7280A output channels for a 3 modules board
+#define MAX_CHANNELS  ((6 + 3) * MAXMODULES)
 
 // Discharge current to pass to run mode, in mA
 // An hysteresis of DISCHARGE_THRESHOLD / 2 is applyed somewhere.

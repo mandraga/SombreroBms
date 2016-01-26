@@ -21,35 +21,30 @@ void stop_any_balancing(void)
   set_balancing(0L);
 }
 
-void calculate_charging_speed(t_balancing *pb, char charging, unsigned long *pvbat, char elements);
-{
-}
-
 // Even 1Amp curent during a 1hour charge will only be like 1% of the total charge.
 // And measuring charge speed will be done half of the time.
 // So do not be too serious about it.
-void balancing_during_charge(t_balancing *pb, unsigned long *pvbat, char elements, int temperature)
+void balancing_during_charge(t_balancing *pb, unsigned long *pvbat, char elements, int *ptemperature)
 {
   switch (pb->state)
     {
     case BALANCING_STATE_IDLE:
       {
 	stop_any_balancing();
-	pb->state = BALANCING_STATE_IDLE;
       }
       break;
     case BALANCING_STATE_CHARGING_CSPEED:
     case BALANCING_STATE_BWHILE_CHARGING:
     case BALANCING_STATE_BWHILE_CHARGING_STOPED:
     case BALANCING_STATE_COOLDOWN:
+    default:
       {
 	stop_any_balancing();
 	pb->state = BALANCING_STATE_IDLE;
       }
       break;
-    default:
-      break;
     }
+  setled_balancing(0);
 }
 
 void get_voltage_differences(unsigned long *pvbat, char elements, char *pvlow_index, char *pvdiffmax_index)
@@ -75,49 +70,117 @@ void get_voltage_differences(unsigned long *pvbat, char elements, char *pvlow_in
     }
 }
 
-void balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elements, int temperature)
+int get_highter_temperature(int *ptemperature, char modules)
+{
+  char i;
+  int  max;
+
+  max = -1000;
+  for (i = 0; i < modules; i++)
+    {
+      if (ptemperature[i] > max)
+	{
+	  max = ptemperature[i];
+	}
+    }
+  //get_uc_internal_temperature()
+  return max;
+}
+
+// If t° is way below max temperature, then shunt any battery above the
+// lower one.
+// As t° closes to the max temperature, only shunt the batteries with higher voltage.
+//
+void balancing_with_temperature_control(char vlowindex, unsigned long *pvbat,
+					int higher_temperature, int max_temperature,
+					char elements)
+{
+  unsigned long balancing_reg;
+  char          sorted[MAXBATTERY];
+  char          i, j, r;
+  unsigned long balanced;
+
+  // Sort the values, higher values first
+  for (i = 0; i < elements; i++)
+    sorted[i] = i;
+  for (i = elements - 1; i > 0 ; i--)
+    for (j = i - 1; j >= 0; j--)
+      {
+	if (pvbat[sorted[i]] < pvbat[sorted[j]])
+	  {
+	    r = sorted[i];
+	    sorted[i] = sorted[j];
+	    sorted[j] = r;
+	  }
+      }
+  // Balance only the n bigger Vbat values depending on the temperature
+  balanced = elements;
+  if (max_temperature - higher_temperature < TEMPERATURE_HISTERESIS)
+    {
+      // B = temperature_diffrence * (elements / tempehisteresis)
+      balanced = (unsigned long)(max_temperature - higher_temperature);
+      balanced = balanced < 0? -balanced : balanced;
+      balanced = balanced * (unsigned long)elements;
+      balanced = balanced / TEMPERATURE_HISTERESIS;
+    }
+  balanced = balanced > elements? elements : balanced; // to be sure
+  balancing_reg = 0;
+  for (i = 0; i < balanced; i++)
+    {
+      if (sorted[i] != vlow_index)
+	if (pvbat[sorted[i]] - pvbat[vlow_index] > 10L)
+	  {
+	    balancing_reg = balancing_reg | (1 << sorted[i]);
+	  }
+    }
+  set_balancing(balancing_reg);
+}
+
+// Only called when the charger has finished charging, or is not charging
+void balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elements, int *ptemperature)
 {
   char          Vdiffmax;
   char          lowVi;
   char          hiVi;
-  unsigned long balancing_reg;
+  int           highter_temperature;
 
   switch (pb->state)
     {
     case BALANCING_STATE_IDLE:
       {
 	stop_any_balancing();
+	//
+	// Check if the batteries are unbalanced
+	//
 	get_voltage_differences(pvbat, elements, &pb->vlow_index, &pb->vdiffmax_index);
 	Vdiffmax = pvbat[pb->vdiffmax_index] - pvbat[pb->vlow_index];
 	Vdiffmax = Vdiffmax < 0? -Vdiffmax : Vdiffmax;
 	if (Vdiff_max > 50L) // 50mV value between batteries of the pack
 	  {
-	    pb->state = BALANCING_STATE_BWHILE_CHARGING_STOPED;    
-	  }
-	else
-	  {
-	    stop_any_balancing();
-	    pb->state = BALANCING_STATE_IDLE;	    
+	    setled_balancing(1);
+	    pb->state = BALANCING_STATE_BWHILE_CHARGING_STOPED;
 	  }
       }
       break;
     case BALANCING_STATE_CHARGING_CSPEED:
     case BALANCING_STATE_BWHILE_CHARGING:
       {
+	// These states are not for this functions
 	stop_any_balancing();
 	pb->state = BALANCING_STATE_IDLE;
       }
       break;
     case BALANCING_STATE_BWHILE_CHARGING_STOPED:
       {
-	// Too hot
-	if (temperature >= g_edat.bat_tmax)
+	// Too hot?
+	highter_temperature = get_highter_temperature(ptemperature, CFGAD728AMODULES);
+	if (highter_temperature >= g_edat.bat_tmax)
 	  {
 	    stop_any_balancing();
 	    pb->state = BALANCING_STATE_COOLDOWN;
 	    break;
 	  }
-	// Balanced
+	// Balanced?
 	get_voltage_differences(pvbat, elements, &lowVi, &hiVi);
 	Vdiffmax = pvbat[hiVi] - pvbat[lpb->vlow_index];
 	Vdiffmax = Vdiffmax < 0? -Vdiffmax : Vdiffmax;
@@ -128,22 +191,25 @@ void balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elemen
 	    pb->state = BALANCING_STATE_IDLE;
 	    break;
 	  }
-	// Balance them
-	balancing_reg = 0;
-	for (i = 0; i < elements; i++)
+	// If the lowest battery is not the one setup when entering the state
+	// then return to IDLE. 4mV tolerance
+	if (pvbat[lpb->vlow_index] > pvbat[lowVi] + 4)
 	  {
-	    if (pvbat[hiVi] - pvbat[lpb->vlow_index] > 10L)
-	      {
-		balancing_reg = balancing_reg | (1 << i);
-	      }
+	    stop_any_balancing();
+	    pb->state = BALANCING_STATE_IDLE;
+	    break;
 	  }
-	set_balancing(balancing_reg);
+	// Balance from higher to lower battery taking temperature into account
+	// The temperature sensors must be reliable.
+	balancing_with_temperature_control(lpb->vlow_index, pvbat,
+					   highter_temperature, g_edat.bat_tmax,
+					   elements);
       }
       break;
     case  BALANCING_STATE_COOLDOWN:
       {
 	stop_any_balancing();
-	if (temperature < g_edat.bat_tmax - TEMPERATURE_HISTERESIS)
+	if (highter_temperature < g_edat.bat_tmax - TEMPERATURE_HISTERESIS)
 	  {
 	    pb->state = BALANCING_STATE_BWHILE_CHARGING_STOPED;
 	  }
@@ -152,5 +218,6 @@ void balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elemen
     default:
       break;
     }
+  setled_balancing(pb->state == BALANCING_STATE_BWHILE_CHARGING_STOPED);
 }
 

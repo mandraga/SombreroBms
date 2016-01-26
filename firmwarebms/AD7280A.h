@@ -124,6 +124,8 @@
 #define POLYNOM_ORDER	8
 #define HIGHBIT		(1 << (POLYNOM_ORDER - 1))
 
+#define AD7280_VREG_MV  5200L
+
 struct           s_ad7280_state 
 {
   unsigned char	 slave_num;       // Device count

@@ -53,8 +53,6 @@ typedef struct s_balancing
   char        *pvlow_index;     // Reference V
 }              t_balancing;
 
-void calculate_charging_speed(t_balancing *pb, char charging, unsigned long *pvbat, char elements);
+void balancing_during_charge(t_balancing *pb, unsigned long *pvbat, char elements, int *ptemperature);
 
-void balancing_during_charge(t_balancing *pb, unsigned long *pvbat, char elements, int temperature);
-
-void balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elements, int temperature);
+void balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elements, int *ptemperature);

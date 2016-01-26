@@ -99,10 +99,10 @@ char __ad7280_read32(unsigned long *val)
 }
 
 // SPI write a command 32bits
-int ad7280_write(unsigned char  devaddr,
-		 unsigned char  addr,
-		 unsigned char  all,
-		 unsigned char  val)
+void ad7280_write(unsigned char  devaddr,
+	          unsigned char  addr,
+		  unsigned char  all,
+		  unsigned char  val)
 {
   unsigned long reg;
 
@@ -256,10 +256,19 @@ int ad7280_chain_setup(t_ad7280_state *st)
 int init_AD7820A(t_ad7280_state *st)
 {
   int  ret;
-  char acquisition_time     = AD7280A_ACQ_TIME_1200ns;
+  char thermistor_term_en = 1;
+  char acquisition_time = AD7280A_ACQ_TIME_1600ns; // Do not change, 1600ns required for the thermistor reading.
   char conversion_averaging = AD7280A_CONV_AVG_DIS;
-  char thermistor_term_en   = 1;
 
+  //
+  // Setup the channels per module count
+  //
+  st->chan_cnt[0] = CFGAD728AMODULE_0_CHAN;
+  st->chan_cnt[1] = CFGAD728AMODULE_1_CHAN;
+  st->chan_cnt[2] = CFGAD728AMODULE_2_CHAN;
+  // Cell balance masks to all MosFets disabled.
+  st->cb_mask[0] = st->cb_mask[1] = st->cb_mask[2] = 0;
+  //
   // Control register values:
   // - Thermistor res enabled
   // - 6 cell + 3 AUX
@@ -309,14 +318,6 @@ int init_AD7820A(t_ad7280_state *st)
 /*    break; */
 /*  case AD7280A_AUX_ADC_UNDERVOLTAGE: */
 /*    val = (st->aux_threshlow * 196) / 10; */
-  //
-  // Setup the channels per module count
-  //
-  st->chan_cnt[0] = CFGAD728AMODULE_0_CHAN;
-  st->chan_cnt[1] = CFGAD728AMODULE_1_CHAN;
-  st->chan_cnt[2] = CFGAD728AMODULE_2_CHAN;
-  // Cell balance masks to all MosFets disabled.
-  st->cb_mask[0] = st->cb_mask[1] = st->cb_mask[2] = 0;
   // Ready for use
   return 0;
 }
@@ -352,9 +353,8 @@ int ad7280_get_VBAT(t_ad7280_state *st, unsigned long *pvbat, int *ptemp)
 	      // Temperature
 	      cnv = varray[chan];
 	      cnv = ((cnv * 122) / 100);  // 1,22mV / LSB, 0V offset
-	      // Fixme convert it to ,A0(BC
-	      zfvzef
-	      ptemp[module] = cnv;
+	      // Convert it to ,A0(BC
+	      ptemp[module] = mv_to_temperature(cnv);
 	      chan += 3; // Hardcoded shit, it retuns only 3 aux temperatures 1, 3 and 5
 	    }
 	}
@@ -362,9 +362,37 @@ int ad7280_get_VBAT(t_ad7280_state *st, unsigned long *pvbat, int *ptemp)
   return ret;
 }
 
-int ad7280_set_balance(char *pchan_count, unsigned long balancing)
+char ad7280_set_balance(t_ad7280_state *st, unsigned long balancing)
 {
-  // Set the values per module
-  
+  char          i, bitnumber;
+  unsigned char reg;
+  int           rb;
+
+  // Set the values per module and send them
+  for (i = 0; i < CFGAD728AMODULES; i++)
+    {
+      reg = 0;
+      for (bitnumber = 0; bitnumber < st->chan_cnt[i]; i++)
+	{
+	  reg = balancing & (1 << bitnumber);
+	}
+      st->cb_mask[i] = reg;
+      ad7280_write(i, AD7280A_CELL_BALANCE, 0, st->cb_mask[i]);
+      // Next module
+      balancing = (balancing >> pchan_count[i]);
+    }  
+  // Check the values
+  for (i = 0; i < CFGAD728AMODULES; i++)
+    {
+      rb = ad7280_read(st, i, AD7280A_CELL_BALANCE);
+      if (rb != st->cb_mask[i])
+	{
+	  add_error_log_EEPROM(ERROR_CODE_BALANCING_FAILED);
+	  // Clear the balancing register
+	  ad7280_write(i, AD7280A_CELL_BALANCE, 0, 0);
+	  return 1;
+	}
+    }
+  return 0;
 }
 

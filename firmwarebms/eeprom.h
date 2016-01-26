@@ -1,4 +1,13 @@
 
+// Log the last 64 errors.
+#define ERROR_CODE_BALANCING_EMPTY   0
+#define ERROR_CODE_BALANCING_FAILED  1
+#define ERROR_CODE_VBAT_LOW_CRITICAL 2
+#define ERROR_CODE_SHORT_CIRCUIT     3
+#define ERROR_CODE_HIGHT_CURRENT     4
+
+void add_error_log_EEPROM(char code);
+
 void set_install_date_EEPROM(char *str);
 void set_min_Vbat_EEPROM(char *str);	  
 void set_max_Vbat_EEPROM(char *str);

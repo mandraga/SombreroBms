@@ -33,17 +33,17 @@ t_ad7280_state       g_ad7280;
 void setled_balancing(char state)
 {
   if (state)
-    SBI(PORTD, LED_BALANCING);
+    CBI(PORTD, LED_BALANCING); // on
   else
-    CBI(PORTD, LED_BALANCING);
+    SBI(PORTD, LED_BALANCING);
 }
 
 void setled_error(char state)
 {
   if (state)
-    SBI(PORTD, LED_ERROR);
-  else
     CBI(PORTD, LED_ERROR);
+  else
+    SBI(PORTD, LED_ERROR);
 }
 
 void uart1_send_bytes(unsigned char *pdat, int len)
