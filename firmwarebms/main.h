@@ -96,7 +96,7 @@ typedef struct  s_pack_variable_data
   unsigned long state_of_charge;          // mili Ampere Hour
   unsigned long vbat[MAXBATTERY];         // Batterey milivolts, last value
   unsigned long total_vbat;               // Pack voltage in mv
-  int           tempereature[MAXMODULES]; // °C
+  int           temperature[MAXMODULES];  // °C
   char          app_state;                // State machine variable
   // Internal variables
   char          charging_started;         // Once started it must finish

@@ -396,3 +396,17 @@ char ad7280_set_balance(t_ad7280_state *st, unsigned long balancing)
   return 0;
 }
 
+char ad7280_get_balance(t_ad7280_state *st, char channel)
+{
+  char          i, channel_cnt;
+  unsigned long mask;
+
+  channel_cnt = 0;
+  mask = 0;
+  for (i = 0; i < CFGAD728AMODULES; i++)
+    {
+      mask = mask | ((unsigned long)st->cb_mask[i] << channel_cnt);
+      channel_cnt += st->chan_cnt[i];
+    }
+  return ((mask & (1L << channel)) != 0);
+}

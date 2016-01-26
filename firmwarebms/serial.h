@@ -5,7 +5,7 @@
 // And will result in the interrupt callback to send a string back.
 //
 //-------------------------------------------------------------------------------------
-// ping
+// "ping\n"
 //
 // Returns something like:
 //
@@ -14,7 +14,8 @@
 // Elements: 11
 //
 //-------------------------------------------------------------------------------------
-// get_params
+// "get_params\n"
+//
 // Returns all the configuration information in the following format:
 //
 // setup date: dd/mm/yyyy
@@ -32,18 +33,19 @@
 // serial number: 12345678
 // client: "golf des paquerettes"       // 32 chars maximum
 // uptime: 0years 3days 5h
-// mintemperature: -20
-// maxtemperature: 60
+// mintemperature: -20°C
+// maxtemperature: 60°C
 // temperature: 23°C
 //
 //-------------------------------------------------------------------------------------
-// set_param -valuename value
+// "set_param -valuename value\n"
+//
 // valuename:
 //   date      dd/mm/yyyy
 //   batVmin         2800              // In mV
 //   batVmax         3600
 //   tmin             -20
-//   tmax              75
+//   tmax              75              // Use someting low, like 60°C
 //   fullcharge     60000              // In mAH
 //   serial      12345678
 //   client      "golf des paquerettes"
@@ -56,7 +58,7 @@
 //
 //-------------------------------------------------------------------------------------
 //
-// get_report
+// "get_report\n"
 //
 // Returns each battery information + current + totalvbat + machine_state + charge
 // Not too verbose in order to send it fast and often
@@ -68,7 +70,7 @@
 // ImA: 56323
 // state: RUN
 // Elts: 11
-// temp: 23
+// temp: 23                      // °C this is the maximum temperature over the board
 // batbegin  1
 // Vb: 3,230                     // V
 // Lowest: 2,83                  // V
@@ -108,6 +110,9 @@
 #define SER_STATE_SEND_SERIAL           13
 #define SER_STATE_SEND_CLIENT           14
 #define SER_STATE_SEND_UPTIME           15
+#define SER_STATE_SEND_MINT             16
+#define SER_STATE_SEND_MAXT             17
+#define SER_STATE_SEND_HITEMP           18
 
 // A battery element counter is also used on top of the state
 #define SER_STATE_SEND_REPORT_START     50
@@ -117,13 +122,15 @@
 #define SER_STATE_SEND_REPORT_IMA       54
 #define SER_STATE_SEND_REPORT_STATE     55
 #define SER_STATE_SEND_REPORT_ELTS      56
-#define SER_STATE_SEND_REPORT_BATBEGIN  57
-#define SER_STATE_SEND_REPORT_BATVB     58
-#define SER_STATE_SEND_REPORT_BATVLOW   59
-#define SER_STATE_SEND_REPORT_BATEVT    60
-#define SER_STATE_SEND_REPORT_BATAVGT   61
-#define SER_STATE_SEND_REPORT_END       62
-#define SER_STATE_SEND_REPORT_FINISHED  63
+#define SER_STATE_SEND_REPORT_TEMP      57
+#define SER_STATE_SEND_REPORT_BATBEGIN  58
+#define SER_STATE_SEND_REPORT_BATVB     59
+#define SER_STATE_SEND_REPORT_BATVLOW   60
+#define SER_STATE_SEND_REPORT_BATEVT    61
+#define SER_STATE_SEND_REPORT_BATAVGT   62
+#define SER_STATE_SEND_REPORT_BATBALANC 63
+#define SER_STATE_SEND_REPORT_END       64
+#define SER_STATE_SEND_REPORT_FINISHED  65
 
 #define SER_STATE_SEND_DEBUG            99
 #define SER_STATE_RECEIVE              100
@@ -149,3 +156,4 @@ typedef struct s_serialport
 
 void uart_puts(char *str);
 void uart_init(unsigned int baudrate);
+

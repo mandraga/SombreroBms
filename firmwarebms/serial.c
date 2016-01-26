@@ -1,6 +1,8 @@
+
 #include "env.h"
 #include "main.h"
 #include "eeprom.h"
+#include "balancing.h"
 #include "serial.h"
 
 extern t_pack_variable_data g_appdata;
@@ -368,15 +370,37 @@ char change_TX_state(char TXstate)
 	days  = g_appdata.uptime_days % 365;
 	hours = g_appdata.minutes / 60;
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, "uptime: %dyears %ddays %dh\n", years, days, hours);
-	nextState = SER_STATE_SEND_CLIENT;
+	nextState = SER_STATE_SEND_UPTIME;
       }
       break;
     case SER_STATE_SEND_UPTIME:
+      {
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "mintemperature:  %d°C\n", g_edat.min_temperature);
+	nextState = SER_STATE_SEND_MINT;
+      }
+      break;
+    case SER_STATE_SEND_MINT:
+      {
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "maxtemperature:  %d°C\n", g_edat.max_temperature);
+	nextState = SER_STATE_SEND_MAXT;
+      }
+      break;
+    case SER_STATE_SEND_MAXT:
+      {
+	int highter_temp;
+
+	highter_temp = get_highter_temperature(g_appdata.temperature, CFGAD728AMODULES);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "temperature:  %d°C\n", highter_temp);
+	nextState = SER_STATE_SEND_HITEMP;
+      }
+      break;
+    case SER_STATE_SEND_HITEMP:
       {
 	g_serial.outsize = 0;
 	nextState = SER_STATE_IDLE; // Finished
       }
       break;
+
       //-----------------------------------------------------------------------------
       // Response to "get_report" command
     case SER_STATE_SEND_REPORT_VB:
@@ -442,13 +466,22 @@ char change_TX_state(char TXstate)
     case SER_STATE_SEND_REPORT_ELTS:
       {
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Elts: %d\n", g_edat.bat_elements);
+	nextState = SER_STATE_SEND_REPORT_TEMP;
+      }
+      break;
+    case SER_STATE_SEND_REPORT_TEMP:
+      {
+	int highter_temp;
+	
+	highter_temp = get_highter_temperature(g_appdata.temperature, CFGAD728AMODULES);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "temperature:  %d\n", highter_temp);
+	g_serial.batcounter = 0;
 	nextState = SER_STATE_SEND_REPORT_BATBEGIN;
       }
       break;
     case SER_STATE_SEND_REPORT_BATBEGIN:
       {
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, "batbegin %d\n", g_serial.batcounter);
-	g_serial.batcounter = 0;
 	nextState = SER_STATE_SEND_REPORT_BATEVT;
       }
       break;
@@ -487,8 +520,17 @@ char change_TX_state(char TXstate)
 
 	average_charge_time = get_charge_speed(g_serial.batcounter);
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, "avgchgt: %d\n", average_charge_time);
-	g_serial.outbuffer++;
-	if (g_serial.outbuffer >= g_edat.bat_elements)
+	nextState = SER_STATE_SEND_REPORT_BATBALANC;
+      }
+      break;
+    case SER_STATE_SEND_REPORT_BATBALANC:
+      {
+	char balanced;
+
+	balanced = ad7280_get_balance(g_serial.batcounter);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "balan: %d\n", balanced);
+	g_serial.batcounter++;
+	if (g_serial.batcounter >= g_edat.bat_elements)
 	  nextState = SER_STATE_SEND_REPORT_END;   // Finished
 	else
 	  nextState = SER_STATE_SEND_REPORT_BATBEGIN; // Next battery element

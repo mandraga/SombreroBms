@@ -141,7 +141,8 @@ struct           s_ad7280_state
 
 void init_AD7820A(t_ad7280_state *st);
 int  ad7280_get_VBAT(t_ad7280_state *st, unsigned long *pvbat, unsigned long *ptemp);
-int  ad7280_set_balance(char *pchan_count, unsigned long balancing);
+int  ad7280_set_balance(t_ad7280_state *st, unsigned long balancing);
+char ad7280_get_balance(t_ad7280_state *st, char channel);
 
 #endif /* IIO_ADC_AD7280_H_ */
 
