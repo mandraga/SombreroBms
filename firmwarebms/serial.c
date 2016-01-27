@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <avr/pgmspace.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
@@ -159,17 +160,17 @@ void process_serial_command(void)
   // transmission will send the other lines.
   if (strcmp("get_report", g_serial.inbuffer) == 0)
     {
-      snprintf(g_serial.outbuffer, TRSTRINGSZ, "bmsReportBegin\n");
+      snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("bmsReportBegin\n"));
       g_serial.TXstate = SER_STATE_SEND_REPORT_VB;
     }
   if (strcmp("ping", g_serial.inbuffer) == 0)
     {
-      snprintf(g_serial.outbuffer, TRSTRINGSZ, "Sombrero BMS C2015-2016 Vreemdelabs.com\n");
+      snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("Sombrero BMS C2015-2016 Vreemdelabs.com\n"));
       g_serial.TXstate = SER_STATE_SEND_PING1;
     }
   if (strcmp("get_params", g_serial.inbuffer) == 0)
     {
-      snprintf(g_serial.outbuffer, TRSTRINGSZ, "setup date: %d/%d/%d\n",
+      snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("setup date: %d/%d/%d\n"),
 	       g_edat.install_date_day,
 	       g_edat.install_date_month,
 	       g_edat.install_date_day);
@@ -280,13 +281,13 @@ char change_TX_state(char TXstate)
       // Response to "ping" command
     case SER_STATE_SEND_PING1:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Firmware Version: %d.%d\n", FIRMWARE_VERSION, FIRMWARE_SUBVERSION);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("Firmware Version: %d.%d\n"), FIRMWARE_VERSION, FIRMWARE_SUBVERSION);
 	nextState = SER_STATE_SEND_PING2;
       }
       break;
     case SER_STATE_SEND_PING2:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Elements: %d\n", g_edat.bat_elements);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("Elements: %d\n"), g_edat.bat_elements);
 	nextState = SER_STATE_SEND_PING3;
       }
       break;
@@ -303,19 +304,19 @@ char change_TX_state(char TXstate)
 	int charge_percent;
 
 	charge_percent = 100L * g_appdata.state_of_charge / g_edat.full_charge;
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Charge: %d%c\n", charge_percent, '%');
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("Charge: %d%c\n"), charge_percent, '%');
 	nextState = SER_STATE_SEND_CHARGE;
       }
       break;
     case SER_STATE_SEND_CHARGE:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "total capacity: %dAH\n", (int)(g_edat.full_charge / 1000L));
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("total capacity: %dAH\n"), (int)(g_edat.full_charge / 1000L));
 	nextState = SER_STATE_SEND_TOTALCAP;
       }
       break;
     case SER_STATE_SEND_TOTALCAP:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "charge cycles: %d\n", g_edat.charge_cycles);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("charge cycles: %d\n"), g_edat.charge_cycles);
 	nextState = SER_STATE_SEND_CHARGECYCLES;
       }
       break;
@@ -324,19 +325,19 @@ char change_TX_state(char TXstate)
 	int hours;
 
 	hours = g_edat.charge_time_minutes / 60;
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "total charging time: %dh\n", hours);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("total charging time: %dh\n"), hours);
 	nextState = SER_STATE_SEND_TOTALCHRGTIME;
       }
       break;
     case SER_STATE_SEND_TOTALCHRGTIME:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Vmin: %d,%2dV\n", (int)(g_edat.bat_minv / 1000L), (int)((g_edat.bat_minv % 1000L) / 10));
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("Vmin: %d,%2dV\n"), (int)(g_edat.bat_minv / 1000L), (int)((g_edat.bat_minv % 1000L) / 10));
 	nextState = SER_STATE_SEND_VMIN;
       }
       break;
     case SER_STATE_SEND_VMIN:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Vmin: %d,%2dV\n", (int)(g_edat.bat_maxv / 1000L), (int)((g_edat.bat_maxv % 1000L) / 10));
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("Vmin: %d,%2dV\n"), (int)(g_edat.bat_maxv / 1000L), (int)((g_edat.bat_maxv % 1000L) / 10));
 	nextState = SER_STATE_SEND_VMAX;
       }
       break;
@@ -345,25 +346,25 @@ char change_TX_state(char TXstate)
 	unsigned long undevorlatege_evt_cnt;
 
 	undevorlatege_evt_cnt = get_total_undervoltage_event_count();
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "undervoltage events: %lu\n", undevorlatege_evt_cnt);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("undervoltage events: %lu\n"), undevorlatege_evt_cnt);
 	nextState = SER_STATE_SEND_UNDERVOLTAGEEVTS;
       }
       break;
     case SER_STATE_SEND_UNDERVOLTAGEEVTS:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "maxdischarge: %dA\n", g_appdata.max_discharge);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("maxdischarge: %dA\n"), g_appdata.max_discharge);
 	nextState = SER_STATE_SEND_MAXDISCHARGE;
       }
       break;
     case SER_STATE_SEND_MAXDISCHARGE:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "serial number: %s\n", g_edat.serial_number);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("serial number: %s\n"), g_edat.serial_number);
 	nextState = SER_STATE_SEND_SERIAL;
       }
       break;
     case SER_STATE_SEND_SERIAL:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "client: %s\n", g_edat.client);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("client: %s\n"), g_edat.client);
 	nextState = SER_STATE_SEND_CLIENT;
       }
       break;
@@ -376,19 +377,19 @@ char change_TX_state(char TXstate)
 	years = g_appdata.uptime_days / 365;
 	days  = g_appdata.uptime_days % 365;
 	hours = g_appdata.uptime_minutes / 60;
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "uptime: %dyears %ddays %dh\n", years, days, hours);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("uptime: %dyears %ddays %dh\n"), years, days, hours);
 	nextState = SER_STATE_SEND_UPTIME;
       }
       break;
     case SER_STATE_SEND_UPTIME:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "mintemperature:  %d°C\n", g_edat.min_temperature);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("mintemperature:  %d°C\n"), g_edat.min_temperature);
 	nextState = SER_STATE_SEND_MINT;
       }
       break;
     case SER_STATE_SEND_MINT:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "maxtemperature:  %d°C\n", g_edat.max_temperature);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("maxtemperature:  %d°C\n"), g_edat.max_temperature);
 	nextState = SER_STATE_SEND_MAXT;
       }
       break;
@@ -397,7 +398,7 @@ char change_TX_state(char TXstate)
 	int highter_temp;
 
 	highter_temp = get_highter_temperature(g_appdata.temperature, CFGAD728AMODULES);
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "temperature:  %d°C\n", highter_temp);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("temperature:  %d°C\n"), highter_temp);
 	nextState = SER_STATE_SEND_HITEMP;
       }
       break;
@@ -412,7 +413,7 @@ char change_TX_state(char TXstate)
       // Response to "get_report" command
     case SER_STATE_SEND_REPORT_VB:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Vb: %d,%d\n", (int)(g_appdata.total_vbat / 1000L), (int)((g_appdata.total_vbat % 1000L) / 10));
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("Vb: %d,%d\n"), (int)(g_appdata.total_vbat / 1000L), (int)((g_appdata.total_vbat % 1000L) / 10));
 	nextState = SER_STATE_SEND_REPORT_CHRG;
       }
       break;
@@ -421,19 +422,19 @@ char change_TX_state(char TXstate)
 	int charge_percent;
 
 	charge_percent = 100L * g_appdata.state_of_charge / g_edat.full_charge;
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "chrg: %d\n", charge_percent);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("chrg: %d\n"), charge_percent);
 	nextState = SER_STATE_SEND_REPORT_CHRGMA;
       }
       break;
     case SER_STATE_SEND_REPORT_CHRGMA:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "chrgmAH: %lu\n", g_appdata.state_of_charge);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("chrgmAH: %lu\n"), g_appdata.state_of_charge);
 	nextState = SER_STATE_SEND_REPORT_CHRGMA;
       }
       break;
     case SER_STATE_SEND_REPORT_IMA:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "ImAH: %d\n", (int)(g_appdata.c_discharge));
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("ImAH: %d\n"), (int)(g_appdata.c_discharge));
 	nextState = SER_STATE_SEND_REPORT_STATE;
       }
       break;
@@ -442,29 +443,29 @@ char change_TX_state(char TXstate)
 	switch (g_appdata.app_state)
 	  {
 	  case STATE_START:
-	    snprintf(g_serial.outbuffer, TRSTRINGSZ, "State: init\n");
+	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: init\n"));
 	    break;
 	  case STATE_CHARGEON:
-	    snprintf(g_serial.outbuffer, TRSTRINGSZ, "State: chargeon\n");
+	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: chargeon\n"));
 	    break;
 	  case STATE_CHARGING:
-	    snprintf(g_serial.outbuffer, TRSTRINGSZ, "State: charging\n");
+	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: charging\n"));
 	    break;
 	  case STATE_IDLE:
-	    snprintf(g_serial.outbuffer, TRSTRINGSZ, "State: idle\n");
+	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: idle\n"));
 	    break;
 	  case STATE_RUN:
-	    snprintf(g_serial.outbuffer, TRSTRINGSZ, "State: run\n");
+	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: run\n"));
 	    break;
 	  case STATE_RELAPSE:
-	    snprintf(g_serial.outbuffer, TRSTRINGSZ, "State: relapse\n");
+	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: relapse\n"));
 	    break;
 	  case STATE_SECURITY:
-	    snprintf(g_serial.outbuffer, TRSTRINGSZ, "State: security\n");
+	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: security\n"));
 	    break;
 	  case STATE_CRITICAL_FAILURE:
 	  default:
-	    snprintf(g_serial.outbuffer, TRSTRINGSZ, "State: failure\n");
+	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: failure\n"));
 	    break;
 	  }
 	nextState = SER_STATE_SEND_REPORT_ELTS;
@@ -472,7 +473,7 @@ char change_TX_state(char TXstate)
       break;
     case SER_STATE_SEND_REPORT_ELTS:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Elts: %d\n", g_edat.bat_elements);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("Elts: %d\n"), g_edat.bat_elements);
 	nextState = SER_STATE_SEND_REPORT_TEMP;
       }
       break;
@@ -481,14 +482,14 @@ char change_TX_state(char TXstate)
 	int highter_temp;
 	
 	highter_temp = get_highter_temperature(g_appdata.temperature, CFGAD728AMODULES);
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "temperature:  %d\n", highter_temp);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("temperature:  %d\n"), highter_temp);
 	g_serial.batcounter = 0;
 	nextState = SER_STATE_SEND_REPORT_BATBEGIN;
       }
       break;
     case SER_STATE_SEND_REPORT_BATBEGIN:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "batbegin %d\n", g_serial.batcounter);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("batbegin %d\n"), g_serial.batcounter);
 	nextState = SER_STATE_SEND_REPORT_BATEVT;
       }
       break;
@@ -497,7 +498,7 @@ char change_TX_state(char TXstate)
 	int vbat, mvbat;
 
 	get_element_vbat(g_serial.batcounter, &vbat, &mvbat);
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Vb: %d,%d\n", vbat, mvbat);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("Vb: %d,%d\n"), vbat, mvbat);
 	g_serial.batcounter = 0;
 	nextState = SER_STATE_SEND_REPORT_BATVLOW;
       }
@@ -507,7 +508,7 @@ char change_TX_state(char TXstate)
 	int vbat, mvbat;
 
 	get_element_vbat_lowest(g_serial.batcounter, &vbat, &mvbat);
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "VLowest: %d,%d\n", vbat, mvbat);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("VLowest: %d,%d\n"), vbat, mvbat);
 	g_serial.batcounter = 0;
 	nextState = SER_STATE_SEND_REPORT_BATEVT;
       }
@@ -517,7 +518,7 @@ char change_TX_state(char TXstate)
 	int underflow_events;
 
 	underflow_events = get_undervoltage_event_count(g_serial.batcounter);
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "evt: %d\n", underflow_events);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("evt: %d\n"), underflow_events);
 	nextState = SER_STATE_SEND_REPORT_BATAVGT;
       }
       break;
@@ -526,7 +527,7 @@ char change_TX_state(char TXstate)
 	int average_charge_time; // Charge speed or whatever
 
 	average_charge_time = get_charge_speed(g_serial.batcounter);
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "avgchgt: %d\n", average_charge_time);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("avgchgt: %d\n"), average_charge_time);
 	nextState = SER_STATE_SEND_REPORT_BATBALANC;
       }
       break;
@@ -535,7 +536,7 @@ char change_TX_state(char TXstate)
 	char balanced;
 
 	balanced = ad7280_get_balance(&g_ad7280, g_serial.batcounter);
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "balan: %d\n", balanced);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("balan: %d\n"), balanced);
 	g_serial.batcounter++;
 	if (g_serial.batcounter >= g_edat.bat_elements)
 	  nextState = SER_STATE_SEND_REPORT_END;   // Finished
@@ -545,7 +546,7 @@ char change_TX_state(char TXstate)
       break;
     case SER_STATE_SEND_REPORT_END:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "bmsReportEnd\n");
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("bmsReportEnd\n"));
 	nextState = SER_STATE_SEND_REPORT_FINISHED;
       }
       break;
