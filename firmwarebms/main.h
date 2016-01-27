@@ -42,7 +42,7 @@
 #define STATE_CRITICAL_FAILURE  7  // Stops here, no way to get out but a reset
 
 #define BAUDRATE       9600
-#indef F_CPU
+#ifndef F_CPU
 #define F_CPU       3686000
 #endif
 
@@ -106,3 +106,5 @@ typedef struct  s_pack_variable_data
 }               t_pack_variable_data;
 
 void setled_balancing(char state);
+void setled_error(char state);
+

@@ -3,17 +3,9 @@
 #define __DELAY_BACKWARD_COMPATIBLE__ 
 #include <util/delay.h>
 
+#include "env.h"
 #include "main.h"
 #include "spi.h"
-
-
-#define NOSEL    0
-#define CS7280A  1
-#define CSDAC    2
-#define CSMEM    3
-
-#define CS7280APOL 11
-#define CS7280APOL 00
 
 void set_SPI_pol(char pol)
 {
@@ -35,7 +27,7 @@ void set_SPI_pol(char pol)
 void select_device(char device)
 {
   // SPI polarity
-  if (device == CS7280A)
+  if (device == SPICS7280A)
     {
       set_SPI_pol(CS7280APOL);
     }
@@ -44,7 +36,7 @@ void select_device(char device)
       set_SPI_pol(CS7280APOL);
     }
   // CHIP select low
-  if (device == CS7280A)
+  if (device == SPICS7280A)
     CBI(PORTB, CSBAT);
   else
     SBI(PORTB, CSBAT);
@@ -54,7 +46,7 @@ void select_device(char device)
 int init_spi_master()
 {
   // Nothing selected at start
-  select_device(NOSEL);
+  select_device(SPINOSEL);
   // SPIE 0 interrupt enable
   // SPE  1 spi enable
   // DORD 0 data order MSB first

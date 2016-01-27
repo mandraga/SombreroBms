@@ -6,6 +6,9 @@
 #define ERROR_CODE_SHORT_CIRCUIT     3
 #define ERROR_CODE_HIGHT_CURRENT     4
 
+#define ERROR_LOG_SIZE              16
+#define ERROR_LOG_START        (E2SIZE - ERROR_LOG_SIZE - 1)
+
 void add_error_log_EEPROM(char code);
 
 void set_install_date_EEPROM(char *str);

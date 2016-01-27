@@ -5,15 +5,16 @@
  Software: AVR-GCC 3.3 
  Hardware: ATMEGA168PA
 
-Description: Part of it is taken from the linux driver source code from Analog Devices and changed to fit the atmel AVR.
-
 *******************************************************************************/
+//
+// Description: Part of this file is taken from the linux driver source code from 
+// Analog Devices and changed to fit the atmel AVR.
+//
 // Original Analog Deviecs code:
 //
 // MODULE_AUTHOR("Michael Hennerich <hennerich@blackfin.uclinux.org>");
 // MODULE_DESCRIPTION("Analog Devices AD7280A");
 // MODULE_LICENSE("GPL v2");
-//
 //
 // AD7280A Lithium Ion Battery Monitoring System
 //
@@ -21,9 +22,23 @@ Description: Part of it is taken from the linux driver source code from Analog D
 //
 // Licensed under the GPL-2.
 //
+#define __DELAY_BACKWARD_COMPATIBLE__ 
+#include <util/delay.h>
 
+#include "env.h"
+#include "main.h"
 #include "spi.h"
+#include "init.h"
+#include "eeprom.h"
+#include "thermistor.h"
 #include "AD7280A.h"
+//#include "balancing.h"
+//#include "state_machine.h"
+
+extern t_pack_variable_data g_appdata;
+extern t_eeprom_data        g_edat;
+extern t_eeprom_battery     g_bat[MAXBATTERY];
+extern t_ad7280_state       g_ad7280;
 
 // CRC section
 // The CRC for a write  is calculated on the 21 bits 11 to 31 of
@@ -65,7 +80,7 @@ char ad7280_check_crc(unsigned long val)
 {
   unsigned char crc;
 
-  car = ad7280_calc_crc8(val >> 10);
+  crc = ad7280_calc_crc8(val >> 10);
   if (crc != ((val >> 2) & 0xFF))
     return 1;
   return 0;
@@ -78,7 +93,7 @@ char ad7280_check_crc(unsigned long val)
 // it may take up to 250us, in this case we better sleep instead of busy wait.
 //
 // But on the AVR at 3Mhz, we just wait for 2000us
-void ad7280_delay()
+void ad7280_delay(void)
 {
   _delay_ms(2);
 }
@@ -88,13 +103,13 @@ char __ad7280_read32(unsigned long *val)
 {
   unsigned long ret;
 
-  select_device(CS7280A);
+  select_device(SPICS7280A);
   ret = SPI_Master_read();
   ret = (ret << 8) | SPI_Master_read();
   ret = (ret << 8) | SPI_Master_read();
   ret = (ret << 8) | SPI_Master_read();
-  select_device(NOSEL);
-  *val = ret
+  select_device(SPINOSEL);
+  *val = ret;
   return 0;
 }
 
@@ -117,12 +132,12 @@ void ad7280_write(unsigned char  devaddr,
   // CRC from all this + b010
   reg |= ad7280_calc_crc8(reg >> 11) << 3 | 0x2;
   // Send the 32bits through SPI, MSB first
-  select_device(CS7280A);
+  select_device(SPICS7280A);
   SPI_Master_write(reg >> 24);
   SPI_Master_write((reg >> 16) & 0xFF);
   SPI_Master_write((reg >>  8) & 0xFF);
   SPI_Master_write(reg & 0xFF);
-  select_device(NOSEL);
+  select_device(SPINOSEL);
 }
 
 // This is a register data read, not a conversion read
@@ -187,10 +202,21 @@ int ad7280_read_channel(t_ad7280_state *st, unsigned devaddr, unsigned addr)
   return (tmp >> 11) & 0xFFF;
 }
 
-// Read all the channels
-void ad7280_read_all_channels(t_ad7280_state *st, unsigned int cnt, unsigned int *array, char *ptype)
+int channel_count(t_ad7280_state *st)
 {
-  int           i;
+  int i, count;
+
+  for (i = 0, count = 0; i < MAXMODULES; i++)
+    {
+      count += st->chan_cnt[i];
+    }
+  return count;
+}
+
+// Read all the channels
+char ad7280_read_all_channels(t_ad7280_state *st, unsigned int *array)
+{
+  int           i, cnt;
   unsigned long tmp;
 
   ad7280_write(AD7280A_DEVADDR_MASTER, AD7280A_READ, 1, AD7280A_CELL_VOLTAGE_1 << 2);
@@ -203,26 +229,24 @@ void ad7280_read_all_channels(t_ad7280_state *st, unsigned int cnt, unsigned int
   // Wait for conversion
   ad7280_delay();
   // Read all the channels
-  sum = 0;
+  cnt = g_edat.bat_elements;
   for (i = 0; i < cnt; i++)
     {
       __ad7280_read32(&tmp);
       // Check the message CRC
       if (ad7280_check_crc(tmp))
 	return 1;
-      // Save the value
-      ptype[i] = (((tmp >> 23) & 0xF) <= AD7280A_CELL_VOLTAGE_6)? 1 : 0; 
       // Extract the conversion values
       tmp = ((tmp >> 11) & 0xFFF);
       array[i] = tmp;
     }
-  return sum;
+  return 0;
 }
 
 int ad7280_chain_setup(t_ad7280_state *st)
 {
-  unsigned val, n;
-  int      ret;
+  unsigned long val;
+  int           n;
 
   // Initialise the addresses on the chain and lock them
   ad7280_write(AD7280A_DEVADDR_MASTER, AD7280A_CONTROL_LB, 1,
@@ -251,6 +275,50 @@ int ad7280_chain_setup(t_ad7280_state *st)
 	return -1;
     }
   return -1;
+}
+
+// initialises the ALERT thresholds
+void ad7280_channel_init(t_ad7280_state *st)
+{
+  // However the default value 1V min - 5V max are enough given the fact that
+  // the alert is not used and checked in the ,A5(BC.
+  // The threshold registers are 8bits and not 12bits.
+  //st->slave_num = ret; // If not < 0 this is the number of devices
+  //st->cell_threshhigh = 0xFF;
+  //st->aux_threshhigh  = 0xFF;
+  // Initialise the channels
+  // Disable ALERT output, the ,A5(BC will check everything. In this applicaiton,
+  // the modules are just a hightech spi dac and output buffer.
+  // The ALERT is in defaultmode: no ALERT signal
+/*   ret = ad7280_write(st, AD7280A_DEVADDR_MASTER, */
+/* 		     AD7280A_ALERT, 1, */
+/* 		     AD7280A_ALERT_RELAY_SIG_CHAIN_DOWN); */
+/*   if (ret) */
+/*     return 1; */
+  // Disable the ALERT output, default
+/*   ret = ad7280_write(st, AD7280A_DEVADDR(st->slave_num), */
+/* 		     AD7280A_ALERT, 0, */
+/* 		     AD7280A_ALERT_GEN_STATIC_HIGH | */
+/* 		     (pdata->chain_last_alert_ignore & 0xF)); */
+// Max and min alert values tresholds conversions in mv
+/*  case AD7280A_CELL_OVERVOLTAGE: */
+/*  case AD7280A_CELL_UNDERVOLTAGE: */
+/*    val = ((val - 1000) * 100) / 1568; // LSB 15.68mV */
+/*    break; */
+/*  case AD7280A_AUX_ADC_OVERVOLTAGE: */
+/*  case AD7280A_AUX_ADC_UNDERVOLTAGE: */
+/*    val = (val * 10) / 196; // LSB 19.6mV */
+/*  case AD7280A_CELL_OVERVOLTAGE: */
+/*    val = 1000 + (st->cell_threshhigh * 1568) / 100; */
+/*    break; */
+/*  case AD7280A_CELL_UNDERVOLTAGE: */
+/*    val = 1000 + (st->cell_threshlow * 1568) / 100; */
+/*    break; */
+/*  case AD7280A_AUX_ADC_OVERVOLTAGE: */
+/*    val = (st->aux_threshhigh * 196) / 10; */
+/*    break; */
+/*  case AD7280A_AUX_ADC_UNDERVOLTAGE: */
+/*    val = (st->aux_threshlow * 196) / 10; */
 }
 
 int init_AD7820A(t_ad7280_state *st)
@@ -283,41 +351,7 @@ int init_AD7820A(t_ad7280_state *st)
   st->cell_threshhigh = 0xFF;
   st->aux_threshhigh  = 0xFF;
   // Initialise the channels
-  ret = ad7280_channel_init(st);
-  if (ret < 0)
-    return ret;
-  // Disable ALERT output, the ,A5(BC will check everything. In this applicaiton,
-  // the modules are just a hightech spi dac and output buffer.
-  // The ALERT is in defaultmode: no ALERT signal
-/*   ret = ad7280_write(st, AD7280A_DEVADDR_MASTER, */
-/* 		     AD7280A_ALERT, 1, */
-/* 		     AD7280A_ALERT_RELAY_SIG_CHAIN_DOWN); */
-/*   if (ret) */
-/*     return 1; */
-  // Disable the ALERT output, default
-/*   ret = ad7280_write(st, AD7280A_DEVADDR(st->slave_num), */
-/* 		     AD7280A_ALERT, 0, */
-/* 		     AD7280A_ALERT_GEN_STATIC_HIGH | */
-/* 		     (pdata->chain_last_alert_ignore & 0xF)); */
-// Max and min alert values tresholds conversions in mv
-/*  case AD7280A_CELL_OVERVOLTAGE: */
-/*  case AD7280A_CELL_UNDERVOLTAGE: */
-/*    val = ((val - 1000) * 100) / 1568; /* LSB 15.68mV */ */
-/*    break; */
-/*  case AD7280A_AUX_ADC_OVERVOLTAGE: */
-/*  case AD7280A_AUX_ADC_UNDERVOLTAGE: */
-/*    val = (val * 10) / 196; /* LSB 19.6mV */ */
-/*  case AD7280A_CELL_OVERVOLTAGE: */
-/*    val = 1000 + (st->cell_threshhigh * 1568) / 100; */
-/*    break; */
-/*  case AD7280A_CELL_UNDERVOLTAGE: */
-/*    val = 1000 + (st->cell_threshlow * 1568) / 100; */
-/*    break; */
-/*  case AD7280A_AUX_ADC_OVERVOLTAGE: */
-/*    val = (st->aux_threshhigh * 196) / 10; */
-/*    break; */
-/*  case AD7280A_AUX_ADC_UNDERVOLTAGE: */
-/*    val = (st->aux_threshlow * 196) / 10; */
+  ad7280_channel_init(st);
   // Ready for use
   return 0;
 }
@@ -326,22 +360,21 @@ int ad7280_get_VBAT(t_ad7280_state *st, unsigned long *pvbat, int *ptemp)
 {
   int           i, ret;
   unsigned int  varray[MAX_CHANNELS];
-  unsigned int  cnt;
   int           chan, module, Vchan;
   unsigned long cnv;
 
-  ret = ad7280_read_all_channels(cnt, varray);
+  ret = ad7280_read_all_channels(st, varray);
   if (!ret)
     {
       chan = Vchan = 0;
       for (module = 0; module < MAXMODULES; module++)
 	{
-	  if (st->chan_count[module] > 0)
+	  if (st->chan_cnt[module] > 0)
 	    {
-	      for (i = 0; i < st->chan_count[module]; i++)
+	      for (i = 0; i < st->chan_cnt[module]; i++)
 		{
 		  // In 5 battery configuration, pass the 5th element Vin value.
-		  if (!(i == 4 && st->chan_count[module] == 5))
+		  if (!(i == 4 && st->chan_cnt[module] == 5))
 		    {
 		      cnv = varray[chan];
 		      cnv = ((cnv * 976L) / 1000L) + 1000L; // 976,A5(BV / LSB, 1V offset
@@ -364,7 +397,7 @@ int ad7280_get_VBAT(t_ad7280_state *st, unsigned long *pvbat, int *ptemp)
 
 char ad7280_set_balance(t_ad7280_state *st, unsigned long balancing)
 {
-  char          i, bitnumber;
+  int           i, bitnumber;
   unsigned char reg;
   int           rb;
 
@@ -379,7 +412,7 @@ char ad7280_set_balance(t_ad7280_state *st, unsigned long balancing)
       st->cb_mask[i] = reg;
       ad7280_write(i, AD7280A_CELL_BALANCE, 0, st->cb_mask[i]);
       // Next module
-      balancing = (balancing >> pchan_count[i]);
+      balancing = (balancing >> st->chan_cnt[i]);
     }  
   // Check the values
   for (i = 0; i < CFGAD728AMODULES; i++)
@@ -398,7 +431,7 @@ char ad7280_set_balance(t_ad7280_state *st, unsigned long balancing)
 
 char ad7280_get_balance(t_ad7280_state *st, char channel)
 {
-  char          i, channel_cnt;
+  int           i, channel_cnt;
   unsigned long mask;
 
   channel_cnt = 0;

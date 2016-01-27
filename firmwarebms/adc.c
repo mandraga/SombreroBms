@@ -7,6 +7,7 @@
 #define __DELAY_BACKWARD_COMPATIBLE__ 
 #include <util/delay.h>
 
+#include "env.h"
 #include "main.h"
 
 void init_adc(void)
@@ -17,8 +18,6 @@ void init_adc(void)
   ADCSRA |= (1 << ADPS2) | (0 << ADPS1) | (1 << ADPS0);
   // Datasheet page 225, ref selection + ADC7 on the mux
   ADMUX = (0 << REFS1) | (1 << REFS0) | (1 << MUX2) | (1 << MUX1) | (1 << MUX0);
-  // Reduce the noise by disabling inputs on unused pins
-  DDIR0 = (1 << ADC1D) | (1 << ADC2D);
   // Left adjust for 8bit only, the result is in ADCH register
   //ADMUX |= (1 << ADLAR);
   // Enable
@@ -60,7 +59,7 @@ unsigned int get_adc7(void)
 }
 
 // Returns the AVR temperature in °C
-int get_uc_internal_temperature()
+int get_uc_internal_temperature(void)
 {
-  
+  return 0;
 }

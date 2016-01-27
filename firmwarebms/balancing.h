@@ -49,8 +49,8 @@ void stop_any_balancing(void);
 typedef struct s_balancing
 {
   char         state;
-  char        *pvdiffmax_index;
-  char        *pvlow_index;     // Reference V
+  int          vdiffmax_index;
+  int          vlow_index;     // Reference battery, the lowest V. A combination between the most discharged and the bigger capacity.
 }              t_balancing;
 
 int get_highter_temperature(int *ptemperature, char modules);
@@ -58,3 +58,4 @@ int get_highter_temperature(int *ptemperature, char modules);
 void balancing_during_charge(t_balancing *pb, unsigned long *pvbat, char elements, int *ptemperature);
 
 void balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elements, int *ptemperature);
+

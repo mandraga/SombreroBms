@@ -135,6 +135,8 @@
 #define SER_STATE_SEND_DEBUG            99
 #define SER_STATE_RECEIVE              100
 
+#define BAUDRATE   9600
+
 /*  Taken from Peter Fleury code, (it was too tigh here to use his library)
  *  @brief  UART Baudrate Expression
  *  @param  xtalcpu  system clock in Mhz, e.g. 4000000L for 4Mhz          
@@ -144,14 +146,15 @@
 
 typedef struct s_serialport
 {
-  char         state;
+  char         RXstate;
   char         inbuffer[RCVSTRINGSZ];
   char         insize;
-  char         inindex;
+  int          inindex;
+  char         TXstate;
   char         outbuffer[TRSTRINGSZ];
   char         outsize;
-  char         outindex;
-  char         batcounter;
+  int          outindex;
+  int          batcounter;
 }              t_serialport;
 
 void uart_puts(char *str);

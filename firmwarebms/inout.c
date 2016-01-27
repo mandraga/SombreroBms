@@ -1,7 +1,10 @@
 
+#include <avr/io.h>
+
 #include "env.h"
 #include "main.h"
 #include "AD7280A.h"
+#include "adc.h"
 #include "inout.h"
 
 void set_buzer(char buzer)
@@ -43,7 +46,7 @@ int get_charger_ON(void)
 // Gets the value through SPI and the AD8280A
 void get_VBAT(t_ad7280_state *p_ad7280, t_pack_variable_data *pappdata)
 {
-  ad7280_get_VBAT(&g_ad7280, pappdata->vbat, pappdata->tempereature);
+  ad7280_get_VBAT(p_ad7280, pappdata->vbat, pappdata->temperature);
 }
 
 // Get the SHUNT amplified tension and calculate the curent.
@@ -105,7 +108,7 @@ void set_gauge_out(unsigned long SOC, unsigned long fullcharge, char bat_low, ch
 	CBI(PORTD, CSDAC);
       gauge_out_value--;
       if (gauge_out_value <= 0)
-	gauge_out_state == GAUGE_OUT_STATE_UPDATE;
+	gauge_out_state = GAUGE_OUT_STATE_UPDATE;
     }
 }
 

@@ -17,13 +17,13 @@
 #define __DELAY_BACKWARD_COMPATIBLE__ 
 #include <util/delay.h>
 
+#include "env.h"
+#include "main.h"
 #include "serial.h"
 #include "adc.h"
 #include "spi.h"
 #include "AD7280A.h"
 #include "init.h"
-#include "main.h"
-#include "env.h"
 
 extern t_pack_variable_data g_appdata;
 extern t_eeprom_data        g_edat;
@@ -71,10 +71,8 @@ void enter_idle_mode(void)
 
 // Called at start, sets the IO port direction, defaults the variables, 
 // Initialises the SPI devices and configures the interrupts
-void init(t_vbat *pvbat)
+void init()
 {
-  int i;
-
   // IO ports
   // Port B:
   DDRB  = 0x00 | (1 << CSBAT) | (1 << BUZZER) | (1 << PD) | (1 << MOSI) | (1 << SCLK);
@@ -86,11 +84,7 @@ void init(t_vbat *pvbat)
   DDRD  = 0x00 | (1 << TXD) | (1 << CSDAC) | (1 << STOP_CHARGER) | (1 << LED_BALANCING) | (1 << LED_ERROR);
   PORTD = 0x00 | (1 << TXD) | (1 << CSDAC) | (1 << STOP_CHARGER) | (1 << LED_BALANCING) | (1 << LED_ERROR);
 
-  // Defaults
-  for (i = 0; i < MAXBATTERY; i++)
-    pvbat->vbat = 0;
-
-  // Wait 50ms second
+  // Wait 50ms
   _delay_ms(50);
 
   // Init UART

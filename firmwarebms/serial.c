@@ -1,13 +1,20 @@
+#include <stdio.h>
+#include <string.h>
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
 
 #include "env.h"
 #include "main.h"
 #include "eeprom.h"
+#include "AD7280A.h"
 #include "balancing.h"
 #include "serial.h"
 
 extern t_pack_variable_data g_appdata;
 extern t_eeprom_data        g_edat;
 extern t_eeprom_battery     g_bat[MAXBATTERY];
+extern t_ad7280_state       g_ad7280;
 
 t_serialport g_serial;
 
@@ -70,7 +77,7 @@ char check_valuename(char *refvalue, char *command_buffer, char index, char **ps
 {
   char reflen;
   char remainlen;
-  char i;
+  int i;
 
   reflen = strlen(refvalue);
   remainlen = strlen(command_buffer);
@@ -94,7 +101,7 @@ char check_valuename(char *refvalue, char *command_buffer, char index, char **ps
 
 void execute_config_command(char *command_buffer, char size)
 {
-  char i, index;
+  int  i;
   char found;
   char *str;
 
@@ -146,7 +153,7 @@ void execute_config_command(char *command_buffer, char size)
     }
 }
 
-void process_serial_command()
+void process_serial_command(void)
 {
   // Send the first line of the report message, the interrupt at the end of the byte
   // transmission will send the other lines.
@@ -183,7 +190,7 @@ void process_serial_command()
 }
 
 // RX interrupt
-ISR(USART_RXC_vect, ISR_BLOCK)
+ISR(USART_RX_vect, ISR_BLOCK)
 {
   char received;
 
@@ -204,14 +211,14 @@ ISR(USART_RXC_vect, ISR_BLOCK)
     }
 }
 
-int get_undervoltage_event_count(char bat)
+int get_undervoltage_event_count(int bat)
 {
   if (bat >= g_edat.bat_elements)
     return 0;
   return g_bat[bat].lowVevents;
 }
 
-int get_total_undervoltage_event_count()
+int get_total_undervoltage_event_count(void)
 {
   int  sum;
   char i;
@@ -224,14 +231,14 @@ int get_total_undervoltage_event_count()
   return sum;
 }
 
-unsigned long get_charge_speed(char bat)
+unsigned long get_charge_speed(int bat)
 {
   if (bat >= g_edat.bat_elements)
     return 0;
   return g_bat[bat].cap;  
 }
 
-void get_element_vbat(char bat, int *pvbat, int *pmvbat)
+void get_element_vbat(int bat, int *pvbat, int *pmvbat)
 {
   if (bat >= g_edat.bat_elements)
     {
@@ -243,7 +250,7 @@ void get_element_vbat(char bat, int *pvbat, int *pmvbat)
   *pmvbat = (g_appdata.vbat[bat] % 1000L) / 100;
 }
 
-void get_element_vbat_lowest(char bat, int *pvbat, int *pmvbat)
+void get_element_vbat_lowest(int bat, int *pvbat, int *pmvbat)
 {
   if (bat >= g_edat.bat_elements)
     {
@@ -266,7 +273,7 @@ char change_TX_state(char TXstate)
     case SER_STATE_IDLE:
       nextState = SER_STATE_IDLE;
       break;
-    case SER_STATE_SEND_DEBUG;
+    case SER_STATE_SEND_DEBUG:
       nextState = SER_STATE_IDLE;
       break;
       //-----------------------------------------------------------------------------
@@ -293,16 +300,16 @@ char change_TX_state(char TXstate)
       // Response to "get_params" command
     case SER_STATE_SEND_DATE:
       {
-	unsigned long charge_percent;
+	int charge_percent;
 
 	charge_percent = 100L * g_appdata.state_of_charge / g_edat.full_charge;
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Charge: %d%\n", charge_percent);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Charge: %d%c\n", charge_percent, '%');
 	nextState = SER_STATE_SEND_CHARGE;
       }
       break;
     case SER_STATE_SEND_CHARGE:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "total capacity: %dAH\n", g_edat.full_charge / 1000L);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "total capacity: %dAH\n", (int)(g_edat.full_charge / 1000L));
 	nextState = SER_STATE_SEND_TOTALCAP;
       }
       break;
@@ -314,7 +321,7 @@ char change_TX_state(char TXstate)
       break;
     case SER_STATE_SEND_CHARGECYCLES:
       {
-	unsigned long hours;
+	int hours;
 
 	hours = g_edat.charge_time_minutes / 60;
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, "total charging time: %dh\n", hours);
@@ -323,13 +330,13 @@ char change_TX_state(char TXstate)
       break;
     case SER_STATE_SEND_TOTALCHRGTIME:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Vmin: %d,%2dV\n", g_edat.bat_minv / 1000L, (g_edat.bat_minv % 1000L) / 10);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Vmin: %d,%2dV\n", (int)(g_edat.bat_minv / 1000L), (int)((g_edat.bat_minv % 1000L) / 10));
 	nextState = SER_STATE_SEND_VMIN;
       }
       break;
     case SER_STATE_SEND_VMIN:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Vmin: %d,%2dV\n", g_edat.bat_maxv / 1000L, (g_edat.bat_maxv % 1000L) / 10);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Vmin: %d,%2dV\n", (int)(g_edat.bat_maxv / 1000L), (int)((g_edat.bat_maxv % 1000L) / 10));
 	nextState = SER_STATE_SEND_VMAX;
       }
       break;
@@ -338,7 +345,7 @@ char change_TX_state(char TXstate)
 	unsigned long undevorlatege_evt_cnt;
 
 	undevorlatege_evt_cnt = get_total_undervoltage_event_count();
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "undervoltage events: %d\n", undevorlatege_evt_cnt);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "undervoltage events: %lu\n", undevorlatege_evt_cnt);
 	nextState = SER_STATE_SEND_UNDERVOLTAGEEVTS;
       }
       break;
@@ -368,7 +375,7 @@ char change_TX_state(char TXstate)
 
 	years = g_appdata.uptime_days / 365;
 	days  = g_appdata.uptime_days % 365;
-	hours = g_appdata.minutes / 60;
+	hours = g_appdata.uptime_minutes / 60;
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, "uptime: %dyears %ddays %dh\n", years, days, hours);
 	nextState = SER_STATE_SEND_UPTIME;
       }
@@ -405,13 +412,13 @@ char change_TX_state(char TXstate)
       // Response to "get_report" command
     case SER_STATE_SEND_REPORT_VB:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Vb: %d,%d\n", g_appdata.total_vbat / 1000L, (g_appdata.total_vbat % 1000L) / 10);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Vb: %d,%d\n", (int)(g_appdata.total_vbat / 1000L), (int)((g_appdata.total_vbat % 1000L) / 10));
 	nextState = SER_STATE_SEND_REPORT_CHRG;
       }
       break;
     case SER_STATE_SEND_REPORT_CHRG:
       {
-	unsigned long charge_percent;
+	int charge_percent;
 
 	charge_percent = 100L * g_appdata.state_of_charge / g_edat.full_charge;
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, "chrg: %d\n", charge_percent);
@@ -420,13 +427,13 @@ char change_TX_state(char TXstate)
       break;
     case SER_STATE_SEND_REPORT_CHRGMA:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "chrgmAH: %d\n", g_appdata.state_of_charge);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "chrgmAH: %lu\n", g_appdata.state_of_charge);
 	nextState = SER_STATE_SEND_REPORT_CHRGMA;
       }
       break;
     case SER_STATE_SEND_REPORT_IMA:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, "ImAH: %d\n", g_appdata.c_discharge);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, "ImAH: %d\n", (int)(g_appdata.c_discharge));
 	nextState = SER_STATE_SEND_REPORT_STATE;
       }
       break;
@@ -487,7 +494,7 @@ char change_TX_state(char TXstate)
       break;
     case SER_STATE_SEND_REPORT_BATVB:
       {
-	unsigned int vbat, mvbat;
+	int vbat, mvbat;
 
 	get_element_vbat(g_serial.batcounter, &vbat, &mvbat);
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, "Vb: %d,%d\n", vbat, mvbat);
@@ -497,7 +504,7 @@ char change_TX_state(char TXstate)
       break;
     case SER_STATE_SEND_REPORT_BATVLOW:
       {
-	unsigned int vbat, mvbat;
+	int vbat, mvbat;
 
 	get_element_vbat_lowest(g_serial.batcounter, &vbat, &mvbat);
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, "VLowest: %d,%d\n", vbat, mvbat);
@@ -511,7 +518,7 @@ char change_TX_state(char TXstate)
 
 	underflow_events = get_undervoltage_event_count(g_serial.batcounter);
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, "evt: %d\n", underflow_events);
-	nextState = SER_STATE_SEND_REPORT_BATAVG;
+	nextState = SER_STATE_SEND_REPORT_BATAVGT;
       }
       break;
     case SER_STATE_SEND_REPORT_BATAVGT:
@@ -527,7 +534,7 @@ char change_TX_state(char TXstate)
       {
 	char balanced;
 
-	balanced = ad7280_get_balance(g_serial.batcounter);
+	balanced = ad7280_get_balance(&g_ad7280, g_serial.batcounter);
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, "balan: %d\n", balanced);
 	g_serial.batcounter++;
 	if (g_serial.batcounter >= g_edat.bat_elements)
@@ -557,7 +564,7 @@ char change_TX_state(char TXstate)
 }
 
 // TX interrupt
-ISR(USART_TXC_vect, ISR_BLOCK)
+ISR(USART_TX_vect, ISR_BLOCK)
 {
   // The last byte was sent, send another one if available
   if (g_serial.outindex < g_serial.outsize)

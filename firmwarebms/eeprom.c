@@ -1,9 +1,11 @@
+#include <stdlib.h>
+#include <string.h>
 #include <avr/eeprom.h>
 
-#include "eeprom.h"
-#include "main.h"
 #include "env.h"
+#include "main.h"
 #include "AD7280A.h"
+#include "eeprom.h"
 
 extern t_pack_variable_data g_appdata;
 extern t_eeprom_data        g_edat;
@@ -22,19 +24,10 @@ void set_install_date_EEPROM(char *str)
   int   install_date_day;
   char *pstr;
 
-  pstr = str;
-  while (*pstr != '/' && *pstr != '\\' && *pstr != 0)
-    pstr++;
-  if (*pstr == 0)
-    return;
-  install_date_day = (int)strtol(str, pstr, 10);
+  install_date_day = (int)strtol(str, &pstr, 10);
   pstr++;
   str = pstr;
-  while (*pstr != '/' && *pstr != '\\' && *pstr != 0)
-    pstr++;
-  if (*pstr == 0)
-    return;
-  install_date_month = (int)strtol(str, pstr, 10);
+  install_date_month = (int)strtol(str, &pstr, 10);
   pstr++;
   install_date_year = (int)strtol(pstr, NULL, 10);
   //
@@ -76,7 +69,7 @@ void set_full_charge_value_mAH_EEPROM(char *str)
 
 void set_serial_number_EEPROM(char *str)
 {
-  char i;
+  int i;
 
   for (i = 0; i < 9; i++)
     g_edat.serial_number[i] = 0;
@@ -87,7 +80,7 @@ void set_serial_number_EEPROM(char *str)
 
 void set_client_name_EEPROM(char *str)
 {
-  char i;
+  int i;
 
   if (*str == '"')
     str++;
@@ -110,14 +103,13 @@ void update_charge_time_minutes_EEPROM(unsigned long additional_charge_time_minu
   write_cfg_to_EEPROM();
 }
 
-void update_temperature_extremes_EEPROM(int *ptempereatures)
+void update_temperature_extremes_EEPROM(int *ptemperatures)
 {
-  int  tavg;
-  char i;
+  int  tavg, i;
 
   for (i = 0, tavg = 0; i < CFGAD728AMODULES; i++)
     {
-      tavg += ptempereatures[i];
+      tavg += ptemperatures[i];
     }
   tavg = tavg / CFGAD728AMODULES;
   g_edat.min_temperature = g_edat.min_temperature < tavg? g_edat.min_temperature : tavg;
@@ -130,13 +122,13 @@ void update_temperature_extremes_EEPROM(int *ptempereatures)
 //---------------------------------------
 void update_battery_low_events_EEPROM(void)
 {
-  char i, chg;
+  int i, chg;
   
   for (i = 0, chg = 0; i < g_edat.bat_elements; i++)
     {
-      if (g_appdata.vbat[i] < g_edata.bat_minv)
+      if (g_appdata.vbat[i] < g_edat.bat_minv)
 	{
-	  g_bat[i].lowestV = lowVevents;
+	  g_bat[i].lowVevents++;
 	  chg = 1;
 	}
     }
@@ -146,7 +138,7 @@ void update_battery_low_events_EEPROM(void)
 
 void update_battery_low_values_EEPROM(void)
 {
-  char i, chg;
+  int i, chg;
 
   for (i = 0, chg = 0; i < g_edat.bat_elements; i++)
     {
@@ -162,16 +154,16 @@ void update_battery_low_values_EEPROM(void)
 
 void update_battery_charge_values_EEPROM(void)
 {
-  char i, chg;
+  int i, chg;
   
   for (i = 0, chg = 0; i < g_edat.bat_elements; i++)
     {
       // Test if charged
-      if (g_appdata.vbat[i] > g_edata.bat_maxv + 10L
-	  fixme a state must be used) // 10mV threshold
+      if (g_appdata.vbat[i] > g_edat.bat_maxv + 10L
+	  /*fixme a state must be used*/) // 10mV threshold
 	{
 	  // Charging time for the battery
-	  g_bat[i].cap = g_appdata.charge_time_count * 60L + charge_time_count_tenth / 10L;
+	  g_bat[i].cap = g_appdata.charge_time_count * 60L + g_appdata.charge_time_count_tenth / 10L;
 	  chg = 1;
 	}
     }
@@ -214,8 +206,8 @@ void read_bat_values_from_EEPROM(t_eeprom_battery *pbats, int elements)
     {
       return ;
     }
-  offset = 0x01 + sizeof(g_edat) + 4 + i ;
-  eeprom_read_block(pbats, offset, elements * sizeof(t_eeprom_battery));  
+  offset = 0x01 + sizeof(g_edat) + 4;
+  eeprom_read_block(pbats, (uint8_t*)offset, elements * sizeof(t_eeprom_battery));  
 }
 
 void write_cfg_to_EEPROM(void)
@@ -245,9 +237,9 @@ void write_bat_values_to_EEPROM(t_eeprom_battery *pbats, int elements)
   unsigned char c;
   unsigned char *ptr;
   
-#if ((sizeof(g_edat) + 5 + sizeof(t_eeprom_battery) * MAXBATTERY) > 510)
-  Not enough EEPROM memory
-#endif
+  //#if ((sizeof (g_edat) + 5 + (sizeof(t_eeprom_battery) * MAXBATTERY)) > 510)
+  // Not enough EEPROM memory
+  //#endif
 #if 1
   for (i = 0; i < elements; i++)
     {
@@ -257,12 +249,27 @@ void write_bat_values_to_EEPROM(t_eeprom_battery *pbats, int elements)
       for (j = 0; j < sizeof(t_eeprom_battery); j++)
 	{
 	  ptr = (unsigned char*)&pbats[i];
-	  c = eeprom_read_byte(offset + j);
+	  c = eeprom_read_byte((uint8_t*)offset + j);
 	  if (c != ptr[j])
-	    eeprom_write_byte(offset + j, ptr[j]);
+	    eeprom_write_byte((uint8_t*)offset + j, ptr[j]);
 	}
     }
 #else
   eeprom_write_block(&pbats, (uint8_t*)0x01 + sizeof(g_edat) + 4, elements * sizeof(t_eeprom_battery));
 #endif
+}
+
+// Adds an error code to a circular memory at the end of the EEPROM.
+// The first byte is the index of the value that will be written or rewritten.
+void add_error_log_EEPROM(char code)
+{
+  char next_index;
+
+  next_index = eeprom_read_byte((uint8_t*)ERROR_LOG_START);
+  next_index = next_index < 0? 0 : next_index;
+  next_index = next_index >= ERROR_LOG_SIZE ? 0 : next_index;
+  eeprom_write_byte((uint8_t*)(ERROR_LOG_START + 1 + next_index), code);
+  next_index++;
+  next_index = next_index >= ERROR_LOG_SIZE ? 0 : next_index;
+  eeprom_write_byte((uint8_t*)(ERROR_LOG_START), next_index);
 }

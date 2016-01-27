@@ -1,19 +1,26 @@
 
-#include "serial.h"
-#include "adc.h"
-#include "spi.h"
-#include "AD7280A.h"
-#include "init.h"
-#include "main.h"
+#include <avr/interrupt.h>
+
 #include "env.h"
+#include "main.h"
+#include "spi.h"
+#include "init.h"
+#include "eeprom.h"
+#include "AD7280A.h"
+#include "balancing.h"
+#include "serial.h"
+//#include "adc.h"
+#include "inout.h"
+#include "state_machine.h"
 
 extern t_pack_variable_data g_appdata;
 extern t_eeprom_data        g_edat;
 extern t_eeprom_battery     g_bat[MAXBATTERY];
-//extern t_ad7280_state       g_ad7280;
+extern t_ad7280_state       g_ad7280;
+extern t_balancing          g_balancing;
 
 // Checks that every voltage is over a value, like 15% under the max value
-char all_over_threshold()
+char all_over_threshold(void)
 {
   unsigned long threshold;
   int           i, ret;
@@ -32,7 +39,7 @@ char all_over_threshold()
 }
 
 // Returns 1 if a battery element is above or equal the max vbat value
-char battery_full()
+char battery_full(void)
 {
   int i, ret;
 
@@ -48,7 +55,7 @@ char battery_full()
 }
 
 // Returns 1 if a battery element is under the minimum voltage
-char check_VBAT()
+char check_VBAT(void)
 {
   int i, ret;
 
@@ -64,7 +71,7 @@ char check_VBAT()
 }
 
 // Removes the Amps from the state of charge value
-void change_state_of_charge()
+void change_state_of_charge(void)
 {
   unsigned long AH_value;
 
@@ -75,7 +82,7 @@ void change_state_of_charge()
   if (AH_value > 0)
     {
       g_appdata.state_of_charge -= AH_value;
-      g_discharge_accumul = g_discharge_accumul % INTERVALS_PER_HOUR;
+      g_appdata.c_discharge_accumulator = g_appdata.c_discharge_accumulator % INTERVALS_PER_HOUR;
     }
   // Average discharge current on the vehicle or on whatever uses the pack
   // (63 * avg + c) / 64;
@@ -85,8 +92,6 @@ void change_state_of_charge()
 // Check everything else, and store min and max and events in the eeprom
 void check_everything_else(void)
 {
-  int  i;
-
   //---------------------------------------
   // App data
   //---------------------------------------
@@ -104,7 +109,7 @@ void check_everything_else(void)
   //---------------------------------------
   // EEprom data
   //---------------------------------------
-  update_temperature_extremes_EEPROM(g_appdata.tempereature);
+  update_temperature_extremes_EEPROM(g_appdata.temperature);
 }
 
 void update_local_charging_time(void)
@@ -117,7 +122,7 @@ void update_local_charging_time(void)
     }
 }
 
-void State_machine(t_eeprom_data *pedat)
+void State_machine()
 {
   char chargeron;
   char buzer;
@@ -127,11 +132,11 @@ void State_machine(t_eeprom_data *pedat)
   char lederror;
 
   // Always read VBAT
-  get_vbat(&g_appdata);
+  get_VBAT(&g_ad7280, &g_appdata);
   // Always read the current
-  get_ibat(&g_appdata);
+  get_IBAT(&g_appdata);
   // Amways check if the charger is on
-  chargeron = get_charger_on();
+  chargeron = get_charger_ON();
   // Check for undervoltage
   VBAT_low = check_VBAT();
   //
@@ -149,6 +154,8 @@ void State_machine(t_eeprom_data *pedat)
       break;
     case STATE_CHARGEON:
       {
+	balancing_charger_stoped(&g_balancing, g_appdata.vbat, g_edat.bat_elements,
+				 g_appdata.temperature);
 	if (chargeron == 0)
 	  {
 	    g_appdata.idle_counter = 0;
@@ -170,6 +177,9 @@ void State_machine(t_eeprom_data *pedat)
       {
 	update_local_charging_time();
 	update_battery_charge_values_EEPROM(); // When a battey is at Vmax, store the charging time
+	// Does nothing but go back to no balancing
+	balancing_during_charge(&g_balancing, g_appdata.vbat, g_edat.bat_elements,
+				g_appdata.temperature);
 	if (chargeron == 0)
 	  {
 	    // FIXME state of charge problem
@@ -280,7 +290,7 @@ void State_machine(t_eeprom_data *pedat)
     default:
       {
       }
-      break
+      break;
     }
   //
   // Change the outputs depending on the state
@@ -298,7 +308,7 @@ void State_machine(t_eeprom_data *pedat)
   set_charger_disabled(charger_off);
   setled_error(lederror);
   // Outputs a signal for the gauge chip on one wire. 0 or VBAT, signal time is the value
-  output_gauge(g_appdata.state_of_charge, g_edat.full_charge,
-	       VBAT_low, (g_appdata.app_state == STATE_CHARGING));
+  set_gauge_out(g_appdata.state_of_charge, g_edat.full_charge,
+		VBAT_low, (g_appdata.app_state == STATE_CHARGING));
 }
 
