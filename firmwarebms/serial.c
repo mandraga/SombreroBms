@@ -60,17 +60,6 @@ void uart_init(unsigned int baudrate)
   init_serial_vars();
 }
 
-void replace_char(char a, char b, char *str)
-{
-  int len;
-  int i;
-  
-  len = strlen(str);
-  for (i = 0; i < len; i++)
-    if (str[i] == a)
-      str[i] = b;
-}
-
 // It starts at the '-' of "set_param -valuename value" and checks if valuename is
 // refvalue. Returns 0 if not. And if equal it fills the pointer to the argument in
 // *pstr and returns 1.

@@ -202,6 +202,7 @@ int ad7280_read_channel(t_ad7280_state *st, unsigned devaddr, unsigned addr)
   return (tmp >> 11) & 0xFFF;
 }
 
+/*
 int channel_count(t_ad7280_state *st)
 {
   int i, count;
@@ -211,7 +212,7 @@ int channel_count(t_ad7280_state *st)
       count += st->chan_cnt[i];
     }
   return count;
-}
+}*/
 
 // Read all the channels
 char ad7280_read_all_channels(t_ad7280_state *st, unsigned int *array)
@@ -429,7 +430,7 @@ char ad7280_set_balance(t_ad7280_state *st, unsigned long balancing)
   return 0;
 }
 
-char ad7280_get_balance(t_ad7280_state *st, char channel)
+char ad7280_get_balance(t_ad7280_state *st, char element)
 {
   int           i, channel_cnt;
   unsigned long mask;
@@ -441,5 +442,6 @@ char ad7280_get_balance(t_ad7280_state *st, char channel)
       mask = mask | ((unsigned long)st->cb_mask[i] << channel_cnt);
       channel_cnt += st->chan_cnt[i];
     }
-  return ((mask & (1L << channel)) != 0);
+  return ((mask & (1L << element)) != 0);
 }
+

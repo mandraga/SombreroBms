@@ -23,6 +23,7 @@
 #include "adc.h"
 #include "spi.h"
 #include "AD7280A.h"
+#include "inout.h"
 #include "init.h"
 
 extern t_pack_variable_data g_appdata;
@@ -30,6 +31,7 @@ extern t_eeprom_data        g_edat;
 extern t_eeprom_battery     g_bat[MAXBATTERY];
 extern t_ad7280_state g_ad7280;
 
+/*
 void INT0_init(void)
 {
   // INT0 low -> interruption
@@ -57,6 +59,7 @@ void configure_Interrupts(void)
 void configure_Timer(void)
 {
 }
+*/
 
 void enter_idle_mode(void)
 {
@@ -73,6 +76,8 @@ void enter_idle_mode(void)
 // Initialises the SPI devices and configures the interrupts
 void init()
 {
+  int i;
+
   // IO ports
   // Port B:
   DDRB  = 0x00 | (1 << CSBAT) | (1 << BUZZER) | (1 << PD) | (1 << MOSI) | (1 << SCLK);
@@ -86,6 +91,22 @@ void init()
 
   // Wait 50ms
   _delay_ms(50);
+
+  // Default values
+  g_appdata.uptime_days = 0;
+  g_appdata.uptime_minutes = 0;
+  g_appdata.tseconds = 0;
+  g_appdata.average_discharge = 0;
+  g_appdata.c_discharge = 0;
+  g_appdata.c_discharge_accumulator = 0;
+  g_appdata.state_of_charge = 0; // empty
+  for (i = 0; i < MAXBATTERY; i++)
+    g_appdata.vbat[i] = 0;
+  for (i = 0; i < MAXMODULES; i++)
+    g_appdata.temperature[i] = 0;
+  // Start point
+  g_appdata.app_state = STATE_START;
+  g_appdata.charging_started = 0;
 
   // Init UART
   uart_init(UART_BAUD_SELECT(BAUDRATE, F_CPU));
@@ -102,5 +123,7 @@ void init()
     }
   // Initialises the ADC channel 7
   init_adc();
+
+  setled_balancing(0);
 }
 

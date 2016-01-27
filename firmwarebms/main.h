@@ -105,6 +105,3 @@ typedef struct  s_pack_variable_data
   int           idle_counter;             // Used to get out of the relapse state
 }               t_pack_variable_data;
 
-void setled_balancing(char state);
-void setled_error(char state);
-

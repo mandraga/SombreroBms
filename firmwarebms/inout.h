@@ -2,6 +2,9 @@
 #define GAUGE_OUT_STATE_UPDATE   0
 #define GAUGE_OUT_STATE_TRANSMIT 1
 
+void setled_balancing(char state);
+void setled_error(char state);
+
 void set_buzer(char buzer);
 void set_main_relay(char cutmains);
 void set_charger_disabled(char charger_off);

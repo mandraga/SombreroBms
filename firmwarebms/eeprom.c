@@ -10,7 +10,6 @@
 extern t_pack_variable_data g_appdata;
 extern t_eeprom_data        g_edat;
 extern t_eeprom_battery     g_bat[MAXBATTERY];
-//extern t_ad7280_state       g_ad7280;
 
 unsigned long string_to_long(char *str)
 {
@@ -69,12 +68,14 @@ void set_full_charge_value_mAH_EEPROM(char *str)
 
 void set_serial_number_EEPROM(char *str)
 {
-  int i;
+  int  i;
+  char end;
 
-  for (i = 0; i < 9; i++)
-    g_edat.serial_number[i] = 0;
-  while (i < 8 && str[i] != 0)
-    g_edat.serial_number[i] = str[i];
+  for (i = 0, end = 0; i < 9; i++)
+    {
+      end = end || (str[i] == 0);
+      g_edat.serial_number[i] = end? 0 : str[i];
+    }
   write_cfg_to_EEPROM();
 }
 

@@ -7,6 +7,22 @@
 #include "adc.h"
 #include "inout.h"
 
+void setled_balancing(char state)
+{
+  if (state)
+    CBI(PORTD, LED_BALANCING); // on
+  else
+    SBI(PORTD, LED_BALANCING);
+}
+
+void setled_error(char state)
+{
+  if (state)
+    CBI(PORTD, LED_ERROR);
+  else
+    SBI(PORTD, LED_ERROR);
+}
+
 void set_buzer(char buzer)
 {
   if (buzer)
@@ -59,9 +75,9 @@ void get_IBAT(t_pack_variable_data *pappdata)
   // Get the value from the ADC channel 7
   conversion = get_adc7();
   // Find the conversion value in millivolts
-  // 12bits = DACREF (like 5V or 1.1V)
-  // value in mV = (REF / 4096) * 1000 * conversion
-  volts = (DACREFV * 1000L * conversion) >> 12; // >> 12 <=> / 4096
+  // 10bits = DACREF (like 5V or 1.1V)
+  // value in mV = (REF / 1024) * 1000 * conversion
+  volts = (DACREFV * 1000L * conversion) >> 10; // >> 10 <=> / 1024
   // We have a shunt of some milli homs, the measured volts of the battery pack and
   // the ADC value to be coverted in volts.
   // the current is shunt_mV / SHUNT_VAL

@@ -5,7 +5,7 @@
 #include "AD7280A.h"
 #include "thermistor.h"
 
-const unsigned int ntclookup[30] PROGMEM =
+const int ntclookup[30] PROGMEM =
   {474, 601, 751, 925, 1121, 1339, 1574, 1823, 2081, 2341, 2600, 
    2850, 3090, 3315, 3523, 3713, 3885, 4039, 4177, 4298, 4406,
    4500, 4583, 4656, 4719, 4774, 4822, 4865, 4902, 4934};

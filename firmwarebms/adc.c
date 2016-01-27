@@ -26,6 +26,7 @@ void init_adc(void)
   ADCSRA |= (1 << ADSC);
 }
 
+// Returns a 10bit value
 unsigned int get_val(void)
 {
   unsigned int res;

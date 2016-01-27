@@ -24,6 +24,7 @@
 #include "AD7280A.h"
 #include "balancing.h"
 #include "state_machine.h"
+#include "inout.h"
 
 t_pack_variable_data g_appdata;
 t_eeprom_data        g_edat;
@@ -31,45 +32,12 @@ t_eeprom_battery     g_bat[MAXBATTERY];
 t_ad7280_state       g_ad7280;
 t_balancing          g_balancing;
 
-void setled_balancing(char state)
-{
-  if (state)
-    CBI(PORTD, LED_BALANCING); // on
-  else
-    SBI(PORTD, LED_BALANCING);
-}
-
-void setled_error(char state)
-{
-  if (state)
-    CBI(PORTD, LED_ERROR);
-  else
-    SBI(PORTD, LED_ERROR);
-}
-
 int main(void)
 {
-  int    i;
   int    led_toggle;
 
   init();
-
-  // Default values
-  g_appdata.uptime_days = 0;
-  g_appdata.uptime_minutes = 0;
-  g_appdata.tseconds = 0;
-  g_appdata.average_discharge = 0;
-  g_appdata.c_discharge = 0;
-  g_appdata.c_discharge_accumulator = 0;
-  g_appdata.state_of_charge = 0; // empty
-  for (i = 0; i < MAXBATTERY; i++)
-    g_appdata.vbat[i] = 0;
-  for (i = 0; i < MAXMODULES; i++)
-    g_appdata.temperature[i] = 0;
-  // Start point
-  g_appdata.app_state = STATE_START;
-  g_appdata.charging_started = 0;
-  setled_balancing(0);
+  //
   led_toggle = 0;
   // Enter here and stay in int for many years
   while (1)

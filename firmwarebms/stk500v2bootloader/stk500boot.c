@@ -111,9 +111,9 @@ LICENSE:
 /*
  * define which UART channel will be used, if device with two UARTs is used
  */
-#define USE_USART1        // undefined means use USART0
+//#define USE_USART1        // undefined means use USART0
 
- 
+
 /*
  * UART Baudrate, AVRStudio AVRISP only accepts 115200 bps
  */
@@ -174,6 +174,8 @@ LICENSE:
 	#define SIGNATURE_BYTES 0x1E9681
 #elif defined (__AVR_AT90CAN128__)
 	#define SIGNATURE_BYTES 0x1E9781    
+#elif defined (__AVR_ATmega168PA__)
+	#define SIGNATURE_BYTES 0x1E940B
 #else
 	#error "no signature definition for MCU available"
 #endif
@@ -198,7 +200,7 @@ LICENSE:
 #define UART_DOUBLE_SPEED        U2X
 
 #elif  defined(__AVR_ATmega64__) || defined(__AVR_ATmega128__) || defined(__AVR_ATmega162__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__) \
-	|| defined(__AVR_AT90CAN32__) || defined(__AVR_AT90CAN64__) || defined(__AVR_AT90CAN128__)
+	|| defined(__AVR_AT90CAN32__) || defined(__AVR_AT90CAN64__) || defined(__AVR_AT90CAN128__)|| defined(__AVR_ATmega168PA__)
 /* 
  *  ATMega with two USART, select USART for bootloader using USE_USART1 define
  */ 

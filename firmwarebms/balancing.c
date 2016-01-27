@@ -5,6 +5,7 @@
 #include "init.h"
 #include "AD7280A.h"
 #include "balancing.h"
+#include "inout.h"
 
 extern t_pack_variable_data g_appdata;
 extern t_eeprom_data        g_edat;
