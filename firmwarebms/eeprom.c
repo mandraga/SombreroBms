@@ -178,8 +178,9 @@ void update_battery_charge_values_EEPROM(void)
 
 void read_cfg_from_EEPROM(void)
 {
+  int           i;
   unsigned char c;
-  
+
   // Read the first byte,
   // if it is 0xFF then the EEPROM is unprogramed: set to default values and return
   // else read the data
@@ -187,7 +188,24 @@ void read_cfg_from_EEPROM(void)
   if (c == 0xFF)
     {
       // Default values to make the buzer scream
-      memset(&g_edat, 0, sizeof(g_edat));
+      g_edat.install_date_year = 2016;
+      g_edat.install_date_month = 1;
+      g_edat.install_date_day = 1;
+      g_edat.bat_maxv = 3600;               // mili volts
+      g_edat.bat_minv = 3000;
+      g_edat.bat_tmax =  50;                // temperature
+      g_edat.bat_tmin = -20;
+      g_edat.bat_elements = CFGBATNUMBER;
+      g_edat.full_charge  = DEFAULT_CHARGE; // AH
+      g_edat.serial_number[0] = '1';
+      for (i = 1; i < sizeof(g_edat.serial_number) / sizeof(char); i++)
+	g_edat.serial_number[i] = 0;       //  8 bytes             plus 0 end of string
+      g_edat.client[0] = 0;                // 32 bytes Client name plus 0 end of string
+      // These are often programmed
+      g_edat.charge_cycles = 0;
+      g_edat.charge_time_minutes = 0;      // Total charging time
+      g_edat.min_temperature = 25;         // Extreme temperatures
+      g_edat.max_temperature = 25;
       return ;
     }
   // Read a block @ 0x01
@@ -198,6 +216,7 @@ void read_bat_values_from_EEPROM(t_eeprom_battery *pbats, int elements)
 {
   unsigned char c;
   int           offset;
+  int           i;
 
   // Read the first byte,
   // if it is 0xFF then the EEPROM is unprogramed: set to default values and return
@@ -205,6 +224,12 @@ void read_bat_values_from_EEPROM(t_eeprom_battery *pbats, int elements)
   c = eeprom_read_byte((uint8_t*)0x00);
   if (c == 0xFF)
     {
+      for (i = 0; i < elements; i++)
+	{
+	  pbats[i].lowestV = g_edat.bat_maxv;
+	  pbats[i].lowVevents = 0;
+	  pbats[i].cap = 40000;
+	}
       return ;
     }
   offset = 0x01 + sizeof(g_edat) + 4;
@@ -274,3 +299,4 @@ void add_error_log_EEPROM(char code)
   next_index = next_index >= ERROR_LOG_SIZE ? 0 : next_index;
   eeprom_write_byte((uint8_t*)(ERROR_LOG_START), next_index);
 }
+

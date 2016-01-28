@@ -100,7 +100,7 @@ void balancing_with_temperature_control(int vlow_index, unsigned long *pvbat,
   unsigned long balancing_reg;
   int           sorted[MAXBATTERY];
   int           r;
-  int           i, j;
+  int           i, j, b;
   unsigned long balanced;
 
   // Sort the values, higher values first
@@ -126,9 +126,10 @@ void balancing_with_temperature_control(int vlow_index, unsigned long *pvbat,
       balanced = balanced * (unsigned long)elements;
       balanced = balanced / TEMPERATURE_HISTERESIS;
     }
-  balanced = balanced > elements? elements : balanced; // to be sure
+  b = (int)balanced;
+  b = b > elements? elements : b; // to be sure
   balancing_reg = 0;
-  for (i = 0; i < balanced; i++)
+  for (i = 0; i < b; i++)
     {
       if (sorted[i] != vlow_index)
 	if (pvbat[sorted[i]] - pvbat[vlow_index] > 10L)

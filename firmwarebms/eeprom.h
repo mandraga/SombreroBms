@@ -28,7 +28,6 @@ void update_battery_low_events_EEPROM(void);
 void update_battery_low_values_EEPROM(void);
 void update_battery_charge_values_EEPROM(void);
 
-
 void read_cfg_from_EEPROM(void);
 void read_bat_values_from_EEPROM(t_eeprom_battery *pbats, int elements);
 

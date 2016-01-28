@@ -3,7 +3,8 @@
 
 #define FONT_FILE      "./VeraMono.ttf"
 
-//#define BATNUMBER 11;
+//#define BELLCODE 7
+#define BELLCODE '\a'
 
 class Cappdata
 {
@@ -17,7 +18,7 @@ class Cappdata
   void key_off(int code);
   void setlooptime();
   void quit();
-  
+
   Cfake_battery *get_fake_bats();
   Cfake_AD7280A *get_fake_AD7280();
   Cfake_charger *get_fake_charger();
@@ -33,10 +34,12 @@ class Cappdata
  private:
   void set_coord(t_fcoord *coord, float prx, float pry);
   void draw_basic_rectangle(Cgfxarea *pw, int color);
+  void draw_rectangle(t_coord pos, t_coord dim, int color);
   void renderTextBlended(t_coord pos, int color, std::string text, bool blended);
   void rendertext(t_coord pos, int color, char *text);
   void set_render_color(int color);
   void render_bats();
+  void Run_Shunt(int batnumber, int delayms);
 
  public:
   int             m_width;
@@ -51,7 +54,7 @@ class Cappdata
 
   t_coord          m_cstart;
   t_coord          m_ccurrent;
-  Ckeypress        m_kstates;  
+  Ckeypress        m_kstates;
 
   bool             m_bquit;
 
@@ -59,7 +62,7 @@ class Cappdata
   double           m_last_time;
   float            m_vbat;
   Cfake_battery    m_bats[CFGBATNUMBER];
-  Cfake_AD7280A    m_fake_AD7280;
+  Cfake_AD7280A    m_fake_AD7280A;
   Cfake_charger    m_fake_charger;
 
   bool             m_errorled;

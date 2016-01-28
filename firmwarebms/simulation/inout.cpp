@@ -1,17 +1,25 @@
 
-#include <avr/io.h>
+#include <unistd.h>
+#include <iterator>
+#include <list>
+#include <vector>
+#include <string>
 
-#include "env.h"
-#include "main.h"
-#include "AD7280A.h"
-#include "adc.h"
-#include "inout.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
+#include "../env.h"
+#include "../main.h"
+#include "../AD7280A.h"
+#include "../inout.h"
+//
+#include "fake_battery.h"
+#include "fake_AD7280A.h"
+#include "fake_charger.h"
+//
 #include "gfxareas.h"
 #include "keypress.h"
 #include "app.h"
-
-#include "fake_AD7280A.h"
 
 extern Cappdata *g_papp;
 
@@ -65,15 +73,15 @@ void get_VBAT(t_ad7280_state *p_ad7280, t_pack_variable_data *pappdata)
       pappdata->vbat[i] = fkbat[i].get_mV();
     }
   for (i = 0; i < CFGAD728AMODULES; i++)
-    {  
-      pappdata->temperature[i] = fkAD7280->get_AUX_mV();
+    {
+      pappdata->temperature[i] = fkAD7280->get_temp();
     }
 }
 
 // Get the SHUNT amplified tension and calculate the curent.
 void get_IBAT(t_pack_variable_data *pappdata)
 {
-  pappdata->c_discharge = get_run_current();
+  pappdata->c_discharge = g_papp->get_run_current();
 }
 
 void set_gauge_out(unsigned long SOC, unsigned long fullcharge, char bat_low, char charging)

@@ -46,12 +46,11 @@ float Cfake_charger::get_Vpack(Cfake_battery *pbats, int batnum)
     {
       Vsum += pbats[i].get_mV();;
     }
-  return sum;
+  return Vsum;
 }
 
 void Cfake_charger::check_Vmax(Cfake_battery *pbats, int batnum)
 {
-  int   i;
   float Vsum;
 
   Vsum = get_Vpack(pbats, batnum);
@@ -62,9 +61,12 @@ void Cfake_charger::check_Vmax(Cfake_battery *pbats, int batnum)
 void Cfake_charger::add_charge(Cfake_battery *pbats, int batnum, float timems)
 {
   int   i;
-  float Vsum;
 
-  Vsum = 0;
+  check_Vmax(pbats, batnum);
+  if (!m_active)
+    {
+      return;
+    }
   for (i = 0; i < batnum; i++)
     {
       pbats[i].add_charge(CHARGER_AMPS, timems);

@@ -1,13 +1,19 @@
-
-#include "fake_AD7289A.h"
+#include <unistd.h>
+#include <iterator>
+#include <list>
+#include <vector>
+#include <string>
+//
+#include "fake_battery.h"
+#include "fake_AD7280A.h"
+#include "fake_charger.h"
+//
 
 Cfake_AD7280A::Cfake_AD7280A(int modules)
 {
-  int i;
-
   m_modules = modules;
   m_balance = 0;
-  m_temperature = 4467;
+  m_temperature = 25;
 }
 
 Cfake_AD7280A::~Cfake_AD7280A()
@@ -17,10 +23,15 @@ Cfake_AD7280A::~Cfake_AD7280A()
 
 void Cfake_AD7280A::set_balancing(int batnum, bool balance)
 {
+  int mask;
+
   if (balance)
     m_balance = m_balance | (1 << batnum);
   else
-    m_balance = m_balance & ~(1 << batnum);
+    {
+      mask = ~(1 << batnum);
+      m_balance = m_balance & mask;
+    }
 }
 
 int Cfake_AD7280A::get_balancing(int batnum)
@@ -33,7 +44,6 @@ void Cfake_AD7280A::balancing_shunt(Cfake_battery *pbats, int batnum, float dela
   int   i;
   float mAmps = 1180; // 1,8Amps
 
-  charge = 0;
   for (i = 0; i < batnum; i++)
     {
       if (m_balance & (1 << i))
@@ -41,12 +51,13 @@ void Cfake_AD7280A::balancing_shunt(Cfake_battery *pbats, int batnum, float dela
     }
 }
 
-void Cfake_AD7280A::set_AUX_mV(int tempmv)
+void Cfake_AD7280A::set_temp(int temp)
 {
-  m_temperature = tempmv;
+  m_temperature = temp;
 }
 
-int Cfake_AD7280A::get_AUX_mV()
+int Cfake_AD7280A::get_temp()
 {
   return m_temperature;
 }
+

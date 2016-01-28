@@ -1,6 +1,4 @@
 
-#include <avr/interrupt.h>
-
 #include "env.h"
 #include "main.h"
 #include "spi.h"
@@ -57,16 +55,20 @@ char battery_full(void)
 // Returns 1 if a battery element is under the minimum voltage
 char check_VBAT(void)
 {
-  int i, ret;
+  int           i, ret;
+  unsigned long sum;
 
   ret = 0;
+  sum = 0;
   for (i = 0; i < g_edat.bat_elements; i++)
     {
+      sum += g_appdata.vbat[i];
       if (g_appdata.vbat[i] <= g_edat.bat_minv)
 	{
 	  ret = 1;
 	}
     }
+  g_appdata.total_vbat = sum;
   return ret;
 }
 
@@ -148,7 +150,6 @@ void State_machine()
     {
     case STATE_START:
       {
-	sei();   // enable interrupts
 	g_appdata.app_state = STATE_IDLE;
       }
       break;

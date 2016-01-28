@@ -21,6 +21,18 @@
 
 #include "gfxareas.h"
 #include "keypress.h"
+//
+#include "../env.h"
+#include "../main.h"
+#include "../init.h"
+#include "../AD7280A.h"
+#include "../balancing.h"
+#include "../state_machine.h"
+//
+#include "fake_battery.h"
+#include "fake_AD7280A.h"
+#include "fake_charger.h"
+//
 #include "app.h"
 #include "sdlcalls.h"
 

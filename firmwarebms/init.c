@@ -22,6 +22,7 @@
 #include "serial.h"
 #include "adc.h"
 #include "spi.h"
+#include "eeprom.h"
 #include "AD7280A.h"
 #include "inout.h"
 #include "init.h"
@@ -29,7 +30,7 @@
 extern t_pack_variable_data g_appdata;
 extern t_eeprom_data        g_edat;
 extern t_eeprom_battery     g_bat[MAXBATTERY];
-extern t_ad7280_state g_ad7280;
+extern t_ad7280_state       g_ad7280;
 
 /*
 void INT0_init(void)
@@ -59,7 +60,6 @@ void configure_Interrupts(void)
 void configure_Timer(void)
 {
 }
-*/
 
 void enter_idle_mode(void)
 {
@@ -71,6 +71,7 @@ void enter_idle_mode(void)
   sleep_cpu();
   sleep_disable();
 }
+*/
 
 // Called at start, sets the IO port direction, defaults the variables, 
 // Initialises the SPI devices and configures the interrupts
@@ -93,20 +94,10 @@ void init()
   _delay_ms(50);
 
   // Default values
-  g_appdata.uptime_days = 0;
-  g_appdata.uptime_minutes = 0;
-  g_appdata.tseconds = 0;
-  g_appdata.average_discharge = 0;
-  g_appdata.c_discharge = 0;
-  g_appdata.c_discharge_accumulator = 0;
-  g_appdata.state_of_charge = 0; // empty
-  for (i = 0; i < MAXBATTERY; i++)
-    g_appdata.vbat[i] = 0;
-  for (i = 0; i < MAXMODULES; i++)
-    g_appdata.temperature[i] = 0;
+  memset(&g_appdata, 0, sizeof(g_appdata));
   // Start point
   g_appdata.app_state = STATE_START;
-  g_appdata.charging_started = 0;
+  //g_appdata.charging_started = 0;
 
   // Init UART
   uart_init(UART_BAUD_SELECT(BAUDRATE, F_CPU));
@@ -116,7 +107,7 @@ void init()
   init_spi_master();
 
   // Init the SPI device AD7820A
-  if (!init_AD7820A(&g_ad7280))
+  if (init_AD7820A(&g_ad7280))
     {
       uart_puts("AD7820A failed\n");
       while (1);
@@ -124,6 +115,13 @@ void init()
   // Initialises the ADC channel 7
   init_adc();
 
+  // If something was stored in the EEPROM, read it
+  read_cfg_from_EEPROM();
+  read_bat_values_from_EEPROM(g_bat, g_edat.bat_elements);
+
   setled_balancing(0);
+
+  // Enable interrupts
+  sei();
 }
 

@@ -23,8 +23,14 @@
 // Licensed under the GPL-2.
 //
 
-#define __DELAY_BACKWARD_COMPATIBLE__ 
-#include <util/delay.h>
+#include <unistd.h>
+#include <iterator>
+#include <list>
+#include <vector>
+#include <string>
+
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "../env.h"
 #include "../main.h"
@@ -35,9 +41,13 @@
 
 #include "gfxareas.h"
 #include "keypress.h"
+//
+#include "fake_battery.h"
+#include "fake_AD7280A.h"
+#include "fake_charger.h"
+//
 #include "app.h"
 
-#include "fake_AD7280A.h"
 
 extern Cappdata  *g_papp;
 
@@ -48,7 +58,6 @@ extern t_ad7280_state       g_ad7280;
 
 int init_AD7820A(t_ad7280_state *st)
 {
-  int  ret;
   char thermistor_term_en = 1;
   char acquisition_time = AD7280A_ACQ_TIME_1600ns; // Do not change, 1600ns required for the thermistor reading.
   char conversion_averaging = AD7280A_CONV_AVG_DIS;
@@ -73,9 +82,8 @@ int init_AD7820A(t_ad7280_state *st)
   st->aux_threshhigh  = 0xFF;
 
   Cfake_AD7280A *pfk_AD7280A = g_papp->get_fake_AD7280();
-  pfk_AD7280A->set_balancing(0, 0);
-  pfk_AD7280A->set_balancing(0, 1);
-  pfk_AD7280A->set_balancing(0, 2);
+  for (int i = 0; i < CFGAD728AMODULES; i++)
+    pfk_AD7280A->set_balancing(i, 0);
 
   // Ready for use
   return 0;
@@ -85,9 +93,14 @@ int ad7280_get_VBAT(t_ad7280_state *st, unsigned long *pvbat, int *ptemp)
 {
   Cfake_battery *pfkbats = g_papp->get_fake_bats();
   Cfake_AD7280A *pfk_AD7280A = g_papp->get_fake_AD7280();
+  int            i;
 
-  pvbat[Vchan] = pfkbats->get_mV();
-  ptemp[module] = pfk_AD7280A->get_AUX_mV();
+  for (i = 0; i < CFGBATNUMBER; i++)
+    {
+      pvbat[i] = pfkbats[i].get_mV();
+    }
+  for (i = 0; i < CFGAD728AMODULES; i++)
+    ptemp[CFGAD728AMODULES] = pfk_AD7280A->get_temp() + i;
   return 0;
 }
 
@@ -97,18 +110,15 @@ char ad7280_set_balance(t_ad7280_state *st, unsigned long balancing)
   Cfake_AD7280A *pfk_AD7280A = g_papp->get_fake_AD7280();
 
   // Set the values per module and send them
-  for (i = 0; i < CFGAD728AMODULES; i++)
+  for (i = 0; i < CFGBATNUMBER; i++)
     {
-      pfk_AD7280A->set_balancing(i, (balancing & (1 << bitnumber)) != 0);
+      pfk_AD7280A->set_balancing(i, (balancing & (1 << i)) != 0);
     }
   return 0;
 }
 
 char ad7280_get_balance(t_ad7280_state *st, char element)
 {
-  int           i;
-  unsigned long mask;
-
   Cfake_AD7280A *pfk_AD7280A = g_papp->get_fake_AD7280();
 
   return pfk_AD7280A->get_balancing(element);
