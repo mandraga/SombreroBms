@@ -42,7 +42,7 @@ int Cfake_AD7280A::get_balancing(int batnum)
 void Cfake_AD7280A::balancing_shunt(Cfake_battery *pbats, int batnum, float delayms)
 {
   int   i;
-  float mAmps = 1180; // 1,8Amps
+  float mAmps = SHUNT_CURRENT;
 
   for (i = 0; i < batnum; i++)
     {

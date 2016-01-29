@@ -98,12 +98,6 @@ void inc_charge_cylces_EEPROM(void)
   write_cfg_to_EEPROM();
 }
 
-void update_charge_time_minutes_EEPROM(unsigned long additional_charge_time_minutes)
-{
-  g_edat.charge_time_minutes += additional_charge_time_minutes;
-  write_cfg_to_EEPROM();
-}
-
 void update_temperature_extremes_EEPROM(int *ptemperatures)
 {
   int  tavg, i;
@@ -172,6 +166,13 @@ void update_battery_charge_values_EEPROM(void)
     write_bat_values_to_EEPROM(g_bat, g_edat.bat_elements);
 }
 
+// Total charging time since the install of the pack
+void update_charge_time_minutes_EEPROM(unsigned long additional_charge_time_minutes)
+{
+  g_edat.charge_time_minutes += additional_charge_time_minutes;
+  write_cfg_to_EEPROM();
+}
+
 //---------------------------------------
 // Read all, Write all
 //---------------------------------------
@@ -197,6 +198,7 @@ void read_cfg_from_EEPROM(void)
       g_edat.bat_tmin = -20;
       g_edat.bat_elements = CFGBATNUMBER;
       g_edat.full_charge  = DEFAULT_CHARGE; // AH
+      g_edat.max_current  = DEFAULT_MAX_CURRENT_A; // A
       g_edat.serial_number[0] = '1';
       for (i = 1; i < sizeof(g_edat.serial_number) / sizeof(char); i++)
 	g_edat.serial_number[i] = 0;       //  8 bytes             plus 0 end of string

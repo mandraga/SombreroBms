@@ -452,6 +452,9 @@ char change_TX_state(char TXstate)
 	  case STATE_SECURITY:
 	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: security\n"));
 	    break;
+	  case STATE_CURRENT_SECURITY:
+	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: current flow security\n"));
+	    break;
 	  case STATE_CRITICAL_FAILURE:
 	  default:
 	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: failure\n"));

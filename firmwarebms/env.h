@@ -30,7 +30,7 @@
 
 // Discharge current to pass to run mode, in mA
 // An hysteresis of DISCHARGE_THRESHOLD / 2 is applyed somewhere.
-#define DISCHARGE_THRESHOLD 100L
+#define DISCHARGE_THRESHOLD 200L
 
 // Measurements per second
 #define SAMPLING_PER_SECOND  10L
@@ -40,7 +40,8 @@
 
 #define TEMPERATURE_HISTERESIS 15L   // °C
 
-#define DEFAULT_CHARGE  1000
+#define DEFAULT_CHARGE        1000
+#define DEFAULT_MAX_CURRENT_A  300
 
 #if CFGBATNUMBER==10
 #define CFGAD728AMODULE_0_CHAN 5

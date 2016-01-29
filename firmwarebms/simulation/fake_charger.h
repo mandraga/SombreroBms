@@ -1,5 +1,5 @@
 
-#define CHARGER_AMPS 33000.
+#define CHARGER_AMPS 4 * 33000.
 
 class Cfake_charger
 {

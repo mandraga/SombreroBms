@@ -39,7 +39,8 @@
 #define STATE_RUN      4  // Run, the current is beingused and state of charge updated
 #define STATE_RELAPSE  5  // After run, wait for the battery voltage to spatbilise (lithium behaviour)
 #define STATE_SECURITY 6  // Undervoltage or overvoltage or error like trying to start when charging
-#define STATE_CRITICAL_FAILURE  7  // Stops here, no way to get out but a reset
+#define STATE_CURRENT_SECURITY 7  // Over current or too much current during charge
+#define STATE_CRITICAL_FAILURE 8  // Stops here, no way to get out but a reset
 
 #define BAUDRATE       9600
 #ifndef F_CPU
@@ -66,6 +67,7 @@ typedef struct  s_eeprom_data
   long          bat_tmin;
   char          bat_elements;
   unsigned long full_charge;         // AH
+  int           max_current;         // Amp
   char          serial_number[9];    //  8 bytes             plus 0 end of string
   char          client[33];          // 32 bytes Client name plus 0 end of string
   // These are often programmed

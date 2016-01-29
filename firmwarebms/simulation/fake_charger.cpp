@@ -63,7 +63,7 @@ void Cfake_charger::add_charge(Cfake_battery *pbats, int batnum, float timems)
   int   i;
 
   check_Vmax(pbats, batnum);
-  if (!m_active)
+  if (!m_active || !m_bpluged)
     {
       return;
     }

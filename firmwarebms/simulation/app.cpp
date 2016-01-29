@@ -128,6 +128,8 @@ Cappdata::Cappdata(int width, int height):
     {
       m_bats[i].set_capa(CAPACITYMAH, 40000);
     }
+#define BREAK_BALANCE
+#ifdef BREAK_BALANCE
   m_bats[ 1].set_capa(CAPACITYMAH + CAPACITYMAH / 20, 56060);
   m_bats[ 2].set_capa(CAPACITYMAH - CAPACITYMAH / 20, 44000);
   m_bats[ 4].set_capa(CAPACITYMAH                   , 42320);
@@ -135,6 +137,7 @@ Cappdata::Cappdata(int width, int height):
   m_bats[ 7].set_capa(CAPACITYMAH + CAPACITYMAH / 22, 39021);
   m_bats[ 9].set_capa(CAPACITYMAH - CAPACITYMAH / 18, 41432);
   m_bats[10].set_capa(CAPACITYMAH                   , 37200);
+#endif //BREAK_BALANCE
 
   init();
 }
@@ -205,7 +208,7 @@ void Cappdata::key_on(int code)
   //printf("%c on\n", code);
   if (m_kstates.is_pressed('r'))
     {
-      m_run_current = 25000;
+      m_run_current = 250000;
     }
   if (m_kstates.is_pressed('t'))
     {
@@ -396,6 +399,9 @@ void display_state(char *str)
     case STATE_SECURITY:
       snprintf(str, TRSTRINGSZ, ("State: security"));
       break;
+    case STATE_CURRENT_SECURITY:
+      snprintf(str, TRSTRINGSZ, ("State: current flow security"));
+      break;
     case STATE_CRITICAL_FAILURE:
     default:
       snprintf(str, TRSTRINGSZ, ("State: failure."));
@@ -435,7 +441,7 @@ void Cappdata::render_bats()
       sprintf(arr, "charge: %f", m_bats[i].m_charge);
       rendertext(pos, tcolor, arr);
       pos.y += 20;
-      sprintf(arr, "V: %d", m_bats[i].get_mV());
+      sprintf(arr, "V: %d,%d", m_bats[i].get_mV() / 1000, m_bats[i].get_mV() % 1000);
       rendertext(pos, tcolor, arr);
       pos.x += dim.x / 2;
       sprintf(arr, "balance: %d", m_fake_AD7280A.get_balancing(i));
@@ -502,11 +508,22 @@ void Cappdata::render_gui()
   pos.x = ofx;
   pos.y += offset;
   rendertext(pos, color, arr);
+  //
+  sprintf(arr, "Vmax: %d,%dV", (int)g_edat.bat_maxv / 1000, (int)g_edat.bat_maxv % 1000);
+  pos.x = ofx;
+  pos.y += offset;
+  pos.y += offset;
+  rendertext(pos, color, arr);
+  //
+  sprintf(arr, "Vmin: %d,%dV", (int)g_edat.bat_minv / 1000, (int)g_edat.bat_minv % 1000);
+  pos.x = ofx;
+  pos.y += offset;
+  rendertext(pos, color, arr);
 
   // Update the screen
   SDL_RenderPresent(m_sdlRenderer);
   //usleep(sleep_delay / 10);
-  usleep(1000000 / 60);
+  //usleep(1000000 / 120);
   //------------------------------------------------------------------
   // Balance discharge depending on the balancing selection
   m_fake_AD7280A.balancing_shunt(m_bats, CFGBATNUMBER, sleep_delay);
@@ -522,15 +539,15 @@ void Cappdata::render_gui()
       Run_Shunt(CFGBATNUMBER, sleep_delay);
     }
   // Error led
-  color = m_errorled? 0xFF0000FF : 0xFF808080;
-  pos.x = ofx;
-  pos.y = 10;
-  dim.x = 10;
-  dim.y = 10;
+  color = m_errorled? 0xFF0000FF : 0xFFA0A0A0;
+  pos.x = m_width - 40;
+  pos.y = 30;
+  dim.x = 20;
+  dim.y = 20;
   draw_rectangle(pos, dim, color);
   // Balancing led
-  color = m_balancingled? 0xFF00FF00 : 0xFF808080;
-  pos.x += 20;
+  color = m_balancingled? 0xFF00FF00 : 0xFFA0A0A0;
+  pos.x += 30;
   draw_rectangle(pos, dim, color);
 }
 

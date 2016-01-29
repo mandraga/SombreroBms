@@ -109,7 +109,7 @@ void balancing_with_temperature_control(int vlow_index, unsigned long *pvbat,
   for (i = elements - 1; i > 0 ; i--)
     for (j = i - 1; j >= 0; j--)
       {
-	if (pvbat[sorted[i]] < pvbat[sorted[j]])
+	if (pvbat[sorted[i]] > pvbat[sorted[j]])
 	  {
 	    r = sorted[i];
 	    sorted[i] = sorted[j];
@@ -188,7 +188,7 @@ void balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elemen
 	get_voltage_differences(pvbat, elements, &lowVi, &hiVi);
 	Vdiffmax = pvbat[hiVi] - pvbat[pb->vlow_index];
 	Vdiffmax = Vdiffmax < 0? -Vdiffmax : Vdiffmax;
-	if (Vdiffmax < 20L ||                // 20mV value between batteries of the pack
+	if (Vdiffmax < 10L ||                // 10mV value between batteries of the pack
 	    pvbat[lowVi] <= g_edat.bat_minv) // Do not bleed a battery to death
 	  {
 	    stop_any_balancing();

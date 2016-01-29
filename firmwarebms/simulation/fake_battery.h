@@ -1,6 +1,6 @@
 
 #define BAT_MINMV 3000
-#define BAT_MAXV  3600
+#define BAT_MAXV  3900
 
 #define CHARGESTOPTHRESHOLD 39300 // 39,2V
 

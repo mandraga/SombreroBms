@@ -18,17 +18,17 @@ extern t_ad7280_state       g_ad7280;
 extern t_balancing          g_balancing;
 
 // Checks that every voltage is over a value, like 15% under the max value
-char all_over_threshold(void)
+char all_under_threshold(void)
 {
   unsigned long threshold;
   int           i, ret;
 
   ret = 1;
   threshold  = g_edat.bat_maxv;
-  threshold -= (g_edat.bat_maxv * 10) / 100; // 10%
+  threshold -= (g_edat.bat_maxv - g_edat.bat_minv) / 10; // 10%
   for (i = 0; i < g_edat.bat_elements; i++)
     {
-      if (g_appdata.vbat[i] <= threshold)
+      if (g_appdata.vbat[i] >= threshold)
 	{
 	  ret = 0;
 	}
@@ -157,49 +157,72 @@ void State_machine()
       {
 	balancing_charger_stoped(&g_balancing, g_appdata.vbat, g_edat.bat_elements,
 				 g_appdata.temperature);
+	// First check if the car runs, stop everything then because the device is pluged
+	if (g_appdata.c_discharge > DISCHARGE_THRESHOLD)
+	  {
+	    stop_any_balancing();
+	    g_appdata.idle_counter = 0;
+	    g_appdata.app_state = STATE_CURRENT_SECURITY;
+	    break;
+	  }
 	if (chargeron == 0)
 	  {
 	    g_appdata.idle_counter = 0;
 	    g_appdata.app_state = STATE_RELAPSE;
+	    break;
 	  }
-	else
+	// If a battery is low, go to CHARGING
+	// And no battery is full
+	if (all_under_threshold() && !battery_full())
 	  {
-	    if (!all_over_threshold()) // If a battery is low, go to CHARGING
-	      {
-		g_appdata.charging_started = 1; // Used ot display a progress animation on the gauge
-		inc_charge_cylces_EEPROM();
-                g_appdata.charge_time_count_tenth = g_appdata.charge_time_count = 0;
-		g_appdata.app_state = STATE_CHARGING;
-	      }
+	    g_appdata.charging_started = 1; // Used ot display a progress animation on the gauge
+	    inc_charge_cylces_EEPROM();
+	    g_appdata.charge_time_count_tenth = g_appdata.charge_time_count = 0;
+	    g_appdata.app_state = STATE_CHARGING;
+	    break;
 	  }
+	/*
+	if (g_appdata.c_discharge >= g_edat.max_current)
+	  {
+	    g_appdata.app_state = STATE_CHARGING;
+	  }
+	*/
       }
       break;
     case STATE_CHARGING:
       {
 	update_local_charging_time();
-	update_battery_charge_values_EEPROM(); // When a battey is at Vmax, store the charging time
 	// Does nothing but go back to no balancing
 	balancing_during_charge(&g_balancing, g_appdata.vbat, g_edat.bat_elements,
 				g_appdata.temperature);
+	// First check if the car runs, stop everything then because the device is pluged
+	if (g_appdata.c_discharge > DISCHARGE_THRESHOLD)
+	  {
+	    stop_any_balancing();
+	    g_appdata.idle_counter = 0;
+	    g_appdata.app_state = STATE_CURRENT_SECURITY;
+	    break;
+	  }
 	if (chargeron == 0)
 	  {
 	    // FIXME state of charge problem
+	    update_battery_charge_values_EEPROM(); // When a battey is at Vmax, store the charging time
 	    update_charge_time_minutes_EEPROM(g_appdata.charge_time_count);
 	    g_appdata.idle_counter = 0;
 	    g_appdata.app_state = STATE_RELAPSE;
+	    break;
 	  }
-	else
+	if (battery_full())
 	  {
-	    if (battery_full())
-	      {
-		update_charge_time_minutes_EEPROM(g_appdata.charge_time_count);
-		g_appdata.charging_started = 0;
-		g_appdata.average_discharge = 0;
-		g_appdata.c_discharge = 0;
-		g_appdata.c_discharge_accumulator = 0;
-		g_appdata.state_of_charge = g_edat.full_charge;
-		g_appdata.app_state = STATE_CHARGEON;
-	      }
+	    update_battery_charge_values_EEPROM(); // When a battey is at Vmax, store the charging time
+	    update_charge_time_minutes_EEPROM(g_appdata.charge_time_count);
+	    g_appdata.charging_started = 0;
+	    g_appdata.average_discharge = 0;
+	    g_appdata.c_discharge = 0;
+	    g_appdata.c_discharge_accumulator = 0;
+	    g_appdata.state_of_charge = g_edat.full_charge;
+	    g_appdata.app_state = STATE_CHARGEON;
+	    break;
 	  }
       }
       break;
@@ -223,18 +246,22 @@ void State_machine()
     case STATE_RUN:
       {
 	change_state_of_charge();
-	if (VBAT_low || chargeron)
+	if (chargeron)
+	  {
+	    g_appdata.idle_counter = 0;
+	    g_appdata.app_state = STATE_CURRENT_SECURITY;
+	    break;
+	  }
+	if (VBAT_low)
 	  {
 	    update_battery_low_events_EEPROM();
 	    g_appdata.app_state = STATE_SECURITY;
+	    break;
 	  }
-	else
+	if (g_appdata.c_discharge < DISCHARGE_THRESHOLD / 2)
 	  {
-	    if (g_appdata.c_discharge < DISCHARGE_THRESHOLD / 2)
-	      {
-		g_appdata.idle_counter = 0;
-		g_appdata.app_state = STATE_RELAPSE;
-	      }
+	    g_appdata.idle_counter = 0;
+	    g_appdata.app_state = STATE_RELAPSE;
 	  }
       }
       break;
@@ -243,32 +270,30 @@ void State_machine()
 	if (chargeron != 0)
 	  {
 	    g_appdata.app_state = STATE_CHARGEON;
+	    break;
 	  }
-	else
-	  if (VBAT_low)
-	    {
-	      update_battery_low_events_EEPROM();
-	      g_appdata.app_state = STATE_SECURITY;
-	    }
-	  else
-	    {
-	      if (g_appdata.c_discharge > DISCHARGE_THRESHOLD)
-		g_appdata.app_state = STATE_RUN;
-	      else
-		{
-		  // After being used the lithium cells voltage tends to go
-		  // up for 20 seconds.
-		  // To know when it is finished, the VBAT change rate must be
-		  // calculated and compared to a threshold. When it is low like
-		  // 1mV/4seconds then go to IDLE.
-		  // Or wait 20 seconds and go to IDLE, t's simpler.
-		  g_appdata.idle_counter++;
-		  if (g_appdata.idle_counter > 20 * SAMPLING_PER_SECOND)
-		    {
-		      g_appdata.app_state = STATE_IDLE;
-		    }
-		}
-	    }
+	if (VBAT_low)
+	  {
+	    update_battery_low_events_EEPROM();
+	    g_appdata.app_state = STATE_SECURITY;
+	    break;
+	  }
+	if (g_appdata.c_discharge > DISCHARGE_THRESHOLD)
+	  {
+	    g_appdata.app_state = STATE_RUN;
+	    break;
+	  }
+	// After being used the lithium cells voltage tends to go
+	// up for 20 seconds.
+	// To know when it is finished, the VBAT change rate must be
+	// calculated and compared to a threshold. When it is low like
+	// 1mV/4seconds then go to IDLE.
+	// Or wait 20 seconds and go to IDLE, t's simpler.
+	g_appdata.idle_counter++;
+	if (g_appdata.idle_counter > 20 * SAMPLING_PER_SECOND)
+	  {
+	    g_appdata.app_state = STATE_IDLE;
+	  }
       }
       break;
     case  STATE_SECURITY:
@@ -276,17 +301,28 @@ void State_machine()
 	if (chargeron != 0)
 	  {
 	    g_appdata.app_state = STATE_CHARGEON;
+	    break;
 	  }
-	else
+	if (!VBAT_low)
 	  {
-	    if (!VBAT_low)
-	      {
-		g_appdata.idle_counter = 0;
-		g_appdata.app_state = STATE_RELAPSE;
-	      }
+	    g_appdata.idle_counter = 0;
+	    g_appdata.app_state = STATE_RELAPSE;
+	    break;
 	  }
       }
       break;
+    case  STATE_CURRENT_SECURITY:
+      {
+	// The pack is disconnected because of current flow where it is not suposed
+	// therefore, no current is flowing. Therefore wait.
+	g_appdata.idle_counter++;
+	// 10 seconds to figure out whats happening
+	if (g_appdata.idle_counter > 10 * SAMPLING_PER_SECOND)
+	  {
+	    g_appdata.app_state = STATE_RELAPSE;
+	  }
+      }
+      break;      
     case STATE_CRITICAL_FAILURE:
     default:
       {
@@ -297,10 +333,12 @@ void State_machine()
   // Change the outputs depending on the state
   //
   buzer = (chargeron && (g_appdata.app_state == STATE_RUN)) || VBAT_low;
-  cutmains = VBAT_low || (g_appdata.app_state == STATE_CHARGEON) || (g_appdata.app_state == STATE_CHARGING);
+  cutmains = VBAT_low || g_appdata.app_state == STATE_CURRENT_SECURITY;
   // Stop the charger only if it is powered & not charging
-  charger_off = (g_appdata.app_state != STATE_CHARGING) && (g_appdata.app_state == STATE_CHARGEON);
-  lederror = VBAT_low || (g_appdata.app_state == STATE_CRITICAL_FAILURE);
+  charger_off = (g_appdata.app_state != STATE_CHARGING) && chargeron;
+  lederror = VBAT_low || (g_appdata.app_state == STATE_CRITICAL_FAILURE)
+                      || (g_appdata.app_state == STATE_SECURITY)
+                      || (g_appdata.app_state == STATE_CURRENT_SECURITY);
   //
   // Output the signals
   //
@@ -310,6 +348,7 @@ void State_machine()
   setled_error(lederror);
   // Outputs a signal for the gauge chip on one wire. 0 or VBAT, signal time is the value
   set_gauge_out(g_appdata.state_of_charge, g_edat.full_charge,
-		VBAT_low, (g_appdata.app_state == STATE_CHARGING));
+		VBAT_low, (g_appdata.app_state == STATE_CHARGING),
+		(g_appdata.app_state == STATE_CURRENT_SECURITY) || (g_appdata.app_state == STATE_CRITICAL_FAILURE));
 }
 

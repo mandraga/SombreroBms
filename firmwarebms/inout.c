@@ -93,14 +93,15 @@ void get_IBAT(t_pack_variable_data *pappdata)
 // States transmited:
 // 1 to 11: bar graph values from blinking 1 to 10
 // 12:      security state, blink fast
-// 13:      charging
+// 13:      charging the bars fill from bottom to top
+// 14:      failure the 10 bars blink simultaneouslty
 //
 // It is transmited with the duration of the pin low state.
 // 1 cycle hight, then 1 to 12 cycles low.
-// Because it is called continuously it mus hcange states depending on the input
-// only once per 13 calls.
+// Because it is called continuously it must change states depending on the input
+// only once per 14 calls.
 // Note that the output goes to an optocoupler so 1 is 0 on the VBAT outpout.
-void set_gauge_out(unsigned long SOC, unsigned long fullcharge, char bat_low, char charging)
+void set_gauge_out(unsigned long SOC, unsigned long fullcharge, char bat_low, char charging, char failure)
 {
   static char   gauge_out_state = GAUGE_OUT_STATE_UPDATE;
   static char   gauge_out_value;
@@ -114,6 +115,8 @@ void set_gauge_out(unsigned long SOC, unsigned long fullcharge, char bat_low, ch
 	gauge_out_value = 12;
       if (charging)
 	gauge_out_value = 13;
+      if (failure)
+	gauge_out_value = 14;
       gauge_out_state = GAUGE_OUT_STATE_TRANSMIT;
     }
   if (gauge_out_state == GAUGE_OUT_STATE_TRANSMIT)

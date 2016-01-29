@@ -1,4 +1,7 @@
 
+//#define SHUNT_CURRENT 1280 // mA
+#define SHUNT_CURRENT 150000 // mA
+
 class Cfake_AD7280A
 {
  public:
