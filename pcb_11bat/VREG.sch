@@ -44,7 +44,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 5 9
 Title ""
-Date "5 jan 2016"
+Date "8 feb 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -72,7 +72,7 @@ L C C46
 U 1 1 56016E96
 P 7550 3650
 F 0 "C46" H 7550 3750 40  0000 L CNN
-F 1 "1uF50V" H 7556 3565 40  0000 L CNN
+F 1 "1uF100V" H 7556 3565 40  0000 L CNN
 F 2 "~" H 7588 3500 30  0000 C CNN
 F 3 "~" H 7550 3650 60  0000 C CNN
 	1    7550 3650
