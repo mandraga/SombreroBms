@@ -12,6 +12,7 @@
 // Sombrero BMS C2015-2016 Vreemdelabs.com
 // Firmware Version: 1.0
 // Elements: 11
+// '\0'
 //
 //-------------------------------------------------------------------------------------
 // "get_params\n"
@@ -27,6 +28,7 @@
 // total charging time: 56h
 // Vmin: 2,9V
 // Vmax: 3,6V
+// MaxVbat: 36,50V
 // undervoltage events: 0
 // maxdischarge: 252A
 // average discharge: 50A
@@ -36,6 +38,7 @@
 // mintemperature: -20°C
 // maxtemperature: 60°C
 // temperature: 23°C
+// '\0'
 //
 //-------------------------------------------------------------------------------------
 // "set_param -valuename value\n"
@@ -51,7 +54,7 @@
 //   client      "golf des paquerettes"
 //
 // Example: set_param -client  "golf des paquerettes"
-//          set_param -date    10/02/2017
+//          set_param -date    "10/02/2017"
 //          set_param -batVmin 2900
 //
 // Note that bat elements comes from the firmware version 
@@ -64,29 +67,29 @@
 // Not too verbose in order to send it fast and often
 //
 // bmsReportBegin
-// Vb: 35,56                     //  V
+// Vbat: 35,56
 // chrg: 80
 // chrgmAH: 40000
 // ImA: 56323
 // state: RUN
 // Elts: 11
 // temp: 23                      // °C this is the maximum temperature over the board
-// batbegin  1
+// batbegin:  1
 // Vb: 3,230                     // V
 // Lowest: 2,83                  // V
 // evt: 2                        // undervoltage events
 // avgchgt: 4567                 // charge time average in seconds more = more capacity
 // balan: 1
-// batbegin 2
+// batbegin: 2
 // ....
-// batbegin 11
+// batbegin: 11
 // Vb: 3,210
 // Lowest: 2,92                   // V
 // evt: 0
 // avgchgt: 4643
 // balan: 0
 // bmsReportEnd
-//
+// '\0'
 //
 
 #define RCVSTRINGSZ 60

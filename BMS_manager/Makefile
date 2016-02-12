@@ -69,7 +69,10 @@ clean:
 OBJS =  $(OBJDIR)/main.o
 OBJS += $(OBJDIR)/info_tab.o
 OBJS += $(OBJDIR)/setup_tab.o
-OBJS += $(OBJDIR)/input_tab.o
+OBJS += $(OBJDIR)/about_tab.o
+OBJS += $(OBJDIR)/battery_tab.o
+OBJS += $(OBJDIR)/charge_tab.o
+OBJS += $(OBJDIR)/port_tab.o
 OBJS += $(OBJDIR)/serialport.o
 
 $(OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp

@@ -85,6 +85,7 @@ void close_function(void *pdata)
   t_app_data *papp_data = (t_app_data*)pdata;
 
   save_coordinates(papp_data);
+  delete app_data.pBMS;
   papp_data->pwindow->hide(); // Close the window
 }
 
@@ -117,6 +118,7 @@ int main(int argc, char **argv)
   app_data.bconnected = true;
   app_data.pwindow    = NULL;
   app_data.pserial = NULL;
+  app_data.pBMS = new CSombreroBMS();
   // Layout
   Fl_File_Icon::load_system_icons();
   read_window_pos(&app_data);

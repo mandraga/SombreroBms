@@ -11,6 +11,7 @@ typedef struct                  s_app_data
   Fl_Window                    *pwindow;
   std::string                   serial_port;
   CSerialPort                  *pserial;
+  CSombreroBMS                 *pBMS;
   //Fl_Check_Button              *pcheckbox_record;
   //Fl_Check_Button              *pcheckbox_do_not;
   //Fl_Button                    *but_cancel;

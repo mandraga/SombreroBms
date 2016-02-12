@@ -34,6 +34,7 @@ void serial_apply_callback(Fl_Widget *pwi, void *pdata)
   selection = papp_data->serial_port_choice->value(0);
   papp_data->pserial = new CSerialPort();
   papp_data->open_serial_port(papp_data->vserial_ports[selection].c_str());
+  papp_data->pBMS->set_port(papp_data->pserial);
 }
 
 void get_choices(t_app_data *papp_data)
