@@ -1,9 +1,9 @@
 /*
- Sombrero BMS - BMS_manager
+ SombreroBMS - BMS_manager
  Copyright (C) 2016 Patrick Areny
  All Rights Reserved.
 
- SombreroBMS - BMS_manager is free software: you can redistribute it and/or modify
+ BMS_manager is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
@@ -16,3 +16,5 @@
  You should have received a copy of the GNU General Public License
  along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
+
+void create_about_tab(int x, int y, int w, int h);

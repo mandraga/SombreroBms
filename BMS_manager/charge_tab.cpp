@@ -3,7 +3,7 @@
 #include <FL/Fl_Text_Display.H>
 #include <FL/Fl_Text_Buffer.H>
 
-void create_charge_tab(int x, int y, int w, int h)
+void create_charge_tab(int x, int y, int w, int h, void *app_data)
 {
   int              border;
   Fl_Text_Display *ptext;

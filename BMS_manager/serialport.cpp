@@ -17,7 +17,7 @@ CSerialPort::~CSerialPort()
 }
 
 // First call:
-// prompt> mkfifo /tmp/myFIFO
+// prompt> mkfifo /tmp/BMSsim_serialFIFO
 // to use a named pipe instead of a serial port for simulation purposes.
 int CSerialPort::open_serial_port(char *devicename)
 {  

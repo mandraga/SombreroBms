@@ -1,9 +1,9 @@
 /*
- BMS_manager (R)
+ SombreroBMS - BMS_manager
  Copyright (C) 2016 Patrick Areny
  All Rights Reserved.
 
- Scoreview is free software: you can redistribute it and/or modify
+ BMS_manager is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
@@ -16,6 +16,7 @@
  You should have received a copy of the GNU General Public License
  along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
+
 #include <unistd.h>
 #include <string>
 #include <list>
@@ -115,6 +116,7 @@ int main(int argc, char **argv)
     app_data.path = string("./");
   app_data.bconnected = true;
   app_data.pwindow    = NULL;
+  app_data.pserial = NULL;
   // Layout
   Fl_File_Icon::load_system_icons();
   read_window_pos(&app_data);
@@ -140,6 +142,9 @@ int main(int argc, char **argv)
   
   // Serial port tab
   create_serialport_tab(20, 30, wx - 30, wy - 30, &app_data);
+
+  // About tab
+  create_about_tab(20, 30, wx - 30, wy - 30);
 
   tabs->end();
   //
