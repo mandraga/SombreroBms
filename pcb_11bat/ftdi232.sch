@@ -37,14 +37,15 @@ LIBS:ina197
 LIBS:hrs1k
 LIBS:ftdichip
 LIBS:ntd5867nl
+LIBS:SPI_Flash
 LIBS:bms-cache
 EELAYER 27 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 9 9
+Sheet 9 10
 Title ""
-Date "8 feb 2016"
+Date "25 feb 2016"
 Rev ""
 Comp ""
 Comment1 ""

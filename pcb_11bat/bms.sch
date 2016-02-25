@@ -37,14 +37,15 @@ LIBS:ina197
 LIBS:hrs1k
 LIBS:ftdichip
 LIBS:ntd5867nl
+LIBS:SPI_Flash
 LIBS:bms-cache
 EELAYER 27 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 1 9
+Sheet 1 10
 Title ""
-Date "8 feb 2016"
+Date "25 feb 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -62,10 +63,9 @@ F3 "SCLK" I L 9450 1800 60
 F4 "SDI" I L 9450 1900 60 
 F5 "SDO" O L 9450 2000 60 
 F6 "CS/" I L 9450 2150 60 
-F7 "ALERT" O L 9450 2600 60 
-F8 "PD/" I L 9450 2300 60 
-F9 "CNVST/" I L 9450 2400 60 
-F10 "VBAT" O L 9450 2850 60 
+F7 "ALERT" O L 9450 2650 60 
+F8 "PD/" I L 9450 2250 60 
+F9 "CNVST/" I L 9450 2550 60 
 $EndSheet
 $Comp
 L LED D1
@@ -158,7 +158,7 @@ Text Label 4950 2850 0    60   ~ 0
 SDO
 Text Label 4950 4250 0    60   ~ 0
 ALERT
-Text Label 9000 2600 2    60   ~ 0
+Text Label 9000 2650 2    60   ~ 0
 ALERT
 Text Label 9000 3000 2    60   ~ 0
 GND
@@ -214,9 +214,9 @@ Text Label 4950 4350 0    60   ~ 0
 CSBAT/
 Text Label 9000 2150 2    60   ~ 0
 CSBAT/
-Text Label 9000 2300 2    60   ~ 0
+Text Label 9000 2250 2    60   ~ 0
 PD/
-Text Label 9000 2400 2    60   ~ 0
+Text Label 9000 2550 2    60   ~ 0
 CNVSTART/
 Text Label 4950 4450 0    60   ~ 0
 PD/
@@ -227,13 +227,11 @@ GND
 Text Label 6800 3900 0    60   ~ 0
 GND
 Text Label 6300 4500 0    60   ~ 0
-5V
+3V
 Text Label 4950 4550 0    60   ~ 0
 LEDBALANCING
 Text Label 4950 4650 0    60   ~ 0
 LEDERROR
-Text Label 8100 4200 0    60   ~ 0
-5V
 Text Label 8050 5400 0    60   ~ 0
 LEDBALANCING
 Text Label 8050 5500 0    60   ~ 0
@@ -258,7 +256,7 @@ BUZZER
 Text Label 7550 6850 2    60   ~ 0
 GND
 Text Label 7550 5900 0    60   ~ 0
-5V
+3V
 Text Label 5850 3900 2    60   ~ 0
 RESET/
 Text Label 9450 6600 2    60   ~ 0
@@ -269,10 +267,8 @@ Text Label 9450 5700 2    60   ~ 0
 TXD
 Text Label 2200 4750 0    60   ~ 0
 GND
-Text Label 9000 2850 0    60   ~ 0
-VBAT
 Text Label 900  2450 0    60   ~ 0
-5V
+3V
 $Comp
 L C C6
 U 1 1 55ECCEF9
@@ -325,12 +321,10 @@ F 3 "~" H 1000 3500 60  0000 C CNN
 $EndComp
 Text Label 8500 3900 0    60   ~ 0
 CSENSE
-Text Label 8500 4500 0    60   ~ 0
-5V
 Text Label 8500 4650 0    60   ~ 0
 GND
 Text Label 6950 1100 0    60   ~ 0
-5V
+3V
 Text Label 5450 1100 0    60   ~ 0
 MOSI
 Text Label 6950 1200 0    60   ~ 0
@@ -383,7 +377,7 @@ GND
 Text Label 5550 6900 0    60   ~ 0
 CHARGER_ON/
 Text Label 5550 7050 0    60   ~ 0
-5V
+3V
 Text Label 5000 6000 0    60   ~ 0
 GND
 Text Label 4950 2450 0    60   ~ 0
@@ -411,26 +405,16 @@ F1 "VREG.sch" 50
 F2 "VBAT" I L 2800 1050 60 
 F3 "5V" O R 4300 1050 60 
 F4 "GND" I L 2800 1400 60 
-$EndSheet
-$Sheet
-S 9000 750  1500 450 
-U 5601295C
-F0 "gauge" 50
-F1 "gauge.sch" 50
-F2 "GND" I R 10500 850 60 
-F3 "5V" I R 10500 950 60 
-F4 "CSDAC/" I L 9000 850 60 
-F5 "SCLK" I L 9000 1000 60 
-F6 "SDI" I L 9000 1100 60 
+F5 "3V" O R 4300 1300 60 
 $EndSheet
 Text Label 4950 3400 0    60   ~ 0
-CSDAC/
-Text Label 8550 850  0    60   ~ 0
-CSDAC/
-Text Label 10950 850  2    60   ~ 0
+CSFLASH/
+Text Label 8550 750  2    60   ~ 0
+CSFLASH/
+Text Label 10250 1100 2    60   ~ 0
 GND
-Text Label 10950 950  2    60   ~ 0
-5V
+Text Label 10250 1200 2    60   ~ 0
+3V
 Text Label 8550 1000 2    60   ~ 0
 SCLK
 Text Label 8550 1100 2    60   ~ 0
@@ -582,7 +566,7 @@ Wire Wire Line
 Wire Wire Line
 	4650 4250 4950 4250
 Wire Wire Line
-	9450 2600 9000 2600
+	9450 2650 9000 2650
 Wire Wire Line
 	9000 3000 9450 3000
 Wire Wire Line
@@ -602,9 +586,9 @@ Wire Wire Line
 Wire Wire Line
 	9450 2150 9000 2150
 Wire Wire Line
-	9450 2300 9000 2300
+	9450 2250 9000 2250
 Wire Wire Line
-	9450 2400 9000 2400
+	9450 2550 9000 2550
 Wire Wire Line
 	4650 3500 4950 3500
 Wire Wire Line
@@ -690,8 +674,6 @@ Wire Wire Line
 	2200 4750 2750 4750
 Connection ~ 2450 4750
 Wire Wire Line
-	9450 2850 9000 2850
-Wire Wire Line
 	5800 3900 5800 4400
 Connection ~ 5800 3900
 Wire Wire Line
@@ -764,11 +746,11 @@ Wire Wire Line
 Wire Wire Line
 	4650 5550 4800 5550
 Wire Wire Line
-	10500 950  10950 950 
+	9800 1200 10250 1200
 Wire Wire Line
-	10500 850  10950 850 
+	9800 1100 10250 1100
 Wire Wire Line
-	8550 850  9000 850 
+	8550 750  9000 750 
 Wire Wire Line
 	9000 1000 8550 1000
 Wire Wire Line
@@ -853,17 +835,18 @@ U 56002A95
 F0 "CSense" 50
 F1 "CSense.sch" 50
 F2 "GND" I L 9500 4650 60 
-F3 "5V" I L 9500 4500 60 
-F4 "CSENSE" O L 9500 3900 60 
+F3 "CSENSE" O L 9500 3900 60 
+F4 "VBAT" O L 9500 4150 60 
+F5 "3V" I L 9500 4500 60 
 $EndSheet
 $Sheet
 S 6650 1650 1050 550 
 U 5613971B
 F0 "comandsolenoid" 50
 F1 "relaislenoide.sch" 50
-F2 "5V" I L 6650 1750 60 
-F3 "COILON" I L 6650 1900 60 
-F4 "GND" I L 6650 2100 60 
+F2 "COILON" I L 6650 1900 60 
+F3 "GND" I L 6650 2100 60 
+F4 "3V" I L 6650 1750 60 
 $EndSheet
 Wire Wire Line
 	6650 1750 6100 1750
@@ -873,8 +856,6 @@ Wire Wire Line
 	6650 2100 6100 2100
 Text Label 6100 2100 0    60   ~ 0
 GND
-Text Label 6100 1750 0    60   ~ 0
-5V
 Text Label 6100 1900 0    60   ~ 0
 RELON
 Text Label 4950 2650 0    60   ~ 0
@@ -977,7 +958,6 @@ Wire Wire Line
 	2000 3550 2000 3800
 Wire Wire Line
 	600  3800 2100 3800
-NoConn ~ 4650 3300
 $Comp
 L R R3
 U 1 1 561C5618
@@ -1002,6 +982,59 @@ Wire Wire Line
 	4650 2650 4950 2650
 Wire Wire Line
 	4950 3800 4650 3800
-Text Notes 7350 3400 0    60   ~ 0
-FIXME ADD A FUSE!!!!!!!!!!!!!!!\n
+Text Label 8500 4150 0    60   ~ 0
+VBAT
+Wire Wire Line
+	9500 4150 8500 4150
+Wire Wire Line
+	4300 1300 4750 1300
+Text Label 4750 1300 0    60   ~ 0
+3V
+Text Label 6100 1750 0    60   ~ 0
+3V
+Text Label 8500 4500 0    60   ~ 0
+3V
+Text Label 8100 4200 0    60   ~ 0
+3V
+$Sheet
+S 9000 650  800  700 
+U 56CF0CE3
+F0 "SPI Flash" 50
+F1 "SPIFlash.sch" 50
+F2 "SDI" I L 9000 1100 60 
+F3 "SDO" O L 9000 1200 60 
+F4 "3V" I R 9800 1200 60 
+F5 "CLK" I L 9000 1000 60 
+F6 "CSFLASH/" I L 9000 750 60 
+F7 "GND" I R 9800 1100 60 
+$EndSheet
+Wire Wire Line
+	4650 3300 4950 3300
+Text Label 4950 3300 0    60   ~ 0
+GAUGEOUT
+$Sheet
+S 7650 2900 650  600 
+U 56CF2100
+F0 "Gauge" 50
+F1 "gauge.sch" 50
+F2 "GND" I R 8300 3400 60 
+F3 "VBAT" I R 8300 3250 60 
+F4 "GAUGEOUT" I L 7650 3050 60 
+$EndSheet
+Wire Wire Line
+	8300 3250 8600 3250
+Wire Wire Line
+	8300 3400 8600 3400
+Wire Wire Line
+	7100 3050 7650 3050
+Text Label 7100 3050 0    60   ~ 0
+GAUGEOUT
+Text Label 8600 3400 2    60   ~ 0
+GND
+Text Label 8600 3250 2    60   ~ 0
+VBAT
+Wire Wire Line
+	8550 1200 9000 1200
+Text Label 8550 1200 2    60   ~ 0
+SDO
 $EndSCHEMATC

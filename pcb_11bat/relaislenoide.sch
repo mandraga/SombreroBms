@@ -37,14 +37,15 @@ LIBS:ina197
 LIBS:hrs1k
 LIBS:ftdichip
 LIBS:ntd5867nl
+LIBS:SPI_Flash
 LIBS:bms-cache
 EELAYER 27 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 8 9
+Sheet 7 10
 Title ""
-Date "8 feb 2016"
+Date "25 feb 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -113,8 +114,6 @@ Text Label 7600 3700 0    60   ~ 0
 VbatCOIL
 Text Label 7300 3350 0    60   ~ 0
 StartCOIL
-Text HLabel 4050 3000 0    60   Input ~ 0
-5V
 Text HLabel 4050 3850 0    60   Input ~ 0
 COILON
 Text HLabel 4050 4150 0    60   Input ~ 0
@@ -157,4 +156,6 @@ Connection ~ 5250 3000
 Wire Wire Line
 	4800 3050 4800 3000
 Connection ~ 4800 3000
+Text HLabel 4050 3000 0    60   Input ~ 0
+3V
 $EndSCHEMATC
