@@ -57,6 +57,8 @@ class Cappdata
   Ckeypress        m_kstates;
 
   bool             m_bquit;
+  pthread_t        m_threadserial;
+  pthread_mutex_t  m_datamutex;
 
   // Battery related
   double           m_last_time;
@@ -64,6 +66,7 @@ class Cappdata
   Cfake_battery    m_bats[CFGBATNUMBER];
   Cfake_AD7280A    m_fake_AD7280A;
   Cfake_charger    m_fake_charger;
+  Cfake_UART       m_fake_uart;
 
   bool             m_errorled;
   bool             m_balancingled;
@@ -73,4 +76,7 @@ class Cappdata
 
   int              m_run_current;
 };
+
+#define LOCK   pthread_mutex_lock(&papp->m_datamutex);
+#define UNLOCK pthread_mutex_unlock(&papp->m_datamutex);
 

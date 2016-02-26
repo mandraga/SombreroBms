@@ -12,5 +12,7 @@ Planed features:
 - Monitoring from a portable computer using a serial communication over USB.
 - Passive balancing (possibility for a heavy duty version for first balancing use).
 - Undervoltage events count per battery + worst value recording.
+- Powered from the battery pack.
 - 10 to 18 batteries.
 
+You can follow the development on www.sombrerobms.com

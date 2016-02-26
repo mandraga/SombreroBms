@@ -6,6 +6,11 @@
 #define ERROR_CODE_SHORT_CIRCUIT     3
 #define ERROR_CODE_HIGHT_CURRENT     4
 
+// EEPROM size
+#ifndef E2SIZE
+#define E2SIZE 512
+#endif
+
 #define ERROR_LOG_SIZE              16
 #define ERROR_LOG_START        (E2SIZE - ERROR_LOG_SIZE - 1)
 

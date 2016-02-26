@@ -6,15 +6,17 @@
 CC = g++
 INCLUDES = "/usr/include/"
 SDL2_INCLUDES="/usr/local/include/"
-FLAGS = -Wall -g -c -I$(INCLUDES) -I$(SDL2_INCLUDES)
+COMMONSRCINCLUDES=../../BMS_manager/
+FLAGS = -Wall -g -c -I$(INCLUDES) -I$(SDL2_INCLUDES) -I$(COMMONSRCINCLUDES)
 SDL2_DIR="/usr/local/lib/"
 LIBDIRS = -L$(OPENCL_DIR) -L$(SDL2_DIR)
 LIBS = -lSDL2 -lSDL2_ttf -lSDL2_image -lGL -lpthread -lm
-LIBS += -lSDL2_gfx
+#LIBS += -lSDL2_gfx
 
 OBJDIR=obj
 SRCDIR=.
 AVRSRCDIR=../
+COMMONSRCDIR=../../BMS_manager/
 EXE_NAME=simulation.bin
 
 clean:
@@ -38,6 +40,8 @@ OBJS += $(OBJDIR)/eeprom.o
 OBJS += $(OBJDIR)/fake_AD7280A.o
 OBJS += $(OBJDIR)/fake_battery.o
 OBJS += $(OBJDIR)/fake_charger.o
+OBJS += $(OBJDIR)/fake_uart.o
+OBJS += $(OBJDIR)/thrSerial.o
 OBJS += $(OBJDIR)/inout.o
 
 $(OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
@@ -46,11 +50,18 @@ $(OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 
 AVROBJS  = $(OBJDIR)/balancing.o
 AVROBJS += $(OBJDIR)/state_machine.o
+AVROBJS += $(OBJDIR)/serial.o
 
 $(AVROBJS): $(OBJDIR)/%.o : $(AVRSRCDIR)/%.c
 	@echo "-------- : $<"
 	$(CC) $(FLAGS) $< -o $@
 
-all: $(OBJS) $(AVROBJS)
+COMMONOBJS  = $(OBJDIR)/serialport.o
+
+$(COMMONOBJS): $(OBJDIR)/%.o : $(COMMONSRCDIR)/%.cpp
+	@echo "-------- : $<"
+	$(CC) $(FLAGS) $< -o $@
+
+all: $(OBJS) $(AVROBJS) $(COMMONOBJS)
 	$(CC) $(OBJS) $(AVROBJS) $(COMMONOBJS) $(LIBDIRS) $(LIBS) -o $(EXE_NAME)
 

@@ -3,8 +3,8 @@
 #include <list>
 #include <vector>
 #include <string>
+#include <termios.h>
 
-//#include <ctime>
 #include <sys/time.h>
 #include <GL/gl.h>
 
@@ -24,6 +24,8 @@
 #include "fake_battery.h"
 #include "fake_AD7280A.h"
 #include "fake_charger.h"
+#include "serialport.h"
+#include "fake_uart.h"
 //
 #include "app.h"
 #include "sdlcalls.h"
@@ -139,6 +141,8 @@ Cappdata::Cappdata(int width, int height):
   m_bats[10].set_capa(CAPACITYMAH                   , 37200);
 #endif //BREAK_BALANCE
 
+  pthread_mutex_init(&m_datamutex, NULL);
+
   init();
 }
 
@@ -146,6 +150,7 @@ Cappdata::~Cappdata()
 {
   int xpos, ypos;
 
+  pthread_mutex_destroy(&m_datamutex);
   // Close everything related to ui
   TTF_CloseFont(m_font);
   TTF_Quit();

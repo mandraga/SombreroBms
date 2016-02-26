@@ -28,7 +28,7 @@ int CSerialPort::open_serial_port(char *devicename)
       m_fd = NULL;
       return 0;
     }
-  // Lecture des parametres
+  // Read the tty parameters
   tcgetattr(m_fd, &tty);
   tcgetattr(m_fd, &old);
   
@@ -51,6 +51,7 @@ int CSerialPort::open_serial_port(char *devicename)
   tty.c_cc[VTIME]  =  5;                  // 0.5 seconds read timeout
   tty.c_cflag     |=  CREAD | CLOCAL;     // turn on READ & ignore ctrl lines
   */
+  tty.c_cc[VMIN]   =  1;                  // read doesn't block
   tcsetattr(m_fd, TCSANOW, &tty);
   return 1;
 }
@@ -63,6 +64,24 @@ void CSerialPort::close_serial_port()
       tcsetattr(fd, TCSANOW, &m_old);
       close(m_fd);
     }
+}
+
+bool CSerialPort::read_next_byte(char *byte)
+{
+  char c[8];
+  int  readbytes;
+
+  if (m_fd != NULL)
+    {
+      readbytes = read(m_fd, c, 1);
+      if (readbytes > 0)
+	{
+	  *byte = c;
+	  printf("%c", c);
+	  return true;
+	}
+    }
+  return false;
 }
 
 int CSerialPort::read_serial_port(char *data, int maxsize)
@@ -103,3 +122,4 @@ int CSerialPort::write_serial_port(char *data, int size)
     }
   return strsize;
 }
+

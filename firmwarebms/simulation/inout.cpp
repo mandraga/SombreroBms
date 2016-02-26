@@ -4,6 +4,7 @@
 #include <list>
 #include <vector>
 #include <string>
+#include <termios.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -16,6 +17,8 @@
 #include "fake_battery.h"
 #include "fake_AD7280A.h"
 #include "fake_charger.h"
+#include "serialport.h"
+#include "fake_uart.h"
 //
 #include "gfxareas.h"
 #include "keypress.h"
@@ -84,7 +87,7 @@ void get_IBAT(t_pack_variable_data *pappdata)
   pappdata->c_discharge = g_papp->get_run_current();
 }
 
-void set_gauge_out(unsigned long SOC, unsigned long fullcharge, char bat_low, char charging)
+void set_gauge_out(unsigned long SOC, unsigned long fullcharge, char bat_low, char charging, char fail)
 {
 }
 

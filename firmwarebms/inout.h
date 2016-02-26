@@ -13,4 +13,4 @@ void get_VBAT(t_ad7280_state *p_ad7280, t_pack_variable_data *pappdata);
 void get_IBAT(t_pack_variable_data *pappdata);
 int  get_charger_ON(void);
 
-void set_gauge_out(unsigned long SOC, unsigned long fullcharge, char bat_low, char charging);
+void set_gauge_out(unsigned long SOC, unsigned long fullcharge, char bat_low, char charging, char failure);

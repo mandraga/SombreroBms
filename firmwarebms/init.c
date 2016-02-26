@@ -19,6 +19,7 @@
 
 #include "env.h"
 #include "main.h"
+#include "uart.h"
 #include "serial.h"
 #include "adc.h"
 #include "spi.h"
@@ -77,8 +78,6 @@ void enter_idle_mode(void)
 // Initialises the SPI devices and configures the interrupts
 void init()
 {
-  int i;
-
   // IO ports
   // Port B:
   DDRB  = 0x00 | (1 << CSBAT) | (1 << BUZZER) | (1 << PD) | (1 << MOSI) | (1 << SCLK);

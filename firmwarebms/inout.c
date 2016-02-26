@@ -89,7 +89,7 @@ void get_IBAT(t_pack_variable_data *pappdata)
   pappdata->c_discharge = (1000L * shunt_uV / SHUNT_VAL); // mA for the interval SAMPLING_INTERVAL_MS;
 }
 
-// Sets an IO port to 0, the duration of the 0 interval gives tha value to be displayed on the custom gauge.
+// Sets an IO port to 0, the duration of the LOW interval gives tha value to be displayed on the custom gauge.
 // States transmited:
 // 1 to 11: bar graph values from blinking 1 to 10
 // 12:      security state, blink fast

@@ -41,7 +41,8 @@
 
 
 # MCU name
-MCU = atmega168pa
+#MCU = atmega168pa
+MCU = atmega168p
 
 # Processor frequency.
 #     This will define a symbol, F_CPU, in all source code files equal to the 
@@ -79,7 +80,7 @@ OBJDIR = .
 
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = $(TARGET).c AD7280A.c serial.c state_machine.c init.c adc.c inout.c eeprom.c thermistor.c balancing.c spi.c
+SRC = $(TARGET).c AD7280A.c serial.c state_machine.c init.c adc.c inout.c eeprom.c thermistor.c balancing.c spi.c uart.c
 
 # List C++ source files here. (C dependencies are automatically generated.)
 CPPSRC = 

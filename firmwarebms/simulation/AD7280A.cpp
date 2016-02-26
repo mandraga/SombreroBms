@@ -28,6 +28,7 @@
 #include <list>
 #include <vector>
 #include <string>
+#include <termios.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -45,6 +46,8 @@
 #include "fake_battery.h"
 #include "fake_AD7280A.h"
 #include "fake_charger.h"
+#include "serialport.h"
+#include "fake_uart.h"
 //
 #include "app.h"
 

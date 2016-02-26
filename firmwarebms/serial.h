@@ -160,6 +160,9 @@ typedef struct s_serialport
   int          batcounter;
 }              t_serialport;
 
-void uart_puts(char *str);
-void uart_init(unsigned int baudrate);
+void init_serial_vars(void);
+
+// Only used in the simulator to test the serial link
+char change_TX_state(char TXstate);
+void process_serial_command(void);
 

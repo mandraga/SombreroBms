@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <string>
 #include <list>
+#include <termios.h>
 
 #include <time.h>
 #include <pthread.h>
@@ -19,10 +20,13 @@
 #include "fake_battery.h"
 #include "fake_AD7280A.h"
 #include "fake_charger.h"
+#include "serialport.h"
+#include "fake_uart.h"
 //
 #include "gfxareas.h"
 #include "keypress.h"
 #include "app.h"
+#include "thrSerial.h"
 #include "sdlcalls.h"
 
 using namespace std;
@@ -57,7 +61,9 @@ int main(int argc, char **argv)
   // Central class
   app = new Cappdata(width, height);
   g_papp = app;
+  start_serial_thread(app);
   main_loop(app);
+  stop_serial_thread(app);
   delete app;
 }
 
