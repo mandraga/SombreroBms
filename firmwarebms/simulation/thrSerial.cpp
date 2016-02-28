@@ -37,7 +37,7 @@ extern t_serialport g_serial;
 
 int g_thrSerialretval;
 
-Cappdata *g_papp;
+extern Cappdata *g_papp;
 
 // Do not send the byte, just send everything
 void send_first_byte(char byte)

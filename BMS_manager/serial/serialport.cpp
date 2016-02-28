@@ -3,12 +3,13 @@
 #include <stdlib.h>
 #include <termios.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "serialport.h"
 
 CSerialPort::CSerialPort()
 {
-  m_fd = NULL;
+  m_fd = 0;
 }
 
 CSerialPort::~CSerialPort()
@@ -25,20 +26,20 @@ int CSerialPort::open_serial_port(char *devicename)
   if ((m_fd = open(devicename, O_RDWR)) < 0)
     {
       perror(devicename);
-      m_fd = NULL;
+      m_fd = 0;
       return 0;
     }
   // Read the tty parameters
-  tcgetattr(m_fd, &tty);
-  tcgetattr(m_fd, &old);
+  tcgetattr(m_fd, &m_tty);
+  m_old = m_tty;
   
   // disconnect the line whatever
   //cfsetospeed(&tty, B0);
   //cfsetispeed(&tty, B0);
 
   // 9600 baud
-  cfsetospeed(&tty, B9600);
-  cfsetispeed(&tty, B9600);
+  cfsetospeed(&m_tty, B9600);
+  cfsetispeed(&m_tty, B9600);
   
   /*
   tty.c_cflag     &=  ~PARENB;            // Make 8n1
@@ -51,17 +52,17 @@ int CSerialPort::open_serial_port(char *devicename)
   tty.c_cc[VTIME]  =  5;                  // 0.5 seconds read timeout
   tty.c_cflag     |=  CREAD | CLOCAL;     // turn on READ & ignore ctrl lines
   */
-  tty.c_cc[VMIN]   =  1;                  // read doesn't block
-  tcsetattr(m_fd, TCSANOW, &tty);
+  m_tty.c_cc[VMIN]   =  1;                  // read doesn't block
+  tcsetattr(m_fd, TCSANOW, &m_tty);
   return 1;
 }
 
 void CSerialPort::close_serial_port()
 {
-  if (m_fd != NULL)
+  if (m_fd != 0)
     {
       // On revient à l'ancien et on quitte
-      tcsetattr(fd, TCSANOW, &m_old);
+      tcsetattr(m_fd, TCSANOW, &m_old);
       close(m_fd);
     }
 }
@@ -71,13 +72,13 @@ bool CSerialPort::read_next_byte(char *byte)
   char c[8];
   int  readbytes;
 
-  if (m_fd != NULL)
+  if (m_fd != 0)
     {
       readbytes = read(m_fd, c, 1);
       if (readbytes > 0)
 	{
-	  *byte = c;
-	  printf("%c", c);
+	  *byte = c[0];
+	  printf("%c", c[0]);
 	  return true;
 	}
     }
@@ -86,15 +87,15 @@ bool CSerialPort::read_next_byte(char *byte)
 
 int CSerialPort::read_serial_port(char *data, int maxsize)
 {
-  char c[256];
+  char c;
   int  readbytes;
   int  strsize = 0;
 
-  if (m_fd != NULL)
+  if (m_fd != 0)
     {
       do
 	{
-	  readbytes = read(m_fd, c, 1);
+	  readbytes = read(m_fd, &c, 1);
 	  if (readbytes > 0)
 	    {
 	      data[strsize++] = c;
@@ -107,12 +108,12 @@ int CSerialPort::read_serial_port(char *data, int maxsize)
   return strsize;
 }
 
-int CSerialPort::write_serial_port(char *data, int size)
+int CSerialPort::write_serial_port(char *data, unsigned int size)
 {
   int    strsize = 0;
   size_t written;
 
-  if (m_fd != NULL)
+  if (m_fd != 0)
     {
       written = write(m_fd, data, size);
       if (written == size)

@@ -6,7 +6,7 @@
 CC = g++
 INCLUDES = "/usr/include/"
 SDL2_INCLUDES="/usr/local/include/"
-COMMONSRCINCLUDES=../../BMS_manager/
+COMMONSRCINCLUDES=../../BMS_manager/serial/
 FLAGS = -Wall -g -c -I$(INCLUDES) -I$(SDL2_INCLUDES) -I$(COMMONSRCINCLUDES)
 SDL2_DIR="/usr/local/lib/"
 LIBDIRS = -L$(OPENCL_DIR) -L$(SDL2_DIR)
@@ -16,7 +16,7 @@ LIBS = -lSDL2 -lSDL2_ttf -lSDL2_image -lGL -lpthread -lm
 OBJDIR=obj
 SRCDIR=.
 AVRSRCDIR=../
-COMMONSRCDIR=../../BMS_manager/
+COMMONSRCDIR=../../BMS_manager/serial/
 EXE_NAME=simulation.bin
 
 clean:

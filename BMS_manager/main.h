@@ -9,9 +9,6 @@ typedef struct                  s_app_data
   int                           xpos;
   int                           ypos;
   Fl_Window                    *pwindow;
-  std::string                   serial_port;
-  CSerialPort                  *pserial;
-  CSombreroBMS                 *pBMS;
   //Fl_Check_Button              *pcheckbox_record;
   //Fl_Check_Button              *pcheckbox_do_not;
   //Fl_Button                    *but_cancel;
@@ -20,8 +17,6 @@ typedef struct                  s_app_data
   std::vector<std::string>      vserial_ports;
   //Fl_Choice                    *input_device_choice;
   //Fl_Choice                    *output_device_choice;
-  pthread_t                     threadclient;
-  pthread_mutex_t               cond_serial_mutex;
-  //  pthread_cond_t                cond_devlist;
+  t_shared_data                 shared;
 }                               t_app_data;
 

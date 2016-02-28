@@ -11,37 +11,6 @@ CSombreroBMS::~CSombreroBMS()
 {
 }
 
-void CSombreroBMS::set_port(CSerialPort *ser_port)
-{
-  m_ser_port = ser_port;
-}
-
-void CSombreroBMS::ping(char *report, int buffer_size, int report_size)
-{
-  const inst cbuff_size = 4096;
-  char       data[cbuff_size];
-  int        i, read, rcv_bytes;
-  bool       bgo_on;
-
-  if (m_ser_port == NULL)
-    return ;
-  // Send the ping command
-  snprintf(data, cbuff_size, "ping\n");
-  m_ser_port->write_serial_port(data, strlen(data));
-  // Read back the shit
-  rcv_bytes = 0;
-  while (bgo_on)
-    {
-      read = m_ser_port->read_serial_port(data, cbuff_size);
-      rcv_bytes += read;
-      for (i = 0; i < rcv_bytes; i++)
-	{
-	  if (data[i] == '\0')
-	    bgo_on = false;
-	}
-    }
-}
-
 bool CSombreroBMS::get_next_line(char **pdata, int size, char *pcode, char *pvalue)
 {
   int   i;
@@ -50,8 +19,6 @@ bool CSombreroBMS::get_next_line(char **pdata, int size, char *pcode, char *pval
   char *pend;
   char *pcolumn;
 
-  if (m_ser_port == NULL)
-    return false;
   pbegin = pend = pcolumn = pd = *pdata;
   if (*pbegin == '\0')
     return false;
@@ -89,7 +56,7 @@ bool CSombreroBMS::get_next_line(char **pdata, int size, char *pcode, char *pval
   return true;
 }
 
-void CSombreroBMS::get_params(t_params *pparams)
+void CSombreroBMS::parse_BMS_params_string(t_params *pparams, char *string)
 {
   const inst cbuff_size = 4096;
   char       data[cbuff_size];
@@ -99,27 +66,8 @@ void CSombreroBMS::get_params(t_params *pparams)
   char       code[cbuff_size];
   char       value[cbuff_size];
 
-  if (m_ser_port == NULL)
-    return ;
-  // Send the ping command
-  snprintf(data, cbuff_size, "get_params\n");
-  m_ser_port->write_serial_port(data, strlen(data));
-  // Read back the shit
-  rcv_bytes = 0;
-  while (bgo_on)
-    {
-      read = m_ser_port->read_serial_port(data, cbuff_size);
-      rcv_bytes += read;
-      for (i = 0; i < rcv_bytes && bgo_on; i++)
-	{
-	  if (data[i] == '\0')
-	    {
-	      bgo_on = false;
-	    }
-	}
-    }
   // Read the structure
-  pdata = data;
+  pdata = string;
   while (get_next_line(&pdata, code, value))
     {
       if (sntrcmp(code, "setup date", cbuff_size))
@@ -204,7 +152,7 @@ void CSombreroBMS::get_params(t_params *pparams)
 #define PACK_REPORT 1
 #define ELMT_REPORT 2
 
-void CSombreroBMS::get_report(t_report *preport)
+void CSombreroBMS::parse_BMS_report_string(t_report *preport, char *string)
 {
   const inst cbuff_size = 4096;
   char       data[cbuff_size];
@@ -216,27 +164,8 @@ void CSombreroBMS::get_report(t_report *preport)
   int        state = PACK_REPORT;
   int        bat;
 
-  if (m_ser_port == NULL)
-    return ;
-  // Send the ping command
-  snprintf(data, cbuff_size, "get_report\n");
-  m_ser_port->write_serial_port(data, strlen(data));
-  // Read back the shit
-  rcv_bytes = 0;
-  while (bgo_on)
-    {
-      read = m_ser_port->read_serial_port(data, cbuff_size);
-      rcv_bytes += read;
-      for (i = 0; i < rcv_bytes && bgo_on; i++)
-	{
-	  if (data[i] == '\0')
-	    {
-	      bgo_on = false;
-	    }
-	}
-    }
   // Read the structure
-  pdata = data;
+  pdata = string;
   while (get_next_line(&pdata, code, value))
     {
       switch (state)
@@ -316,25 +245,19 @@ void CSombreroBMS::get_report(t_report *preport)
     }
 }
 
-void CSombreroBMS::set_param_int(char *valuename, int value)
+void CSombreroBMS::set_param_int(char *valuename, int value, char* str)
 {
   const inst cbuff_size = 4096;
   char       data[cbuff_size];
 
-  if (m_ser_port == NULL)
-    return ;
   snprintf(data, cbuff_size, "set_param -%s %d\n", valuename, value);
-  m_ser_port->write_serial_port(data, strlen(data));
 }
 
-void CSombreroBMS::set_param_str(char *valuename, char *pvalue)
+void CSombreroBMS::set_param_str(char *valuename, char *pvalue, char* str)
 {
   const inst cbuff_size = 4096;
   char       data[cbuff_size];
 
-  if (m_ser_port == NULL)
-    return ;
   snprintf(data, cbuff_size, "set_param -%s %s\n", valuename, pvalue);
-  m_ser_port->write_serial_port(data, strlen(data));
 }
 

@@ -8,13 +8,13 @@ public:
   ~CSerialPort();
 
   int  open_serial_port(char *devicename);
-  int  close_serial_port();
+  void close_serial_port();
   int  read_serial_port(char *data, int maxsize);
   bool read_next_byte(char *byte);
-  int  write_serial_port(char *data, int size);
+  int  write_serial_port(char *data, unsigned int size);
 
 private:
-  FILE m_fd;
-  struct termios m_tty, m_old;
+  int             m_fd;
+  struct termios  m_tty, m_old;
 };
 

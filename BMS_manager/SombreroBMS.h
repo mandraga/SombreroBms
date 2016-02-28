@@ -53,20 +53,23 @@ typedef struct s_report
 class CSombreroBMS
 {
  public:
-  CSombreroBMS(CSerialPort *ser_port);
+  CSombreroBMS();
   ~CSombreroBMS();
 
  public:
-  void set_port(CSerialPort *ser_port);
-  void ping(char *report, int buffer_size, int report_size);
-  void get_params(t_params *pparams);
-  void get_report(t_report *preport);
+
+  void parse_BMS_params_string(t_params *pparams, char *string);
+  void parse_BMS_report_string(t_report *preport, char *string);
 
   void set_param_int(char *valuename, int value);
   void set_param_str(char *valuename, char *pvalue);
 
  private:
-  CSerialPort *m_ser_port;
-  int          m_state;
+  bool get_next_line(char **pdata, int size, char *pcode, char *pvalue);
+
+ public:
+  t_report m_report;
+  t_params m_params;
+ private:
 };
 

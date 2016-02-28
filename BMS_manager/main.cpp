@@ -36,6 +36,7 @@
 #include "config_tab.h"
 #include "input_tab.h"
 #include "info_tab.h"
+#include "shared.h"
 #include "main.h"
 
 using namespace std;
@@ -117,8 +118,8 @@ int main(int argc, char **argv)
     app_data.path = string("./");
   app_data.bconnected = true;
   app_data.pwindow    = NULL;
-  app_data.pserial = NULL;
-  app_data.pBMS = new CSombreroBMS();
+  app_data.shared.pserial = NULL;
+  app_data.shared.pBMS = new CSombreroBMS();
   // Layout
   Fl_File_Icon::load_system_icons();
   read_window_pos(&app_data);
@@ -140,7 +141,7 @@ int main(int argc, char **argv)
   create_information_tab(20, 30, wx - 30, wy - 30, &app_data);
 
   // Setup tab
-  create_setup_tab(20, 30, wx - 30, wy - 30, &app_data);
+  create_setup_tab(20, 30, wx - 30, wy - 3hr0, &app_data);
   
   // Serial port tab
   create_serialport_tab(20, 30, wx - 30, wy - 30, &app_data);
@@ -153,6 +154,9 @@ int main(int argc, char **argv)
   window->end();
   window->callback(wincall);
   window->user_data(&app_data);
+  // Start a serial port thread so that every transfer is not blocking he interface
+  start_serial_thread(&app_data);
+  // Show the window
   argc = 1;
   window->show(argc, argv);
   //Fl::scheme("gtk+");

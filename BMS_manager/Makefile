@@ -47,6 +47,7 @@ LIBS += `fltk-config --use-images --ldflags`
 
 OBJDIR=obj
 SRCDIR=.
+SERDIR=./serial/
 appname=BMSmanager
 ifeq ($(OPERATINGON),__LINUX)
 EXE_NAME=$(appname)
@@ -73,12 +74,18 @@ OBJS += $(OBJDIR)/about_tab.o
 OBJS += $(OBJDIR)/battery_tab.o
 OBJS += $(OBJDIR)/charge_tab.o
 OBJS += $(OBJDIR)/port_tab.o
-OBJS += $(OBJDIR)/serialport.o
+OBJS += $(OBJDIR)/thrSerial.o
 
 $(OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 	@echo "-------- : $<"
 	$(CC) $(FLAGS) $< -o $@
 
-all: $(OBJS)
-	$(CC) $(OBJS) $(LIBDIRS) $(LIBS) -o $(OUTPUT_DIR)$(EXE_NAME) $(CONSOLEFLAG)
+SEROBJS = $(OBJDIR)/serialport.o
+
+$(SEROBJS): $(OBJDIR)/%.o : $(SERDIR)/%.cpp
+	@echo "-------- : $<"
+	$(CC) $(FLAGS) $< -o $@
+
+all: $(OBJS) $(SEROBJS)
+	$(CC) $(OBJS) $(SEROBJS) $(LIBDIRS) $(LIBS) -o $(OUTPUT_DIR)$(EXE_NAME) $(CONSOLEFLAG)
 

@@ -15,4 +15,4 @@ Planed features:
 - Powered from the battery pack.
 - 10 to 18 batteries.
 
-You can follow the development on www.sombrerobms.com
+You can follow the development at www.sombrerobms.com
