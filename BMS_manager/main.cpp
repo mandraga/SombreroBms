@@ -20,8 +20,12 @@
 #include <unistd.h>
 #include <string>
 #include <list>
+#include <vector>
+#include <termios.h>
 
 #include <time.h>
+
+#include <tinyxml.h>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
@@ -31,13 +35,35 @@
 #include <FL/Fl_Choice.H>
 #include <FL/Fl_Tabs.H>
 #include <FL/Fl_Check_Button.H>
+#include <FL/Fl_Text_Buffer.H>
+#include <FL/Fl_Gl_Window.H>
+#include <FL/Fl_Int_Input.H>
+#include <FL/Fl_Float_Input.H>
 
+// Linux and windows
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <GL/glew.h>
+//
+#include "gfxareas.h"
+#include "mesh.h"
+#include "gl2Dprimitives.h"
+
+#include "serial/serialport.h"
 #include "cfgfile.h"
-#include "config_tab.h"
-#include "input_tab.h"
+//
+#include "port_tab.h"
+#include "about_tab.h"
+#include "battery_tab.h"
+#include "charge_tab.h"
 #include "info_tab.h"
+#include "setup_tab.h"
+//
+#include "SombreroBMS.h"
 #include "shared.h"
 #include "main.h"
+#include "timer.h"
+#include "thrSerial.h"
 
 using namespace std;
 
@@ -46,16 +72,21 @@ void read_window_pos(t_app_data *papp_data)
   int x, y;
   Cxml_cfg_file_decoder *pd;
   string                 path;
+  string                 ser_name;
 
   papp_data->xpos = papp_data->ypos = 0;
   pd = new Cxml_cfg_file_decoder();
   path = pd->get_user_config_path();
-  if (pd->open_for_reading(path + string("dialogs/configFLTK/") + string(CONFIG_FILE_NAME)))
+  if (pd->open_for_reading(path + string(CONFIG_FILE_NAME)))
     {
       if (pd->read_window_position(&x, &y))
 	{
 	  papp_data->xpos = x;
 	  papp_data->ypos = y;
+	}
+      if (pd->read_serial_port_name(&ser_name))
+	{
+	  papp_data->ser_path = string(ser_name);
 	}
     }
   delete pd;
@@ -75,8 +106,10 @@ void save_coordinates(t_app_data *pappdata)
 
       pd->open_for_writing();
       pd->write_window_position(x, y);
+      if (pappdata->ser_path.size() > 0)
+	pd->write_serial_port_name(pappdata->ser_path);
       path = pd->get_user_config_path();
-      pd->write(path + string("dialogs/configFLTK/") + string(CONFIG_FILE_NAME));
+      pd->write(path + string(CONFIG_FILE_NAME));
       delete pd;
     }
 }
@@ -86,7 +119,8 @@ void close_function(void *pdata)
   t_app_data *papp_data = (t_app_data*)pdata;
 
   save_coordinates(papp_data);
-  delete app_data.pBMS;
+  stop_serial_thread(&papp_data->shared);
+  delete papp_data->shared.pBMS;
   papp_data->pwindow->hide(); // Close the window
 }
 
@@ -100,7 +134,7 @@ void wincall(Fl_Widget *pwi, void *pdata)
 void set_button(Fl_Button *pb, void* puser_data)
 {
   pb->type(FL_NORMAL_BUTTON);
-  pb->labelsize(21);
+  //pb->labelsize(15);
   pb->user_data(puser_data);
 }
 
@@ -109,39 +143,38 @@ int main(int argc, char **argv)
   int         wx, wy;
   int         border;
   Fl_Window  *window;
-  Fl_Tabs    *tabs;
   t_app_data  app_data;
 
-  if (argc > 1)
-    app_data.path = string(argv[1]);
-  else
-    app_data.path = string("./");
-  app_data.bconnected = true;
-  app_data.pwindow    = NULL;
+  TTF_Init();
+  //
+  app_data.path = string("./");
+  //
+  app_data.pwindow        = NULL;
   app_data.shared.pserial = NULL;
-  app_data.shared.pBMS = new CSombreroBMS();
+  app_data.shared.pBMS    = new CSombreroBMS();
   // Layout
   Fl_File_Icon::load_system_icons();
+  app_data.ser_path = string("");
   read_window_pos(&app_data);
   wx = 800;
   wy = 600;
-  window = new Fl_Window(app_data.xpos, app_data.ypos, wx, wy, "Settings");
+  window = new Fl_Window(app_data.xpos, app_data.ypos, wx, wy, "BMS manager");
   app_data.pwindow = window;
   window->begin();
   //
   border = 10;
-  tabs = new Fl_Tabs(border, border, wx - 2 * border, wy - 2 * border);
+  app_data.tabs = new Fl_Tabs(border, border, wx - 2 * border, wy - 2 * border);
+  // Information tab
+  create_information_tab(20, 30, wx - 30, wy - 30, &app_data);
+
   // Battery tab
-  create_battery_tab(20, 30, wx - 30, wy - 30, &app_data);
+  //create_battery_tab(20, 30, wx - 30, wy - 30, &app_data);
 
   // Charge tab
   create_charge_tab(20, 30, wx - 30, wy - 30, &app_data);
 
-  // Information tab
-  create_information_tab(20, 30, wx - 30, wy - 30, &app_data);
-
   // Setup tab
-  create_setup_tab(20, 30, wx - 30, wy - 3hr0, &app_data);
+  create_setup_tab(20, 30, wx - 30, wy - 30, &app_data);
   
   // Serial port tab
   create_serialport_tab(20, 30, wx - 30, wy - 30, &app_data);
@@ -149,13 +182,15 @@ int main(int argc, char **argv)
   // About tab
   create_about_tab(20, 30, wx - 30, wy - 30);
 
-  tabs->end();
+  app_data.tabs->end();
   //
   window->end();
   window->callback(wincall);
   window->user_data(&app_data);
   // Start a serial port thread so that every transfer is not blocking he interface
-  start_serial_thread(&app_data);
+  start_serial_thread(&app_data.shared);
+  // Start the tab refresh timer
+  install_timer(&app_data);
   // Show the window
   argc = 1;
   window->show(argc, argv);
@@ -163,4 +198,5 @@ int main(int argc, char **argv)
   return Fl::run();
   //return 0;
 }
+
 

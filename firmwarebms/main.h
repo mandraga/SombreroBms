@@ -67,6 +67,7 @@ typedef struct  s_eeprom_data
   long          bat_tmin;
   char          bat_elements;
   unsigned long full_charge;         // AH
+  unsigned long full_chargeV;        // mV when the pack voltage reaches this value, the charger is stoped and the charge is set at 100%
   int           max_current;         // Amp
   char          serial_number[9];    //  8 bytes             plus 0 end of string
   char          client[33];          // 32 bytes Client name plus 0 end of string
@@ -105,5 +106,6 @@ typedef struct  s_pack_variable_data
   int           charge_time_count_tenth;  // 1/10 second
   int           charge_time_count;        // Minutes
   int           idle_counter;             // Used to get out of the relapse state
+  char          prev_idle;                // Used to count the charge cycles
 }               t_pack_variable_data;
 

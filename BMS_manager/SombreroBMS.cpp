@@ -1,10 +1,13 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "serialport.h"
-#include "SomberoBMS.h"
+#include "SombreroBMS.h"
 
-CSombreroBMS::CSombreroBMS(CSerialPort *ser_port):
-  m_ser_port(ser_port)
+CSombreroBMS::CSombreroBMS()
 {
+  memset(&m_report, 0, sizeof(t_report));
+  memset(&m_params, 0, sizeof(t_params));
 }
 
 CSombreroBMS::~CSombreroBMS()
@@ -14,7 +17,7 @@ CSombreroBMS::~CSombreroBMS()
 bool CSombreroBMS::get_next_line(char **pdata, int size, char *pcode, char *pvalue)
 {
   int   i;
-  char  pd;
+  char *pd;
   char *pbegin;
   char *pend;
   char *pcolumn;
@@ -30,6 +33,11 @@ bool CSombreroBMS::get_next_line(char **pdata, int size, char *pcode, char *pval
       i++;
     }
   pend = &pd[i];
+  // Command limiter like reportBegin
+  if (pcolumn == pbegin)
+    {
+      pcolumn = pend;
+    }
   // next line
   *pdata = &pd[i + 1];
   // copy the code
@@ -39,13 +47,14 @@ bool CSombreroBMS::get_next_line(char **pdata, int size, char *pcode, char *pval
     }
   pcode[i] = '\0';
   // copy the value
-  pcolumn++;
-  while (pcolumn != pend && pcolumn == ' ')
+  if (pcolumn != pend)
+    pcolumn++;
+  while (pcolumn != pend && *pcolumn == ' ')
     {
       pcolumn++;
     }
   i = 0;
-  while (pcolumn != pend)
+  while (pcolumn != pend && i < size)
     {
       pvalue[i++] = *pcolumn;
       pcolumn++;
@@ -56,93 +65,98 @@ bool CSombreroBMS::get_next_line(char **pdata, int size, char *pcode, char *pval
   return true;
 }
 
+bool CSombreroBMS::is_equal(char *code, const char *value)
+{
+  int len;
+
+  len = strlen(value);
+  return strncmp(code, value, len) == 0;
+}
+
 void CSombreroBMS::parse_BMS_params_string(t_params *pparams, char *string)
 {
-  const inst cbuff_size = 4096;
-  char       data[cbuff_size];
-  int        i, read, rcv_bytes;
-  bool       bgo_on;
+  const int  cbuff_size = 4096;
   char      *pdata;
   char       code[cbuff_size];
   char       value[cbuff_size];
 
   // Read the structure
   pdata = string;
-  while (get_next_line(&pdata, code, value))
+  while (get_next_line(&pdata, cbuff_size, code, value))
     {
-      if (sntrcmp(code, "setup date", cbuff_size))
+      if (is_equal(code, "setup date"))
 	{
 	  strncpy(pparams->setupdate, value, SETUP_DATE_SIZE * sizeof(char));
 	}
-      if (sntrcmp(code, "charge", cbuff_size))
+      if (is_equal(code, "charge"))
 	{
 	  pparams->charge_percent = strtol(value, NULL, 10);
 	}
-      if (sntrcmp(code, "total capacity", cbuff_size))
+      if (is_equal(code, "total capacity"))
 	{
 	  pparams->total_capacity = strtol(value, NULL, 10);
 	}
-      if (sntrcmp(code, "Vbat", cbuff_size))
+      if (is_equal(code, "Vbat"))
 	{
-	  pparams->Vbat = strtof(value, NULL, 10);	  
+	  pparams->Vbat = strtof(value, NULL);	  
 	}
-      if (sntrcmp(code, "Bat elements", cbuff_size))
+      if (is_equal(code, "Bat elements"))
 	{
 	  pparams->BatElements = strtol(value, NULL, 10);	  
 	}
-      if (sntrcmp(code, "charge cycles", cbuff_size))
+      if (is_equal(code, "charge cycles"))
 	{
 	  pparams->ChargeCycles = strtol(value, NULL, 10);
 	}
-      if (sntrcmp(code, "total charging time", cbuff_size))
+      if (is_equal(code, "total charging time"))
 	{
 	  pparams->ChargeTimeTotal = strtol(value, NULL, 10);	  
 	}
-      if (sntrcmp(code, "Vmin", cbuff_size))
+      if (is_equal(code, "Vmin"))
 	{
-	  pparams->EltVmin = strtof(value, NULL, 10);
+	  pparams->EltVmin = strtof(value, NULL);
 	}
-      if (sntrcmp(code, "Vmax", cbuff_size))
+      if (is_equal(code, "Vmax"))
 	{
-	  pparams->EltVmax = strtof(value, NULL, 10);
+	  pparams->EltVmax = strtof(value, NULL);
 	}
-      if (sntrcmp(code, "MaxVbat", cbuff_size))
+      if (is_equal(code, "MaxVbat"))
 	{
-	  pparams->MaxVbat = strtof(value, NULL, 10);
+	  pparams->MaxVbat = strtof(value, NULL);
 	}
-      if (sntrcmp(code, "undervoltage events", cbuff_size))
+      if (is_equal(code, "undervoltage events"))
 	{
 	  pparams->undervoltageEvts = strtol(value, NULL, 10);
 	}
-      if (sntrcmp(code, "maxdischarge", cbuff_size))
+      if (is_equal(code, "maxdischarge"))
 	{
 	  pparams->maxdischarge = strtol(value, NULL, 10);
 	}
-      if (sntrcmp(code, "average discharge", cbuff_size))
+      if (is_equal(code, "average discharge"))
 	{
 	  pparams->avgdischarge = strtol(value, NULL, 10);
 	}
-      if (sntrcmp(code, "serial number", cbuff_size))
+      if (is_equal(code, "serial number"))
 	{
 	  strncpy(pparams->serialnumber, value, SERNUM_SIZE * sizeof(char));
 	}
-      if (sntrcmp(code, "client", cbuff_size))
+      if (is_equal(code, "client"))
 	{
 	  strncpy(pparams->client, value, CLIENT_STR_SIZE * sizeof(char));
 	}
-      if (sntrcmp(code, "uptime", cbuff_size))
+      if (is_equal(code, "uptime"))
 	{
 	  strncpy(pparams->uptime, value, UPTIME_STR_SIZE * sizeof(char));
 	}
-      if (sntrcmp(code, "mintemperature", cbuff_size))
+      if (is_equal(code, "mintemperature"))
 	{
 	  pparams->tmin = strtol(value, NULL, 10);
 	}
-      if (sntrcmp(code, "maxtemperature", cbuff_size))
+      if (is_equal(code, "maxtemperature"))
 	{
 	  pparams->tmax = strtol(value, NULL, 10);	  
 	}
-      if (sntrcmp(code, "temperature", cbuff_size))
+      if (is_equal(code, "temperature"))
 	{
 	  pparams->temperature = strtol(value, NULL, 10);
 	}
@@ -154,10 +168,7 @@ void CSombreroBMS::parse_BMS_params_string(t_params *pparams, char *string)
 
 void CSombreroBMS::parse_BMS_report_string(t_report *preport, char *string)
 {
-  const inst cbuff_size = 4096;
-  char       data[cbuff_size];
-  int        i, read, rcv_bytes;
-  bool       bgo_on;
+  const int  cbuff_size = 4096;
   char      *pdata;
   char       code[cbuff_size];
   char       value[cbuff_size];
@@ -166,43 +177,45 @@ void CSombreroBMS::parse_BMS_report_string(t_report *preport, char *string)
 
   // Read the structure
   pdata = string;
-  while (get_next_line(&pdata, code, value))
+  bat = 0;
+  while (get_next_line(&pdata, cbuff_size, code, value))
     {
       switch (state)
 	{
 	case PACK_REPORT:
 	  {
-	    if (sntrcmp(code, "Vbat", cbuff_size))
+	    if (is_equal(code, "Vb"))
 	      {
-		preport-> = strtof(value, NULL, 10);
+		preport->Vbat = strtof(value, NULL);
 	      }
-	    if (sntrcmp(code, "chrg", cbuff_size))
+	    if (is_equal(code, "chrg"))
 	      {
 		preport->charge_percent = strtol(value, NULL, 10);
+		printf("charge percent = %d   value=%s\n", preport->charge_percent, value);
 	      }
-	    if (sntrcmp(code, "chrgmAH", cbuff_size))
+	    if (is_equal(code, "chmAH"))
 	      {
 		preport->chargemAH = strtol(value, NULL, 10);
 	      }
-	    if (sntrcmp(code, "ImA", cbuff_size))
+	    if (is_equal(code, "ImA"))
 	      {
 		preport->currentmA = strtol(value, NULL, 10);
 	      }
-	    if (sntrcmp(code, "state", cbuff_size))
+	    if (is_equal(code, "State"))
 	      {
 		strncpy(preport->state, value, STATE_STR_SIZE * sizeof(char));
 	      }
-	    if (sntrcmp(code, "Elts", cbuff_size))
+	    if (is_equal(code, "Elts"))
 	      {
 		preport->elements = strtol(value, NULL, 10);
 	      }
-	    if (sntrcmp(code, "temp", cbuff_size))
+	    if (is_equal(code, "temp"))
 	      {
 		preport->temperature = strtol(value, NULL, 10);
 	      }
-	    if (sntrcmp(code, "batbegin", cbuff_size))
+	    if (is_equal(code, "batbegin"))
 	      {
-		bat = strtol(value, NULL, 10) - 1;
+		bat = strtol(value, NULL, 10);
 		state = ELMT_REPORT;
 	      }	    
 	  }
@@ -211,30 +224,30 @@ void CSombreroBMS::parse_BMS_report_string(t_report *preport, char *string)
 	  {
 	    if (bat >= 0 && bat < MAX_BAT_ELEMENTS)
 	      {
-		if (sntrcmp(code, "Vb", cbuff_size))
+		if (is_equal(code, "Vb"))
 		  {
-		    preport->elements[bat].Velement = strtof(value, NULL, 10);
+		    preport->element_array[bat].Velement = strtof(value, NULL);
 		  }
-		if (sntrcmp(code, "Lowest", cbuff_size))
+		if (is_equal(code, "Lowest"))
 		  {
-		    preport->elements[bat].Vlowest = strtof(value, NULL, 10);
+		    preport->element_array[bat].Vlowest = strtof(value, NULL);
 		  }
-		if (sntrcmp(code, "evt", cbuff_size))
+		if (is_equal(code, "evt"))
 		  {
-		    preport->elements[bat].events = strtol(value, NULL, 10);
+		    preport->element_array[bat].events = strtol(value, NULL, 10);
 		  }
-		if (sntrcmp(code, "avgchgt", cbuff_size))
+		if (is_equal(code, "avgchgt"))
 		  {
-		    preport->elements[bat].average_charging_time = strtol(value, NULL, 10);
+		    preport->element_array[bat].average_charging_time = strtol(value, NULL, 10);
 		  }
-		if (sntrcmp(code, "balan", cbuff_size))
+		if (is_equal(code, "balan"))
 		  {
-		    preport->elements[bat].balancing = (strtol(value, NULL, 10) != 0);
+		    preport->element_array[bat].balancing = (strtol(value, NULL, 10) != 0);
 		  }
 	      }
-	    if (sntrcmp(code, "batbegin", cbuff_size))
+	    if (is_equal(code, "batbegin"))
 	      {
-		bat = strtol(value, NULL, 10) - 1;
+		bat = strtol(value, NULL, 10);
 		state = ELMT_REPORT;
 	      }   
 	  }
@@ -245,19 +258,13 @@ void CSombreroBMS::parse_BMS_report_string(t_report *preport, char *string)
     }
 }
 
-void CSombreroBMS::set_param_int(char *valuename, int value, char* str)
+void CSombreroBMS::set_param_int(char *valuename, int value, char* str, int strsz)
 {
-  const inst cbuff_size = 4096;
-  char       data[cbuff_size];
-
-  snprintf(data, cbuff_size, "set_param -%s %d\n", valuename, value);
+  snprintf(str, strsz, "set_param -%s %d\n", valuename, value);
 }
 
-void CSombreroBMS::set_param_str(char *valuename, char *pvalue, char* str)
+void CSombreroBMS::set_param_str(char *valuename, char *pvalue, char* str, int strsz)
 {
-  const inst cbuff_size = 4096;
-  char       data[cbuff_size];
-
-  snprintf(data, cbuff_size, "set_param -%s %s\n", valuename, pvalue);
+  snprintf(str, strsz, "set_param -%s %s\n", valuename, pvalue);
 }
 

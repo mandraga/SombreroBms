@@ -185,7 +185,7 @@ void handle_input_events(Cappdata *app)
 	  break;
 	  // WM quit event occured
 	case SDL_QUIT:
-	  printf("Quit event receives\n");
+	  printf("Quit event received\n");
 	  app->quit();
 	  break;
 	/*

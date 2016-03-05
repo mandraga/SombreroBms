@@ -23,7 +23,6 @@
 
 #include <tinyxml.h>
 
-#include "audioapi.h"
 #include "cfgfile.h"
 
 using namespace std;
@@ -315,11 +314,10 @@ bool Cxml_cfg_file_decoder::read_window_size(int *w, int *h)
   return false;
 }
 
-void Cxml_cfg_file_decoder::read_freq_view_mode(bool &bpiano)
+bool Cxml_cfg_file_decoder::read_serial_port_name(std::string *ser_name)
 {
   string             ValueStr;
   TiXmlNode*         pnode;
-  int                v;
 
   pnode = m_pdoc->RootElement();
   //m_pdoc->Print(); 
@@ -328,134 +326,15 @@ void Cxml_cfg_file_decoder::read_freq_view_mode(bool &bpiano)
       if (pnode->Type() == TiXmlNode::TINYXML_ELEMENT)
 	{
 	  ValueStr = pnode->ValueStr();
-	  if (ValueStr == string("frequency_view"))
+	  if (ValueStr == string("ser_port_path"))
 	    {
-	      if (get_int_attribute(pnode, string("piano"), &v))
-		{
-		  bpiano = (v == 1);
-		}
-	    }
-	}
-      pnode = pnode->NextSiblingElement();
-    }
-}
-
-void Cxml_cfg_file_decoder::read_record_params(bool *pbrecord_at_start, bool *pbnotappend_to_saved)
-{
-  string             ValueStr;
-  TiXmlNode*         pnode;
-  int                v;
-
-  pnode = m_pdoc->RootElement();
-  //m_pdoc->Print(); 
-  while (pnode != NULL)
-    {
-      if (pnode->Type() == TiXmlNode::TINYXML_ELEMENT)
-	{
-	  ValueStr = pnode->ValueStr();
-	  if (ValueStr == string("Record_config"))
-	    {
-	      if (get_int_attribute(pnode, string("record_at_start"), &v))
-		{
-		  *pbrecord_at_start = (v == 1);
-		}
-	      if (get_int_attribute(pnode, string("do_not_append_on_opened"), &v))
-		{
-		  *pbnotappend_to_saved = (v == 1);
-		}
-	    }
-	}
-      pnode = pnode->NextSiblingElement();
-    }
-}
-
-void Cxml_cfg_file_decoder::read_sound_io_params(t_channel_select_strings *chs)
-{
-  string             ValueStr;
-  TiXmlNode*         pnode;
-  string             v;
-
-  pnode = m_pdoc->RootElement();
-  //m_pdoc->Print(); 
-  while (pnode != NULL)
-    {
-      if (pnode->Type() == TiXmlNode::TINYXML_ELEMENT)
-	{
-	  ValueStr = pnode->ValueStr();
-	  if (ValueStr == string("Sound_io_config"))
-	    {
-	      if (get_string_attribute(pnode, string("audio_api"), &v))
-		{
-		  chs->api_name = v;
-		}
-	      if (get_string_attribute(pnode, string("input_device"), &v))
-		{
-		  chs->in_device_name = v;
-		}
-	      if (get_string_attribute(pnode, string("output_device"), &v))
-		{
-		  chs->out_device_name = v;
-		}
-	    }
-	}
-      pnode = pnode->NextSiblingElement();
-    }
-}
-
-bool Cxml_cfg_file_decoder::read_music_path(std::string *pmusic_path)
-{
-  string             ValueStr;
-  TiXmlNode*         pnode;
-  string             v;
-
-  pnode = m_pdoc->RootElement();
-  //m_pdoc->Print(); 
-  while (pnode != NULL)
-    {
-      if (pnode->Type() == TiXmlNode::TINYXML_ELEMENT)
-	{
-	  ValueStr = pnode->ValueStr();
-	  if (ValueStr == string("MusicDirectory"))
-	    {
-	      if (get_string_attribute(pnode, string("music_dir"), &v))
-		{
-		  *pmusic_path = v;
+	      if (get_string_attribute(pnode, string("ser_path"), ser_name))
 		  return true;
-		}
 	    }
 	}
       pnode = pnode->NextSiblingElement();
     }
   return false;
-}
-
-void Cxml_cfg_file_decoder::read_edit_params(bool *pautobeam, bool *pchordfuse)
-{
-  string             ValueStr;
-  TiXmlNode*         pnode;
-  int                v;
-
-  pnode = m_pdoc->RootElement();
-  //m_pdoc->Print(); 
-  while (pnode != NULL)
-    {
-      if (pnode->Type() == TiXmlNode::TINYXML_ELEMENT)
-	{
-	  ValueStr = pnode->ValueStr();
-	  if (ValueStr == string("EditParams"))
-	    {
-	      if (get_int_attribute(pnode, string("autobeam"), &v))
-		{
-		  *pautobeam = (v == 1);
-		}
-	      if (get_int_attribute(pnode, string("chordfuse"), &v))
-		{
-		  *pchordfuse = (v == 1);
-		}
-	    }
-	}
-      pnode = pnode->NextSiblingElement();
-    }
 }
 
 bool Cxml_cfg_file_decoder::open_for_writing()
@@ -502,51 +381,11 @@ void Cxml_cfg_file_decoder::write_window_size(int w, int h)
    m_pdoc->LinkEndChild(pnew_element);  
 }
 
-void Cxml_cfg_file_decoder::write_freq_view_mode(bool piano)
+void Cxml_cfg_file_decoder::write_serial_port_name(std::string ser_name)
 {
    TiXmlElement *pnew_element;
 
-   pnew_element = new TiXmlElement("frequency_view");
-   pnew_element->SetAttribute("piano", (piano? 1 : 0));
-   m_pdoc->LinkEndChild(pnew_element);
-}
-
-void Cxml_cfg_file_decoder::write_record_params(bool brecord_at_start, bool bnotappend_to_saved)
-{
-   TiXmlElement *pnew_element;
-
-   pnew_element = new TiXmlElement("Record_config");
-   pnew_element->SetAttribute("record_at_start", (brecord_at_start? 1 : 0));
-   pnew_element->SetAttribute("do_not_append_on_opened", (bnotappend_to_saved? 1 : 0));
-   m_pdoc->LinkEndChild(pnew_element);
-}
-
-void Cxml_cfg_file_decoder::write_sound_io_params(t_channel_select_strings *chs)
-{
-   TiXmlElement *pnew_element;
-
-   pnew_element = new TiXmlElement("Sound_io_config");
-   pnew_element->SetAttribute("audio_api", chs->api_name);
-   pnew_element->SetAttribute("input_device", chs->in_device_name);
-   pnew_element->SetAttribute("output_device", chs->out_device_name);
-   m_pdoc->LinkEndChild(pnew_element);
-}
-
-void Cxml_cfg_file_decoder::write_music_path(std::string music_path)
-{
-   TiXmlElement *pnew_element;
-
-   pnew_element = new TiXmlElement("MusicDirectory");
-   pnew_element->SetAttribute("music_dir", music_path);
-   m_pdoc->LinkEndChild(pnew_element);
-}
-
-void Cxml_cfg_file_decoder::write_edit_params(bool bautobeam, bool bchordfuse)
-{
-   TiXmlElement *pnew_element;
-
-   pnew_element = new TiXmlElement("EditParams");
-   pnew_element->SetAttribute("autobeam", (bautobeam? 1 : 0));
-   pnew_element->SetAttribute("chordfuse", (bchordfuse? 1 : 0));
+   pnew_element = new TiXmlElement("ser_port_path");
+   pnew_element->SetAttribute("ser_path", ser_name);
    m_pdoc->LinkEndChild(pnew_element);
 }

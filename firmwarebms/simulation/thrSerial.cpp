@@ -44,6 +44,7 @@ void send_first_byte(char byte)
 {
   while (g_serial.TXstate != SER_STATE_IDLE && g_serial.outsize != 0)
     {
+      printf("-> Sending \"%s\"\n", g_serial.outbuffer);
       g_papp->m_fake_uart.send(g_serial.outbuffer, g_serial.outsize);
       g_serial.TXstate = change_TX_state(g_serial.TXstate);
     }
@@ -56,9 +57,10 @@ void* thr_serial(void *p_data)
   bool            brcv;
   char            byte;
 
-  g_papp = papp;
+  //g_papp = papp;
   g_thrSerialretval = 0;
   printf("Initialising the serial thread\n");
+  papp->m_fake_uart.init();
   LOCK;
   bquit = papp->m_bquit;
   UNLOCK;
@@ -71,16 +73,20 @@ void* thr_serial(void *p_data)
 	  g_serial.RXstate = SER_STATE_RECEIVE;
 	  g_serial.inbuffer[g_serial.inindex++] = byte;
 	  if (byte == '\n' ||
-	      g_serial.inindex >= g_serial.insize ||
-	      g_serial.inindex >= RCVSTRINGSZ)
+	      g_serial.inindex >= RCVSTRINGSZ || 
+	      byte == 0)
 	    {
-	      g_serial.RXstate = SER_STATE_IDLE;
+	      //g_serial.RXstate = SER_STATE_IDLE;
 	      if (byte == '\n' && g_serial.inindex < RCVSTRINGSZ) // Otherwise there is an error somewhere
 		{
+		  printf("-> Received \"%s\"\n", g_serial.inbuffer);
 		  g_serial.inbuffer[g_serial.inindex] = 0; // Add an end to form a string
-		  // Answer in this through "send_firs_byte"
+		  // Answer it through "send_firs_byte"
 		  process_serial_command();
 		}
+	      if (g_serial.inindex >= RCVSTRINGSZ)
+		printf("RCV buffer overflow\n");
+	      g_serial.inindex = 0;
 	      g_serial.RXstate = SER_STATE_IDLE;
 	    }
 	}
@@ -97,7 +103,7 @@ void start_serial_thread(Cappdata *app)
   int ret;
 
   ret = pthread_create(&app->m_threadserial, NULL,
-		       thr_serial, (void*)&app);
+		       thr_serial, (void*)app);
   if (ret)
     printf("Serial thread creation error.");
 }

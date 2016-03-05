@@ -51,6 +51,7 @@ $(OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 AVROBJS  = $(OBJDIR)/balancing.o
 AVROBJS += $(OBJDIR)/state_machine.o
 AVROBJS += $(OBJDIR)/serial.o
+AVROBJS += $(OBJDIR)/eeprom_functions.o
 
 $(AVROBJS): $(OBJDIR)/%.o : $(AVRSRCDIR)/%.c
 	@echo "-------- : $<"

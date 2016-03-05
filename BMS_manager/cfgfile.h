@@ -16,11 +16,7 @@ class Cxml_cfg_file_decoder
   bool open_for_reading(std::string file_name);
   bool read_window_position(int *x, int *y);
   bool read_window_size(int *x, int *y);
-  void read_freq_view_mode(bool &bpiano);
-  void read_record_params(bool *pbrecord_at_start, bool *pbnotappend_to_saved);
-  void read_sound_io_params(t_channel_select_strings *chs);
-  bool read_music_path(std::string *pmusic_path);
-  void read_edit_params(bool *pautobeam, bool *pchordfuse);
+  bool read_serial_port_name(std::string *ser_name);
   bool close();
 
   // Writing
@@ -29,11 +25,7 @@ class Cxml_cfg_file_decoder
 
   void write_window_position(int x, int y);
   void write_window_size(int x, int y);
-  void write_freq_view_mode(bool piano);
-  void write_record_params(bool brecord_at_start, bool bnotappend_to_saved);
-  void write_sound_io_params(t_channel_select_strings *chs);
-  void write_music_path(std::string music_path);
-  void write_edit_params(bool autobeam, bool chordfuse);
+  void write_serial_port_name(std::string ser_name);
 
  private:
   bool get_int_attribute(TiXmlNode* pnode, std::string name, int *pvalue);

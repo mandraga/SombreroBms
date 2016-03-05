@@ -443,7 +443,7 @@ void Cappdata::render_bats()
       //
       pw->get_pos(&pos);
       pw->get_dim(&dim);
-      sprintf(arr, "charge: %f", m_bats[i].m_charge);
+      sprintf(arr, "%d  charge: %f", i + 1, m_bats[i].m_charge);
       rendertext(pos, tcolor, arr);
       pos.y += 20;
       sprintf(arr, "V: %d,%d", m_bats[i].get_mV() / 1000, m_bats[i].get_mV() % 1000);

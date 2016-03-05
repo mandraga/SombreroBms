@@ -3,7 +3,7 @@
 #include <FL/Fl_Text_Display.H>
 #include <FL/Fl_Text_Buffer.H>
 
-void create_baterry_tab(int x, int y, int w, int h)
+void create_battery_tab(int x, int y, int w, int h, void *appdata)
 {
   int              border;
   Fl_Text_Display *ptext;
@@ -15,7 +15,7 @@ void create_baterry_tab(int x, int y, int w, int h)
     ptext = new Fl_Text_Display(x + border, y + border, w - 3 * border, h - 3 * border);
     pbuff = new Fl_Text_Buffer();
     ptext->buffer(pbuff);
-    pbuff->text("\n\n"
+    pbuff->text("\nReserved\n"
 		"\n");
   }
   group1->end();

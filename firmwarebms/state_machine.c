@@ -176,7 +176,11 @@ void State_machine()
 	if (all_under_threshold() && !battery_full())
 	  {
 	    g_appdata.charging_started = 1; // Used ot display a progress animation on the gauge
-	    inc_charge_cylces_EEPROM();
+	    if (g_appdata.prev_idle)
+	      {
+		inc_charge_cylces_EEPROM();
+		g_appdata.prev_idle = 0;
+	      }
 	    g_appdata.charge_time_count_tenth = g_appdata.charge_time_count = 0;
 	    g_appdata.app_state = STATE_CHARGING;
 	    break;
@@ -229,7 +233,10 @@ void State_machine()
     case STATE_IDLE:
       {
 	if (chargeron != 0)
-	  g_appdata.app_state = STATE_CHARGEON;
+	  {
+	    g_appdata.prev_idle = 1;
+	    g_appdata.app_state = STATE_CHARGEON;
+	  }
 	else
 	  {
 	    if (VBAT_low)

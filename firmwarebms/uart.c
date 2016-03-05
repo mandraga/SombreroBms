@@ -48,7 +48,6 @@ ISR(USART_RX_vect, ISR_BLOCK)
   g_serial.RXstate = SER_STATE_RECEIVE;
   g_serial.inbuffer[g_serial.inindex++] = received;
   if (received == '\n' ||
-      g_serial.inindex >= g_serial.insize ||
       g_serial.inindex >= RCVSTRINGSZ)
     {
       g_serial.RXstate = SER_STATE_IDLE;
@@ -57,6 +56,7 @@ ISR(USART_RX_vect, ISR_BLOCK)
 	  g_serial.inbuffer[g_serial.inindex] = 0; // Add an end to form a string
 	  process_serial_command();
 	}
+      g_serial.inindex = 0;
       g_serial.RXstate = SER_STATE_IDLE;
     }
 }

@@ -1,42 +1,101 @@
+#include <string>
+#include <list>
+#include <vector>
+#include <termios.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
+#include <time.h>
+#include <tinyxml.h>
+
+#include <FL/Fl_Button.H>
 #include <FL/Fl_Group.H>
+#include <FL/Fl_Choice.H>
+#include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Text_Display.H>
 #include <FL/Fl_Text_Buffer.H>
+#include <FL/Fl_Tabs.H>
+#include <FL/Fl_Gl_Window.H>
+#include <FL/Fl_Int_Input.H>
+#include <FL/Fl_Float_Input.H>
 
+// Linux and windows
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <GL/glew.h>
+//
+#include "gfxareas.h"
+#include "mesh.h"
+#include "gl2Dprimitives.h"
+
+#include "serial/serialport.h"
+#include "cfgfile.h"
+//
+#include "charge_tab.h"
+#include "info_tab.h"
+//
 #include "env.h"
+#include "SombreroBMS.h"
+#include "shared.h"
+#include "main.h"
 
 using namespace std;
 
-void create_information_tab(int x, int y, int w, int h, void *app_data)
+// FIXME reorder the includes so that void will be the real type and not void
+void update_information_tab(void *app_data)
 {
-  t_app_data      *papp_data = (t_app_data*)pdata;
-  int              border;
-  Fl_Text_Display *ptext;
-  Fl_Text_Buffer  *pbuff;
+  t_app_data      *papp_data = (t_app_data*)app_data;
+  t_shared_data   *pshared = &papp_data->shared;
   t_params         BMSparams;
   char             text[4096];
   string           out;
 
-  Fl_Group *group1 = new Fl_Group(x, y, w, h, "info");
+  // Get the text from the BMS
+  LOCK;
+  BMSparams = papp_data->shared.pBMS->m_params;
+  UNLOCK;
+  // Print them
+  if (strlen(pshared->bms_version) == 0)
+    {
+      LOCK;
+      if (papp_data->shared.pserial == NULL)
+	sprintf(text, "\n  Configure the serial port.\n");
+      else
+	sprintf(text, "\n  No BMS was detected.\n\n");
+      UNLOCK;
+      out =  string(text);
+    }
+  else
+    {
+      sprintf(text, "\n\%s\n\n", pshared->bms_version);
+      out =  string(text);
+      sprintf(text, "\n\%s\n", pshared->param_msg);
+      //sprintf(text, "\n\%s\n", pshared->report_msg);
+      out += string(text);
+    }
+  //
+  papp_data->pinfo_buffer->text(out.c_str());
+}
+
+void create_information_tab(int x, int y, int w, int h, void *app_data)
+{
+  t_app_data      *papp_data = (t_app_data*)app_data;
+  int              border;
+  Fl_Text_Display *ptext;
+  Fl_Text_Buffer  *pbuff;
+
+  Fl_Group *group1 = new Fl_Group(x, y, w, h, "BMS Parameters");
   {
     border = TAB_BORDER;
     ptext = new Fl_Text_Display(x + border, y + border, w - 3 * border, h - 3 * border);
     pbuff = new Fl_Text_Buffer();
     ptext->buffer(pbuff);
-    // Get the text from the BMS
-    papp_data->pBMS->get_params(&BMSparams);
-    // Print them
-    sprintf(text, "\n\nSetup date: %s\nCharge: %d%c\ntotal capacity: %f\nVbat: %fV\n\n", BMSparams.setupdate, BMSparams.charge_percent, '%', BMSparams.total_capacity, BMSparams.Vbat);
-    out =  string(text);
-    sprintf(text, "\n\nBat elements: %d\nCharge cycles: %d\nTotal charging time: %dh\nVmin: %fV\nVmax: %fV\n", BMSparams.BatElements, BMSparams.ChargeCycles, BMSparams.ChargeTimeTotal, BMSparams.EltVmin, BMSparams.EltVmax);
-    out += string(text);
-    sprintf(text, "MaxVbat: %fV\nundervoltage events: %d\nmaxdischarge: %dA\naverage discharge: %dA\nserial number: %s\n", BMSparams.MaxVbat, BMSparams.undervoltageEvts, BMSparams.maxdischarge, BMSparams.avgdischarge, BMSparams.serialnumber);
-    out += string(text);
-    sprintf(text, "Client name: %s\nuptime: %s\nmintemperature: %d°C\nmaxtemperature: %d°C\ntemperature: %d°C\n", BMSparams.client, BMSparams.uptime, BMSparams.tmin, BMSparams.tmax, BMSparams.temperature);
-    out += string(text);
-    //
-    pbuff->text(out.c_str());
+    ptext->textcolor(fl_rgb_color(85, 170, 255));
+    ptext->color(fl_rgb_color(8, 7, 5));
+    papp_data->pinfo_buffer = pbuff;
+    update_information_tab(papp_data);
   }
   group1->end();
 }

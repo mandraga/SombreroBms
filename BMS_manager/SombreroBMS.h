@@ -23,7 +23,7 @@ typedef struct s_params
   int          avgdischarge;
   char         serialnumber[SERNUM_SIZE];
   char         client[CLIENT_STR_SIZE];
-  char         uptime[UPTIME_SIZE];
+  char         uptime[UPTIME_STR_SIZE];
   int          tmin;
   int          tmax;
   int          temperature;
@@ -47,7 +47,7 @@ typedef struct s_report
   char         state[STATE_STR_SIZE];
   int          elements;
   int          temperature;
-  t_batreport  elements[MAX_BAT_ELEMENTS]; // Ready for huge stacks
+  t_batreport  element_array[MAX_BAT_ELEMENTS]; // Ready for huge stacks
 }              t_report;
 
 class CSombreroBMS
@@ -61,8 +61,10 @@ class CSombreroBMS
   void parse_BMS_params_string(t_params *pparams, char *string);
   void parse_BMS_report_string(t_report *preport, char *string);
 
-  void set_param_int(char *valuename, int value);
-  void set_param_str(char *valuename, char *pvalue);
+  void set_param_int(char *valuename, int value, char *str, int strsz);
+  void set_param_str(char *valuename, char *pvalue, char *str, int strsz);
+
+  bool is_equal(char *code, const char *value);
 
  private:
   bool get_next_line(char **pdata, int size, char *pcode, char *pvalue);

@@ -21,7 +21,8 @@ void set_min_Vbat_EEPROM(char *str);
 void set_max_Vbat_EEPROM(char *str);
 void set_min_temperature_EEPROM(char *str);	  
 void set_max_temperature_EEPROM(char *str);
-void set_full_charge_value_mAH_EEPROM(char *str);	  
+void set_full_charge_value_mAH_EEPROM(char *str);
+void set_full_charge_value_mV_EEPROM(char *str);
 void set_serial_number_EEPROM(char *str);
 void set_client_name_EEPROM(char *str);
 

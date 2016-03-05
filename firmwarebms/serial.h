@@ -49,6 +49,7 @@
 //   tmin             -20
 //   tmax              75              // Use someting low, like 60°C
 //   fullcharge     60000              // In mAH
+//   fullVbat          36              // In Volts
 //   serial      12345678
 //   client      "golf des paquerettes"
 //
@@ -137,6 +138,8 @@
 #define SER_STATE_SEND_DEBUG            99
 #define SER_STATE_RECEIVE              100
 
+#define SER_STATE_ENDOF_MSG            101
+
 #define BAUDRATE   9600
 
 /*  Taken from Peter Fleury code, (it was too tigh here to use his library)
@@ -150,7 +153,7 @@ typedef struct s_serialport
 {
   char         RXstate;
   char         inbuffer[RCVSTRINGSZ];
-  char         insize;
+  //char         insize;
   int          inindex;
   char         TXstate;
   char         outbuffer[TRSTRINGSZ];

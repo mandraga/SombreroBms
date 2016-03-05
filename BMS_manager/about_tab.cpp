@@ -33,9 +33,11 @@ void create_about_tab(int x, int y, int w, int h)
     ptext = new Fl_Text_Display(x + border, y + border, w - 3 * border, h - 3 * border);
     pbuff = new Fl_Text_Buffer();
     ptext->buffer(pbuff);
-    pbuff->text("\n\n"
-		" BMS manager Fev 2016.\n"
-		" Part of SombreroBMS (battery management system)"
+    ptext->textcolor(fl_rgb_color(85, 170, 255));
+    ptext->color(fl_rgb_color(8, 7, 5));
+    pbuff->text("\n"
+		" BMS manager Feb 2016.\n"
+		" Part of SombreroBMS (battery management system)\n"
 		" Copyright 2016 Patrick Xavier Areny\n"
 		"\n"
 		"\n"
@@ -44,9 +46,10 @@ void create_about_tab(int x, int y, int w, int h)
 		"  Tinyxml    \tLee Thomason\n"
 		"  FLTK       \twww.fltk.org\n"
 		"  OpenGl     \tKhronos group\n"
-		"  FreeType   \twww.freetype.org\n"
+		"\n"
 		"\n"
 		" Used font: "
+		"\n"
 		"\n"
 		" VeraMono ttf, Bitstream, Inc.\n"
 		"\n");
