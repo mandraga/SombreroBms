@@ -11,7 +11,7 @@
 
 // Program space string macro replacement for the simulation
 #ifndef PSTR
-#define PSTR(A) A
+#define PSTR(A) ((char*)A)
 #endif
 
 extern t_pack_variable_data g_appdata;
@@ -27,9 +27,10 @@ void init_serial_vars(void)
   g_serial.TXstate = SER_STATE_IDLE;
   g_serial.inbuffer[0] = '\n';
   g_serial.inindex = 0;
-  //g_serial.insize = 0;
+  g_serial.inCRC = 0;
   g_serial.outbuffer[0] = '\n';
   g_serial.outindex = 0;
+  g_serial.outCRC = 0;
   g_serial.outsize = 0;
 }
 
@@ -69,7 +70,7 @@ void execute_config_command(char *command_buffer, char size)
   char found;
   char *str;
 
-  if (strncmp(command_buffer, "set_param", 9))
+  if (strncmp(command_buffer, PSTR("set_param"), 9))
     return;
   // Find the command type
   i = 0;
@@ -84,39 +85,39 @@ void execute_config_command(char *command_buffer, char size)
     }
   if (found)
     {
-      if (check_valuename("date", command_buffer, i, &str))
+      if (check_valuename(PSTR("date"), command_buffer, i, &str))
 	{
 	  set_install_date_EEPROM(str);
 	}
-      if (check_valuename("batVmin", command_buffer, i, &str))
+      if (check_valuename(PSTR("batVmin"), command_buffer, i, &str))
 	{
 	  set_min_Vbat_EEPROM(str);
 	}
-      if (check_valuename("batVmax", command_buffer, i, &str))
+      if (check_valuename(PSTR("batVmax"), command_buffer, i, &str))
 	{
 	  set_max_Vbat_EEPROM(str);
 	}
-      if (check_valuename("tmin", command_buffer, i, &str))
+      if (check_valuename(PSTR("tmin"), command_buffer, i, &str))
 	{
 	  set_min_temperature_EEPROM(str);
 	}
-      if (check_valuename("tmax", command_buffer, i, &str))
+      if (check_valuename(PSTR("tmax"), command_buffer, i, &str))
 	{
 	  set_max_temperature_EEPROM(str);
 	}
-      if (check_valuename("fullcharge", command_buffer, i, &str))
+      if (check_valuename(PSTR("fullcharge"), command_buffer, i, &str))
 	{
 	  set_full_charge_value_mAH_EEPROM(str);	  
 	}
-      if (check_valuename("fullVbat", command_buffer, i, &str))
+      if (check_valuename(PSTR("fullVbat"), command_buffer, i, &str))
 	{
 	  set_full_charge_value_mV_EEPROM(str);	  
 	}
-      if (check_valuename("serial", command_buffer, i, &str))
+      if (check_valuename(PSTR("serial"), command_buffer, i, &str))
 	{
 	  set_serial_number_EEPROM(str);
 	}
-      if (check_valuename("client", command_buffer, i, &str))
+      if (check_valuename(PSTR("client"), command_buffer, i, &str))
 	{
 	  set_client_name_EEPROM(str);
 	}
@@ -127,17 +128,17 @@ void process_serial_command(void)
 {
   // Send the first line of the report message, the interrupt at the end of the byte
   // transmission will send the other lines.
-  if (strcmp("get_report\n", g_serial.inbuffer) == 0)
+  if (strcmp(PSTR("get_report\n"), g_serial.inbuffer) == 0)
     {
       snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("bmsReportBegin\n"));
       g_serial.TXstate = SER_STATE_SEND_REPORT_VB;
     }
-  if (strcmp("ping\n", g_serial.inbuffer) == 0)
+  if (strcmp(PSTR("ping\n"), g_serial.inbuffer) == 0)
     {
       snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("Sombrero BMS C2015-2016 Vreemdelabs.com\n"));
       g_serial.TXstate = SER_STATE_SEND_PING1;
     }
-  if (strcmp("get_params\n", g_serial.inbuffer) == 0)
+  if (strcmp(PSTR("get_params\n"), g_serial.inbuffer) == 0)
     {
       snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("setup date: %d/%d/%d\n"),
 	       g_edat.install_date_day,
@@ -146,7 +147,7 @@ void process_serial_command(void)
       g_serial.TXstate = SER_STATE_SEND_DATE;
     }
   // This is a configuration command
-  if (strncmp("set_param", g_serial.inbuffer, strlen("set_param")) == 0)
+  if (strncmp(PSTR("set_param"), g_serial.inbuffer, strlen("set_param")) == 0)
     {
       execute_config_command(g_serial.inbuffer, g_serial.inindex);
     }
@@ -211,7 +212,8 @@ char change_TX_state(char TXstate)
   switch (TXstate)
     {
     case SER_STATE_IDLE:
-	g_serial.outsize = 0;
+      g_serial.outsize = 0;
+      g_serial.outCRC = 0;
       nextState = SER_STATE_IDLE;
       break;
     case SER_STATE_SEND_DEBUG:
@@ -233,8 +235,9 @@ char change_TX_state(char TXstate)
       break;
     case SER_STATE_SEND_PING3:
       {
-	g_serial.outbuffer[0] = 0;
-	g_serial.outsize = 1;
+	g_serial.outbuffer[0] = g_serial.outCRC;
+	g_serial.outbuffer[1] = '\0';
+	g_serial.outsize = 2;
 	nextState = SER_STATE_ENDOF_MSG;
       }
       break;
@@ -376,8 +379,9 @@ char change_TX_state(char TXstate)
       break;
     case SER_STATE_SEND_HITEMP:
       {
-	g_serial.outbuffer[0] = 0;
-	g_serial.outsize = 1;
+	g_serial.outbuffer[0] = g_serial.outCRC;
+	g_serial.outbuffer[1] = '\0';
+	g_serial.outsize = 2;
 	nextState = SER_STATE_ENDOF_MSG; // Finished
       }
       break;
@@ -522,8 +526,9 @@ char change_TX_state(char TXstate)
       break;
     case SER_STATE_SEND_REPORT_FINISHED:
       {
-	g_serial.outbuffer[0] = 0;
-	g_serial.outsize = 1;
+	g_serial.outbuffer[0] = g_serial.outCRC;
+	g_serial.outbuffer[1] = '\0';
+	g_serial.outsize = 2;
 	nextState = SER_STATE_ENDOF_MSG;
       }
       break;
@@ -532,6 +537,57 @@ char change_TX_state(char TXstate)
       g_serial.outsize = 0;
       nextState = SER_STATE_IDLE;
     }
-  g_serial.outsize = (nextState == SER_STATE_ENDOF_MSG)? 1 : strlen(g_serial.outbuffer);
+  g_serial.outsize = (nextState == SER_STATE_ENDOF_MSG)? g_serial.outsize : strlen(g_serial.outbuffer);
   return nextState;
 }
+
+void serial_RX_Ir(char received)
+{
+  switch (g_serial.RXstate)
+    {
+    case SER_STATE_IDLE:
+    case SER_STATE_RECEIVE:
+      {
+	g_serial.inbuffer[g_serial.inindex++] = received;
+	g_serial.inCRC = g_serial.inCRC ^ received;
+	if (received == '\n')
+	  {
+	    g_serial.inbuffer[g_serial.inindex] = 0; // Add an end to form a string
+	    g_serial.RXstate = SER_STATE_CRC;
+	  }
+	if (g_serial.inindex >= RCVSTRINGSZ)
+	  {
+	    g_serial.inCRC = 0;
+	    g_serial.inindex = 0;
+	    g_serial.RXstate = SER_STATE_IDLE;
+	  }
+      }
+      break;
+    case SER_STATE_CRC:
+      {
+	if (g_serial.inCRC == received)
+	  {
+	    g_serial.RXstate = SER_STATE_WAIT_ENDOF_MESSAGE;
+	  }
+	else
+	  {
+	    g_serial.inCRC = 0;
+	    g_serial.inindex = 0;
+	    g_serial.RXstate = SER_STATE_IDLE;
+	  }
+      }
+      break;
+    case SER_STATE_WAIT_ENDOF_MESSAGE:
+      {
+	process_serial_command();
+      }
+    default:
+      {
+	g_serial.inCRC = 0;
+	g_serial.inindex = 0;
+	g_serial.RXstate = SER_STATE_IDLE;
+      }
+      break;
+    }
+}
+

@@ -145,8 +145,10 @@
 
 #define SER_STATE_SEND_DEBUG            99
 #define SER_STATE_RECEIVE              100
+#define SER_STATE_CRC                  101
+#define SER_STATE_WAIT_ENDOF_MESSAGE   102
 
-#define SER_STATE_ENDOF_MSG            101
+#define SER_STATE_ENDOF_MSG            120
 
 #define BAUDRATE   9600
 
@@ -157,22 +159,25 @@
  */
 #define UART_BAUD_SELECT(baudRate,xtalCpu) ((xtalCpu)/((baudRate)*16l)-1)
 
-typedef struct s_serialport
+typedef struct  s_serialport
 {
-  char         RXstate;
-  char         inbuffer[RCVSTRINGSZ];
-  //char         insize;
-  int          inindex;
-  char         TXstate;
-  char         outbuffer[TRSTRINGSZ];
-  char         outsize;
-  int          outindex;
-  int          batcounter;
-}              t_serialport;
+  char          RXstate;
+  char          inbuffer[RCVSTRINGSZ];
+  char          inCRC;
+  int           inindex;
+  char          TXstate;
+  char          outbuffer[TRSTRINGSZ];
+  char          outsize;
+  char          outCRC;
+  int           outindex;
+  int           batcounter;
+}               t_serialport;
 
 void init_serial_vars(void);
 
 // Only used in the simulator to test the serial link
 char change_TX_state(char TXstate);
 void process_serial_command(void);
+
+void serial_RX_Ir(char received);
 

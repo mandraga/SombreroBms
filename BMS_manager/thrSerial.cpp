@@ -61,6 +61,32 @@ void add_command_in_locked_area(eserial_command type, const char *command, t_sha
   pshared->request.push_back(rq);
 }
 
+char calculate_CRC(char *message, int length)
+{
+  int  i;
+  char CRC;
+
+  for (i  = 0, CRC = 0; i < length; i++)
+    {
+      CRC = CRC ^ message[i];
+    }
+  return CRC;
+}
+
+void add_crc(char *message)
+{
+  int  length;
+
+  length = strlen(message);
+  message[length] = calculate_CRC(message, length);
+  message[length + 1] = '\0';
+}
+
+bool check_crc(char *pmessage, int sz)
+{
+  return (calculate_CRC(pmessage, sz - 1) == pmessage[sz - 1]);
+}
+
 void send_command(t_serial_request *prq, t_shared_data *pshared)
 {
   char             byte;
@@ -83,6 +109,7 @@ void send_command(t_serial_request *prq, t_shared_data *pshared)
       {
 	while (pshared->pserial->read_next_byte(&byte)); // Empty the buffer
 	snprintf(message, MAX_MSG_SIZE, "ping\n");
+	add_crc(message);
 	pshared->pserial->write_serial_port(message, 1 + strlen(message));
 	ser_state = ser_waiting_response;
       }
@@ -91,6 +118,7 @@ void send_command(t_serial_request *prq, t_shared_data *pshared)
       {
 	while (pshared->pserial->read_next_byte(&byte)); // Empty the buffer
 	snprintf(message, MAX_MSG_SIZE, "get_params\n");
+	add_crc(message);
 	pshared->pserial->write_serial_port(message, 1 + strlen(message));
 	ser_state = ser_waiting_response;
       }
@@ -99,6 +127,7 @@ void send_command(t_serial_request *prq, t_shared_data *pshared)
       {
 	while (pshared->pserial->read_next_byte(&byte)); // Empty the buffer
 	snprintf(message, MAX_MSG_SIZE, "get_report\n");
+	add_crc(message);
 	pshared->pserial->write_serial_port(message, 1 + strlen(message));
 	ser_state = ser_waiting_response;
       }
@@ -106,6 +135,7 @@ void send_command(t_serial_request *prq, t_shared_data *pshared)
     case eprogram:
       {
 	snprintf(message, MAX_MSG_SIZE, "set_param %s\n", prq->command);
+	add_crc(message);
 	pshared->pserial->write_serial_port(message, 1 + strlen(message));
 	usleep(500000);
 	ser_state = ser_nothing;
@@ -130,6 +160,12 @@ void send_command(t_serial_request *prq, t_shared_data *pshared)
       if (byte == 0 && sz > 0)
 	{
 	  message[sz] = '\0';
+	  if (!check_crc(message, sz))
+	    {
+	      printf("Wrong CRC: %x / %x.\n", calculate_CRC(message, sz - 1), message[sz - 1]);
+	      return;
+	    }
+	  message[sz - 1] = '\0'; // Erase the CRC
 	  printf("<- Received a serial message: \"%s\".\n", message);
 	  LOCK;
 	  // Process the shit, like if it was a sewer pipe.

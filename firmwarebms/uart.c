@@ -45,20 +45,7 @@ ISR(USART_RX_vect, ISR_BLOCK)
   char received;
 
   received = UDR0;
-  g_serial.RXstate = SER_STATE_RECEIVE;
-  g_serial.inbuffer[g_serial.inindex++] = received;
-  if (received == '\n' ||
-      g_serial.inindex >= RCVSTRINGSZ)
-    {
-      g_serial.RXstate = SER_STATE_IDLE;
-      if (received == '\n' && g_serial.inindex < RCVSTRINGSZ) // Otherwise there is an error somewhere
-	{
-	  g_serial.inbuffer[g_serial.inindex] = 0; // Add an end to form a string
-	  process_serial_command();
-	}
-      g_serial.inindex = 0;
-      g_serial.RXstate = SER_STATE_IDLE;
-    }
+  serial_RX_Ir(received);
 }
 
 // TX interrupt
@@ -68,17 +55,25 @@ ISR(USART_TX_vect, ISR_BLOCK)
   if (g_serial.outindex < g_serial.outsize)
     {
       // Put data into buffer, sends the data
-      UDR0 = g_serial.outbuffer[g_serial.outindex++];
+      g_serial.outCRC = g_serial.outCRC ^ g_serial.outbuffer[g_serial.outindex];
+      UDR0 = g_serial.outbuffer[g_serial.outindex];
+      g_serial.outindex++;
     }
   else
     {
       g_serial.TXstate = change_TX_state(g_serial.TXstate);
       if (g_serial.TXstate != SER_STATE_IDLE && g_serial.outsize != 0)
-	UDR0 = g_serial.outbuffer[g_serial.outindex++];
+	{
+	  g_serial.outCRC = g_serial.outCRC ^ g_serial.outbuffer[g_serial.outindex];
+	  UDR0 = g_serial.outbuffer[g_serial.outindex];
+	  g_serial.outindex++;
+	}
     }
 }
 
 void send_first_byte(char byte)
 {
+  g_serial.outCRC = byte;
   UDR0 = byte;
 }
+
