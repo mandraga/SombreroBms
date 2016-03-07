@@ -9,6 +9,7 @@ typedef struct                  s_app_data
   std::string                   ser_path; // Serial port file descriptor
   int                           xpos;
   int                           ypos;
+  TTF_Font                     *pfont;
   Fl_Window                    *pwindow;
   //
   //Fl_Check_Button              *pcheckbox_do_not;
@@ -40,6 +41,7 @@ typedef struct                  s_app_data
   //
   Fl_Tabs                      *tabs;
   GLBatWindow                  *pGLBatWindow;
+  GLBatCurvWindow              *pGLBatCurvWindow;
   t_shared_data                 shared;
 }                               t_app_data;
 

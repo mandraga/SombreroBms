@@ -33,6 +33,7 @@
 #include "serial/serialport.h"
 #include "cfgfile.h"
 //
+#include "battery_tab.h"
 #include "charge_tab.h"
 #include "info_tab.h"
 //

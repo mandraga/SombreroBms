@@ -276,6 +276,7 @@ void State_machine()
       {
 	if (chargeron != 0)
 	  {
+	    g_appdata.prev_idle = 1; // More or less, but count a new charge cycle
 	    g_appdata.app_state = STATE_CHARGEON;
 	    break;
 	  }

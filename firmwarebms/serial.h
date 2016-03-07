@@ -22,7 +22,7 @@
 // charge: 80%
 // total capacity: 60AH
 // Vbat: 36,23V
-// Bat elements: 11
+// Elements: 11
 // charge cycles: 123
 // total charging time: 56h
 // Vmin: 2,9V
@@ -34,8 +34,10 @@
 // serial number: 12345678
 // client: "golf des paquerettes"       // 32 chars maximum
 // uptime: 0years 3days 5h
-// mintemperature: -20°C
-// maxtemperature: 60°C
+// max recorded temp: 40°C
+// max temperature: 60°C
+// min recorded temp: -4°C
+// min temperature: -20°C
 // temperature: 23°C
 // '\0'
 //
@@ -101,21 +103,27 @@
 #define SER_STATE_SEND_PING1             1
 #define SER_STATE_SEND_PING2             2
 #define SER_STATE_SEND_PING3             3
-#define SER_STATE_SEND_DATE              4
-#define SER_STATE_SEND_CHARGE            5
-#define SER_STATE_SEND_TOTALCAP          6
-#define SER_STATE_SEND_CHARGECYCLES      7
-#define SER_STATE_SEND_TOTALCHRGTIME     8
-#define SER_STATE_SEND_VMIN              9
-#define SER_STATE_SEND_VMAX             10
-#define SER_STATE_SEND_UNDERVOLTAGEEVTS 11
-#define SER_STATE_SEND_MAXDISCHARGE     12
-#define SER_STATE_SEND_SERIAL           13
-#define SER_STATE_SEND_CLIENT           14
-#define SER_STATE_SEND_UPTIME           15
-#define SER_STATE_SEND_MINT             16
-#define SER_STATE_SEND_MAXT             17
-#define SER_STATE_SEND_HITEMP           18
+
+#define SER_STATE_SEND_DATE             10
+#define SER_STATE_SEND_CHARGE           11
+#define SER_STATE_SEND_TOTALCAP         12
+#define SER_STATE_SEND_VBAT             13
+#define SER_STATE_SEND_ELEMENTS         14
+#define SER_STATE_SEND_CHARGECYCLES     15
+#define SER_STATE_SEND_TOTALCHRGTIME    16
+#define SER_STATE_SEND_VMAX             17
+#define SER_STATE_SEND_VMIN             18
+#define SER_STATE_SEND_MAX_VBAT         19
+#define SER_STATE_SEND_UNDERVOLTAGEEVTS 20
+#define SER_STATE_SEND_MAXDISCHARGE     21
+#define SER_STATE_SEND_SERIAL           22
+#define SER_STATE_SEND_CLIENT           23
+#define SER_STATE_SEND_UPTIME           24
+#define SER_STATE_SEND_MAXT_RECORD      25
+#define SER_STATE_SEND_MAXT             26
+#define SER_STATE_SEND_MINT_RECORD      27
+#define SER_STATE_SEND_MINT             28
+#define SER_STATE_SEND_HITEMP           29
 
 // A battery element counter is also used on top of the state
 #define SER_STATE_SEND_REPORT_START     50

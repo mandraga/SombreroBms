@@ -61,20 +61,20 @@ typedef struct  s_eeprom_data
   int           install_date_year;
   char          install_date_month;
   char          install_date_day;
-  unsigned long bat_maxv;            // mili volts
+  unsigned long bat_maxv;            // mV
   unsigned long bat_minv;
-  long          bat_tmax;            // temperature
-  long          bat_tmin;
+  int           bat_tmax;            // temperature °C
+  int           bat_tmin;
   char          bat_elements;
   unsigned long full_charge;         // AH
   unsigned long full_chargeV;        // mV when the pack voltage reaches this value, the charger is stoped and the charge is set at 100%
   int           max_current;         // Amp
-  char          serial_number[9];    //  8 bytes             plus 0 end of string
+  char          serial_number[10];   //  8 bytes             plus 0 end of string
   char          client[33];          // 32 bytes Client name plus 0 end of string
   // These are often programmed
   int           charge_cycles;
   unsigned long charge_time_minutes; // Total charging time
-  int           min_temperature;     // Extreme temperatures
+  int           min_temperature;     // Extreme temperatures °C
   int           max_temperature;
 }               t_eeprom_data;
 

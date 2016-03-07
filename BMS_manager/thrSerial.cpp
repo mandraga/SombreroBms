@@ -39,6 +39,7 @@
 #include "info_tab.h"
 #include "setup_tab.h"
 */
+#include "battery_tab.h"
 #include "charge_tab.h"
 //
 #include "SombreroBMS.h"

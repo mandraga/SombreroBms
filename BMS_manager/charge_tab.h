@@ -2,7 +2,7 @@
 class GLBatWindow : public Fl_Gl_Window
 {
 public:
-  GLBatWindow(int X, int Y, int W, int H, const char *L, void *m_pshared);
+  GLBatWindow(TTF_Font *pfont, int X, int Y, int W, int H, const char *L, void *m_pshared);
   ~GLBatWindow();
 
   void draw();
@@ -10,8 +10,11 @@ public:
 
 private:
 
- void draw_info_lines(int w, int h);
- void draw_batteries(float x, float y, float w, float h);
+  void  draw_info_lines(float x, int w, int h);
+  void  draw_battery(int i, float x, float y, float w, float h);
+  void  draw_batteries(float x, float y, float w, float h);
+  void  draw_batteries_thresholds(float x, float y, float w);
+  float V2pos(float Vbat, float maxv, float minv, float w);
 
  private:
   void            *m_pshared;

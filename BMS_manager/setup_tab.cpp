@@ -35,6 +35,7 @@
 #include "serial/serialport.h"
 #include "cfgfile.h"
 //
+#include "battery_tab.h"
 #include "charge_tab.h"
 #include "setup_tab.h"
 //
@@ -71,8 +72,8 @@ void client_name_callback(Fl_Widget *pwi, void *pdata)
 
   if (fl_choice("Do you really want to program the value?", fl_no, fl_yes, 0))
     {
-      strncpy(client_name, papp_data->input_client_name->value(), SERNUM_SIZE - 1);
-      client_name[SERNUM_SIZE - 1] = '\0';
+      strncpy(client_name, papp_data->input_client_name->value(), CLIENT_STR_SIZE - 1);
+      client_name[CLIENT_STR_SIZE - 1] = '\0';
       snprintf(command, MAX_MSG_SIZE, "-client \"%s\"", client_name);
       LOCK;
       add_command_in_locked_area(eprogram, command, pshared);
@@ -237,13 +238,13 @@ void create_setup_tab(int x, int y, int w, int h, void *pdata)
     set_button(papp_data->but_program_FullpackV, papp_data);
     papp_data->but_program_FullpackV->callback(full_pack_callback);
     //
-    papp_data->but_program_minV = new Fl_Button(start, YPOS, buttonw, buttonh, "Program");
-    set_button(papp_data->but_program_minV, papp_data);
-    papp_data->but_program_minV->callback(minV_callback);
-    //
     papp_data->but_program_maxV = new Fl_Button(start, YPOS, buttonw, buttonh, "Program");
     set_button(papp_data->but_program_maxV, papp_data);
     papp_data->but_program_maxV->callback(maxV_callback);
+    //
+    papp_data->but_program_minV = new Fl_Button(start, YPOS, buttonw, buttonh, "Program");
+    set_button(papp_data->but_program_minV, papp_data);
+    papp_data->but_program_minV->callback(minV_callback);
     //
     papp_data->but_program_minT = new Fl_Button(start, YPOS, buttonw, buttonh, "Program");
     set_button(papp_data->but_program_minT, papp_data);
@@ -265,8 +266,8 @@ void create_setup_tab(int x, int y, int w, int h, void *pdata)
     i++;
     papp_data->input_capacityAH = new Fl_Int_Input(start, YPOS, buttonw, buttonh, "Capacity AH");
     papp_data->input_FullpackV = new Fl_Float_Input(start, YPOS, buttonw, buttonh, "Full Voltage (charger stops + 100% charge)");
-    papp_data->input_minV = new Fl_Float_Input(start, YPOS, buttonw, buttonh, "Minimum battery V");
     papp_data->input_maxV = new Fl_Float_Input(start, YPOS, buttonw, buttonh, "Maximum battery V");
+    papp_data->input_minV = new Fl_Float_Input(start, YPOS, buttonw, buttonh, "Minimum battery V");
     papp_data->input_minT = new Fl_Int_Input(start, YPOS, buttonw, buttonh, "Min tempereature (like -5°C)");
     papp_data->input_minT->value("-1");
     papp_data->input_maxT = new Fl_Int_Input(start, YPOS, buttonw, buttonh, "Max tempereature (like 40°C)");

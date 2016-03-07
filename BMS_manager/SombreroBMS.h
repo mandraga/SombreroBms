@@ -42,13 +42,18 @@ typedef struct s_report
 {
   float        Vbat;
   int          charge_percent;
-  int          chargemAH;
+  float        chargeAH;
   int          currentmA;
   char         state[STATE_STR_SIZE];
   int          elements;
   int          temperature;
   t_batreport  element_array[MAX_BAT_ELEMENTS]; // Ready for huge stacks
 }              t_report;
+
+typedef struct s_batmeasurement
+{
+  float        Vbat[MAX_BAT_ELEMENTS];
+}              t_batmeasurement;
 
 class CSombreroBMS
 {
@@ -66,6 +71,10 @@ class CSombreroBMS
 
   bool is_equal(char *code, const char *value);
 
+  void add_history(t_batmeasurement *pm);
+  int  get_history_sz();
+  t_batmeasurement *get_hitory_elt(int elt);
+
  private:
   bool get_next_line(char **pdata, int size, char *pcode, char *pvalue);
 
@@ -73,5 +82,8 @@ class CSombreroBMS
   t_report m_report;
   t_params m_params;
  private:
+  std::vector<t_batmeasurement> m_Vbat_history;
+  t_batmeasurement m_tmpmeasure;
 };
+
 

@@ -88,8 +88,12 @@ void refresh_timer_callback(void *user_data)
       printf("Active tab: Batteries.\n");
       active_tab = tabcharge;
     }
+  if (strcmp("History", pactive_tab_widget->label()) == 0)
+    {
+      printf("Active tab: History.\n");
+      active_tab = tabhist;
+    }
   LOCK;
-  pshared->active_tab = active_tab;
   // If anything was updated then refresh the current tab
   iter = pshared->request.begin();
   while (iter != pshared->request.end())
@@ -102,15 +106,24 @@ void refresh_timer_callback(void *user_data)
       else
 	iter++;
     }
-  switch (pshared->active_tab)
+  switch (active_tab)
     {
+    case tabhist:
     case tabcharge:
       {
+	if (pshared->last_tab != active_tab && pshared->last_tab != tabparam)
+	  {
+	    add_command_in_locked_area(einformation, " ", pshared);
+	    usleep(100000);
+	  }
 	add_command_in_locked_area(ereport, " ", pshared);
 	if (bupdate)
 	  {
 	    UNLOCK;
-	    update_charge_tab(papp_data);
+	    if (active_tab == tabcharge)
+	      update_charge_tab(papp_data);
+	    else
+	      update_battery_tab(papp_data);
 	    LOCK;
 	  }
       }
@@ -127,7 +140,6 @@ void refresh_timer_callback(void *user_data)
 	  }
       }
       break;
-    case tabhist:
     case tabunknown:
     case tabport:
     case tababout:
@@ -135,6 +147,7 @@ void refresh_timer_callback(void *user_data)
     default:
       break;
     };
+  pshared->last_tab = active_tab;
   UNLOCK;
   Fl::repeat_timeout(REFRESHDELAYS, refresh_timer_callback, papp_data);
 }

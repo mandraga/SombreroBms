@@ -74,17 +74,15 @@ void set_full_charge_value_mV_EEPROM(char *str)
 
 void set_serial_number_EEPROM(char *str)
 {
-  int  i;
-  char end;
+  int i;
 
   if (*str == '"')
     str++;
-  for (i = 0, end = 0; i < 9; i++)
-    {
-      end = end || (str[i] == 0) || (str[i] == '"');
-      g_edat.serial_number[i] = end? 0 : str[i];
-    }
-  write_cfg_to_EEPROM();
+  for (i = 0; i < 10; i++)
+    g_edat.serial_number[i] = '\0';
+  for (i = 0; (i < 9 && str[i] != '\0' && str[i] != '"'); i++)
+    g_edat.serial_number[i] = str[i];
+  write_cfg_to_EEPROM(); // Only writes what's different
 }
 
 void set_client_name_EEPROM(char *str)
@@ -94,8 +92,8 @@ void set_client_name_EEPROM(char *str)
   if (*str == '"')
     str++;
   for (i = 0; i < 33; i++)
-    g_edat.client[i] = 0;
-  for (i = 0; (i < 32 && str[i] != 0 && str[i] != '"'); i++)
+    g_edat.client[i] = '\0';
+  for (i = 0; (i < 32 && str[i] != '\0' && str[i] != '"'); i++)
     g_edat.client[i] = str[i];
   write_cfg_to_EEPROM(); // Only writes what's different
 }

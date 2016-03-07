@@ -35,6 +35,7 @@
 #include "serial/serialport.h"
 #include "cfgfile.h"
 //
+#include "battery_tab.h"
 #include "charge_tab.h"
 //
 #include "env.h"
@@ -44,15 +45,10 @@
 
 using namespace std;
 
-GLBatWindow::GLBatWindow(int X, int Y, int W, int H, const char *L, void *pshared) : Fl_Gl_Window(X, Y, W, H, L)
+GLBatWindow::GLBatWindow(TTF_Font *pfont, int X, int Y, int W, int H, const char *L, void *pshared) : Fl_Gl_Window(X, Y, W, H, L)
 {
   m_pshared = pshared;
-  m_pfont = TTF_OpenFont(DATAPATH MAINFONT, 14);
-  if (m_pfont == NULL)
-    {
-      printf("Error: font \"%s\" is missing.\n", DATAPATH MAINFONT);
-      exit(EXIT_FAILURE);
-    }
+  m_pfont = pfont;
   m_prenderer = new CGL2Dprimitives(W, H);
 }
 
@@ -63,7 +59,7 @@ GLBatWindow::~GLBatWindow()
   delete m_prenderer;
 }
 
-void GLBatWindow::draw_info_lines(int w, int h)
+void GLBatWindow::draw_info_lines(float x, int w, int h)
 {
   const int      txtsz = 512;
   char           txt[txtsz];
@@ -98,28 +94,78 @@ void GLBatWindow::draw_info_lines(int w, int h)
   //
   pos.x = 20;
   pos.y += texth;
-  snprintf(txt, txtsz, "Charge: %d%% (%.3fAH)", preport->charge_percent, (float)(preport->chargemAH) / 1000.);
+  snprintf(txt, txtsz, "Charge: %d%% (%.3fAH)", preport->charge_percent, preport->chargeAH);
   m_prenderer->print(txt, m_pfont, pos, color, blended);
   UNLOCK;
 }
 
-void draw_battery(CGL2Dprimitives *prenderer, TTF_Font *pfont, t_shared_data *pshared, int i, float x, float y, float w, float h)
+float GLBatWindow::V2pos(float Vbat, float maxv, float minv, float w)
 {
-  char         text[4096];
-  float        Vbat, minv, maxv, bot, span;
-  float        border = 0;
-  t_fcoord     pos, dim;
-  int          color;
-  bool         blended = true;
-  t_report    *prep = &pshared->pBMS->m_report;
-  t_batreport *preport = &prep->element_array[i];
+  float bot, span, ret, diff;
+
+  diff = (maxv - minv);
+  span = diff * 1.5;
+  bot = minv - (span - diff) / 2.;
+  //
+  ret = (Vbat - bot) * w / span;
+  ret = ret < 0? 0 : ret;
+  ret = ret > w? w : ret;
+  return ret;
+}
+
+void GLBatWindow::draw_batteries_thresholds(float x, float y, float w)
+{
+  const int      txtsz = 512;
+  char           txt[txtsz];
+  t_shared_data *pshared = (t_shared_data*)m_pshared;
+  float          vlimit, minv, maxv;
+  t_fcoord       pos;
+  int            color;
+  bool           blended;
+
+  blended = true;
+  // Vmin Vcharged Vmax
+  color = 0xAFADADAD;
+  minv = pshared->pBMS->m_params.EltVmin;
+  maxv = pshared->pBMS->m_params.EltVmax;
+  pos.y = y;
+  pos.x = x + V2pos(minv, maxv, minv, w);
+  snprintf(txt, txtsz, "%.3fV", minv);
+  m_prenderer->print(txt, m_pfont, pos, color, blended);
+  //
+  pos.x = x + V2pos(maxv, maxv, minv, w);
+  snprintf(txt, txtsz, "%.3fV", maxv);
+  m_prenderer->print(txt, m_pfont, pos, color, blended);
+  //
+  if (pshared->pBMS->m_params.BatElements > 0)
+    {
+      color = 0xAF3DAD3D;
+      vlimit = pshared->pBMS->m_params.MaxVbat / pshared->pBMS->m_params.BatElements;
+      pos.x = x + V2pos(vlimit, maxv, minv, w);
+      snprintf(txt, txtsz, "%.3fV", vlimit);
+      m_prenderer->print(txt, m_pfont, pos, color, blended);
+    }
+  UNLOCK;
+}
+
+void GLBatWindow::draw_battery(int i, float x, float y, float w, float h)
+{
+  char           text[4096];
+  float          Vbat, minv, maxv, xlimit;
+  float          border = 0;
+  t_fcoord       pos, dim;
+  int            color;
+  bool           blended = true;
+  t_shared_data *pshared = (t_shared_data*)m_pshared;
+  t_report      *prep = &pshared->pBMS->m_report;
+  t_batreport   *preport = &prep->element_array[i];
 
   // Draw the charge box
   pos.x = x;
   pos.y = y;
   dim.x = w;
   dim.y = h;
-  prenderer->box(pos, dim, 0xFF7E7E7E);
+  m_prenderer->box(pos, dim, 0xFF7E7E7E);
   //
   Vbat = preport->Velement;
   minv = pshared->pBMS->m_params.EltVmin;
@@ -134,15 +180,23 @@ void draw_battery(CGL2Dprimitives *prenderer, TTF_Font *pfont, t_shared_data *ps
   pos.x = x;
   pos.y = y;
   //
-  span = (maxv - minv) * 1.5;
-  bot = minv - span / 6;
-  //top = maxv + span / 6;
-  dim.x = (Vbat - bot) * w / span;
-  dim.x = dim.x < 0? 0 : dim.x;
-  dim.x = dim.x > w? w : dim.x;
+  dim.x = V2pos(Vbat, maxv, minv, w);
   //
   dim.y = h;
-  prenderer->box(pos, dim, color);
+  m_prenderer->box(pos, dim, color);
+  // Vbat limits
+  color = 0xAFADADAD;
+  xlimit = x + V2pos(minv, maxv, minv, w);
+  m_prenderer->vline(xlimit, pos.y, dim.y, color);
+  xlimit = x + V2pos(maxv, maxv, minv, w);
+  m_prenderer->vline(xlimit, pos.y, dim.y, color);
+  // Ideal value on full charge
+  if (pshared->pBMS->m_params.BatElements > 0)
+    {
+      color = 0xAF3DAD3D;
+      xlimit = x + V2pos(pshared->pBMS->m_params.MaxVbat / pshared->pBMS->m_params.BatElements, maxv, minv, w);
+      m_prenderer->vline(xlimit, pos.y, dim.y, color);
+    }
   //
   // Write the values
   //
@@ -150,21 +204,20 @@ void draw_battery(CGL2Dprimitives *prenderer, TTF_Font *pfont, t_shared_data *ps
   sprintf(text, "%2d  %.3fV (Lowest %.3fV)     Lowbat: %dEvents", i + 1, Vbat, preport->Vlowest, preport->events);
   pos.x = x + 8;
   pos.y = y + border;
-  prenderer->print(text, pfont, pos, color, blended);
+  m_prenderer->print(text, m_pfont, pos, color, blended);
   //
-  sprintf(text, "Average Charge time: %ds", preport->average_charging_time);
+  sprintf(text, "Average Charge time: %dV/s", preport->average_charging_time);
   pos.y += gl_height();
-  prenderer->print(text, pfont, pos, color, blended);
+  m_prenderer->print(text, m_pfont, pos, color, blended);
   //
   sprintf(text, "Balancing %d", preport->balancing? 1 : 0);
   pos.x += w * 0.65;
-  prenderer->print(text, pfont, pos, color, blended);
+  m_prenderer->print(text, m_pfont, pos, color, blended);
 }
 
 void GLBatWindow::draw_batteries(float x, float y, float wf, float hf)
 {
   t_shared_data *pshared = (t_shared_data*)m_pshared;
-  //float          border = 10;
   t_report      *preport = &pshared->pBMS->m_report;
   int            i;
   float          by, hy;
@@ -175,7 +228,7 @@ void GLBatWindow::draw_batteries(float x, float y, float wf, float hf)
       hy = (float)hf / (float)preport->elements;
       by = y + (float)(preport->elements - 1 - i) * hy;
       hy -= 5.;
-      draw_battery(m_prenderer, m_pfont, pshared, i, x, by, wf, hy);
+      draw_battery(i, x, by, wf, hy);
     }
   UNLOCK;
 }
@@ -186,7 +239,7 @@ void GLBatWindow::draw()
   t_fcoord orthodim;
   int      y;
 
-  printf("Charge GlWindow draw() is called.\n");
+  //printf("Charge GlWindow draw() is called.\n");
   // valid() is turned on by FLTK after draw() returns
   if (!valid())
     {
@@ -197,7 +250,6 @@ void GLBatWindow::draw()
 	  exit(EXIT_FAILURE);
 	}
       m_prenderer->SetLogicalSize(w(), h());
-      m_prenderer->set_clear_color(0xFF020302);
       //
       pos.x = pos.y = 0;
       dim.x = orthodim.x = w();
@@ -210,8 +262,9 @@ void GLBatWindow::draw()
   //
   // Draw everything
   y  = h() / 7;
-  draw_info_lines(w(), y);
+  draw_info_lines(20, w(), y);
   draw_batteries(20, y, w() - 40, h() - y);
+  draw_batteries_thresholds(20, y - 20, w() - 40);
 }
 
 int GLBatWindow::handle(int event)
@@ -271,7 +324,7 @@ void create_charge_tab(int x, int y, int w, int h, void *app_data)
   Fl_Group *group1 = new Fl_Group(x, y, w, h, "Batteries");
   {
     border = TAB_BORDER;
-    papp_data->pGLBatWindow = new GLBatWindow(x + border, y + border, w - 3 * border, h - 3 * border, "BatGl", pshared);
+    papp_data->pGLBatWindow = new GLBatWindow(papp_data->pfont, x + border, y + border, w - 3 * border, h - 3 * border, "BatGl", pshared);
     update_charge_tab(papp_data);
   }
   group1->end();

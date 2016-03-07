@@ -47,7 +47,7 @@ typedef struct                s_shared_data
   char                        param_msg[MAX_MSG_SIZE];
   char                        report_msg[MAX_MSG_SIZE];
   CSombreroBMS               *pBMS;
-  etab                        active_tab;
+  etab                        last_tab;
 }                             t_shared_data;
 
 //#define INSPECT_INTERLOCK
@@ -58,3 +58,4 @@ typedef struct                s_shared_data
 #define LOCK   pthread_mutex_lock(&pshared->datamutex);
 #define UNLOCK pthread_mutex_unlock(&pshared->datamutex);
 #endif
+

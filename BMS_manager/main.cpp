@@ -121,6 +121,8 @@ void close_function(void *pdata)
   save_coordinates(papp_data);
   stop_serial_thread(&papp_data->shared);
   delete papp_data->shared.pBMS;
+  if (papp_data->pfont)
+    TTF_CloseFont(papp_data->pfont);
   papp_data->pwindow->hide(); // Close the window
 }
 
@@ -145,9 +147,15 @@ int main(int argc, char **argv)
   Fl_Window  *window;
   t_app_data  app_data;
 
-  TTF_Init();
-  //
   app_data.path = string("./");
+  //
+  TTF_Init();
+  app_data.pfont = TTF_OpenFont(DATAPATH MAINFONT, 14);
+  if (app_data.pfont == NULL)
+    {
+      printf("Error: font \"%s\" is missing.\n", DATAPATH MAINFONT);
+      exit(EXIT_FAILURE);
+    }
   //
   app_data.pwindow        = NULL;
   app_data.shared.pserial = NULL;
@@ -167,11 +175,11 @@ int main(int argc, char **argv)
   // Information tab
   create_information_tab(20, 30, wx - 30, wy - 30, &app_data);
 
-  // Battery tab
-  //create_battery_tab(20, 30, wx - 30, wy - 30, &app_data);
-
   // Charge tab
   create_charge_tab(20, 30, wx - 30, wy - 30, &app_data);
+
+  // Battery tab
+  create_battery_tab(20, 30, wx - 30, wy - 30, &app_data);
 
   // Setup tab
   create_setup_tab(20, 30, wx - 30, wy - 30, &app_data);

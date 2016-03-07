@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
 
 #include "SombreroBMS.h"
 
@@ -100,7 +101,7 @@ void CSombreroBMS::parse_BMS_params_string(t_params *pparams, char *string)
 	{
 	  pparams->Vbat = strtof(value, NULL);	  
 	}
-      if (is_equal(code, "Bat elements"))
+      if (is_equal(code, "Elements"))
 	{
 	  pparams->BatElements = strtol(value, NULL, 10);	  
 	}
@@ -148,13 +149,21 @@ void CSombreroBMS::parse_BMS_params_string(t_params *pparams, char *string)
 	{
 	  strncpy(pparams->uptime, value, UPTIME_STR_SIZE * sizeof(char));
 	}
-      if (is_equal(code, "mintemperature"))
+      if (is_equal(code, "max recorded temp"))
+	{
+	  pparams->tmax = strtol(value, NULL, 10);	  
+	}
+      if (is_equal(code, "max temperature"))
+	{
+	  pparams->tmax = strtol(value, NULL, 10);	  
+	}
+      if (is_equal(code, "min recorded temp"))
 	{
 	  pparams->tmin = strtol(value, NULL, 10);
 	}
-      if (is_equal(code, "maxtemperature"))
+      if (is_equal(code, "min temperature"))
 	{
-	  pparams->tmax = strtol(value, NULL, 10);	  
+	  pparams->tmin = strtol(value, NULL, 10);
 	}
       if (is_equal(code, "temperature"))
 	{
@@ -163,8 +172,9 @@ void CSombreroBMS::parse_BMS_params_string(t_params *pparams, char *string)
     }
 }
 
-#define PACK_REPORT 1
-#define ELMT_REPORT 2
+#define PACK_REPORT     1
+#define ELMT_REPORT     2
+#define ELMT_REPORT_END 3
 
 void CSombreroBMS::parse_BMS_report_string(t_report *preport, char *string)
 {
@@ -193,9 +203,9 @@ void CSombreroBMS::parse_BMS_report_string(t_report *preport, char *string)
 		preport->charge_percent = strtol(value, NULL, 10);
 		printf("charge percent = %d   value=%s\n", preport->charge_percent, value);
 	      }
-	    if (is_equal(code, "chmAH"))
+	    if (is_equal(code, "chAH"))
 	      {
-		preport->chargemAH = strtol(value, NULL, 10);
+		preport->chargeAH = strtof(value, NULL);
 	      }
 	    if (is_equal(code, "ImA"))
 	      {
@@ -249,7 +259,21 @@ void CSombreroBMS::parse_BMS_report_string(t_report *preport, char *string)
 	      {
 		bat = strtol(value, NULL, 10);
 		state = ELMT_REPORT;
-	      }   
+	      }
+	    if (is_equal(code, "bmsReportEnd"))
+	      {
+		// Save the current Vbat values
+		for (int i = 0; i < MAX_BAT_ELEMENTS; i++)
+		  {
+		    if (i < preport->elements)
+		      m_tmpmeasure.Vbat[i] = preport->element_array[i].Velement;
+		    else
+		      m_tmpmeasure.Vbat[i] = 0;
+		  }
+		add_history(&m_tmpmeasure);
+		//
+		state = ELMT_REPORT_END;
+	      }
 	  }
 	  break;
 	default:
@@ -266,5 +290,24 @@ void CSombreroBMS::set_param_int(char *valuename, int value, char* str, int strs
 void CSombreroBMS::set_param_str(char *valuename, char *pvalue, char* str, int strsz)
 {
   snprintf(str, strsz, "set_param -%s %s\n", valuename, pvalue);
+}
+
+void CSombreroBMS::add_history(t_batmeasurement *pm)
+{
+  m_Vbat_history.push_back(*pm);
+}
+
+int  CSombreroBMS::get_history_sz()
+{
+  return m_Vbat_history.size();
+}
+
+t_batmeasurement *CSombreroBMS::get_hitory_elt(int elt)
+{
+  if (elt < get_history_sz())
+    {
+      return &m_Vbat_history[elt];
+    }
+  return NULL;
 }
 

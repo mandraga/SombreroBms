@@ -257,6 +257,18 @@ char change_TX_state(char TXstate)
       break;
     case SER_STATE_SEND_TOTALCAP:
       {
+	print_decimal("Vbat", (int)(g_appdata.total_vbat), "V");
+	nextState = SER_STATE_SEND_VBAT;
+      }
+      break;
+    case SER_STATE_SEND_VBAT:
+      {
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("Elements: %d\n"), g_edat.bat_elements);
+	nextState = SER_STATE_SEND_ELEMENTS;
+      }
+      break;
+    case SER_STATE_SEND_ELEMENTS:
+      {
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("charge cycles: %d\n"), g_edat.charge_cycles);
 	nextState = SER_STATE_SEND_CHARGECYCLES;
       }
@@ -272,17 +284,23 @@ char change_TX_state(char TXstate)
       break;
     case SER_STATE_SEND_TOTALCHRGTIME:
       {
+	print_decimal("Vmax", (int)(g_edat.bat_maxv), "V");
+	nextState = SER_STATE_SEND_VMAX;
+      }
+      break;
+    case SER_STATE_SEND_VMAX:
+      {
 	print_decimal("Vmin", (int)(g_edat.bat_minv), "V");
 	nextState = SER_STATE_SEND_VMIN;
       }
       break;
     case SER_STATE_SEND_VMIN:
       {
-	print_decimal("Vmax", (int)(g_edat.bat_maxv), "V");
-	nextState = SER_STATE_SEND_VMAX;
+	print_decimal("MaxVbat", (int)(g_edat.full_chargeV), "V");
+	nextState = SER_STATE_SEND_MAX_VBAT;
       }
       break;
-    case SER_STATE_SEND_VMAX:
+    case SER_STATE_SEND_MAX_VBAT:
       {
 	unsigned long undevorlatege_evt_cnt;
 
@@ -324,17 +342,30 @@ char change_TX_state(char TXstate)
       break;
     case SER_STATE_SEND_UPTIME:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("mintemperature:  %d°C\n"), g_edat.min_temperature);
-	nextState = SER_STATE_SEND_MINT;
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("max recorded temp:  %d°C\n"), g_edat.max_temperature);
+	nextState = SER_STATE_SEND_MAXT_RECORD;
       }
       break;
-    case SER_STATE_SEND_MINT:
+    case SER_STATE_SEND_MAXT_RECORD:
       {
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("maxtemperature:  %d°C\n"), g_edat.max_temperature);
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("max temperature:  %d°C\n"), g_edat.bat_tmax);
 	nextState = SER_STATE_SEND_MAXT;
       }
       break;
     case SER_STATE_SEND_MAXT:
+      {
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("min recorded temp:  %d°C\n"), g_edat.min_temperature);
+	nextState = SER_STATE_SEND_MINT_RECORD;
+      }
+      break;
+    case SER_STATE_SEND_MINT_RECORD:
+      {
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("min temperature:  %d°C\n"), g_edat.bat_tmin);
+	nextState = SER_STATE_SEND_MINT;
+
+      }
+      break;
+    case SER_STATE_SEND_MINT:
       {
 	int highter_temp;
 
@@ -370,7 +401,7 @@ char change_TX_state(char TXstate)
       break;
     case SER_STATE_SEND_REPORT_CHRGMA:
       {
-	print_decimal("chmAH", (int)(g_appdata.state_of_charge), "");
+	print_decimal("chAH", (int)(g_appdata.state_of_charge), "");
 	nextState = SER_STATE_SEND_REPORT_IMA;
       }
       break;
@@ -400,7 +431,7 @@ char change_TX_state(char TXstate)
 	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: run\n"));
 	    break;
 	  case STATE_RELAPSE:
-	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: relapse\n"));
+	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: relax\n"));
 	    break;
 	  case STATE_SECURITY:
 	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: security\n"));
