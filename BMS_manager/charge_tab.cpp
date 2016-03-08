@@ -201,7 +201,7 @@ void GLBatWindow::draw_battery(int i, float x, float y, float w, float h)
   // Write the values
   //
   color = 0xFF000000;
-  sprintf(text, "%2d  %.3fV (Lowest %.3fV)     Lowbat: %dEvents", i + 1, Vbat, preport->Vlowest, preport->events);
+  sprintf(text, "%2d  %.3fV (Lowest %.3fV)     Lowbat: %dEvent%c", i + 1, Vbat, preport->Vlowest, preport->events, preport->events > 1? 's' : ' ');
   pos.x = x + 8;
   pos.y = y + border;
   m_prenderer->print(text, m_pfont, pos, color, blended);

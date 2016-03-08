@@ -142,6 +142,8 @@ void GLBatCurvWindow::draw_battery(int i, float x, float y, float w, float h)
   int               bat;
   float             xsta, ysta, xsto, ysto;
 
+  if (!pbms->m_checked[i])
+    return;
   minv = pbms->m_params.EltVmin;
   maxv = pbms->m_params.EltVmax;
   elts = pbms->get_history_sz();
@@ -252,10 +254,27 @@ int GLBatCurvWindow::handle(int event)
     }
 }
 
+void Vbat_radio_callback(Fl_Widget *pwi, void *pdata)
+{
+  t_radio_VBat  *pradiodat  = (t_radio_VBat*)pdata;
+  t_app_data    *papp_data = (t_app_data*)pradiodat->appdata;
+  t_shared_data *pshared = &papp_data->shared;
+
+  printf("selected %d\n", pradiodat->num);
+  pshared->pBMS->m_checked[pradiodat->num] = (papp_data->pcheckbox_Vbat[pradiodat->num]->value() != 0);
+}
+
 void update_battery_tab(void *app_data)
 {
-  t_app_data *papp_data = (t_app_data*)app_data;
+  t_app_data    *papp_data = (t_app_data*)app_data;
+  t_shared_data *pshared   = &papp_data->shared;
+  int            i;
 
+  for (i = 0; i < pshared->pBMS->m_params.BatElements && i < MAXVBATRADIOB; i++)
+    {
+      papp_data->pcheckbox_Vbat[i]->show();
+      papp_data->pcheckbox_Vbat[i]->value(pshared->pBMS->m_checked[i]? 1 : 0);
+    }
   // Redraw
   papp_data->pGLBatCurvWindow->redraw();
 }
@@ -264,11 +283,22 @@ void create_battery_tab(int x, int y, int w, int h, void *app_data)
 {
   t_app_data *papp_data = (t_app_data*)app_data;
   int         border;
+  int         i;
 
   Fl_Group *group1 = new Fl_Group(x, y, w, h, "History");
   {
     border = 10;
-    papp_data->pGLBatCurvWindow = new GLBatCurvWindow(papp_data->pfont, x + border, y + border, w - 3 * border, h - 3 * border, "BatVbGl", &papp_data->shared);
+    for (i = 0; i < MAXVBATRADIOB; i++)
+      {
+	snprintf(papp_data->radiodat[i].check_labels, 8, "B%d", i + 1);
+	papp_data->radiodat[i].num = i;
+	papp_data->radiodat[i].appdata = app_data;
+	papp_data->pcheckbox_Vbat[i] = new Fl_Check_Button(x + w - w / 16 - 10, y + 2 * border + i * 3 * border, w / 16, border, papp_data->radiodat[i].check_labels);
+	papp_data->pcheckbox_Vbat[i]->hide();
+	papp_data->pcheckbox_Vbat[i]->callback(Vbat_radio_callback);
+	papp_data->pcheckbox_Vbat[i]->user_data(&papp_data->radiodat[i]);
+      }
+    papp_data->pGLBatCurvWindow = new GLBatCurvWindow(papp_data->pfont, x + border, y + border, w - 3 * border - w / 16, h - 3 * border, "BatVbGl", &papp_data->shared);
     update_battery_tab(papp_data);
   }
   group1->end();

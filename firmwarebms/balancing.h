@@ -46,6 +46,9 @@ void stop_any_balancing(void);
 // 3 if (vbat = (vfull + vstart) / 2) balance everything to the lowest
 //
 
+#define UNBALANCED_THRESHOLD 30L
+#define BALANCED_THRESHOLD    8L
+
 typedef struct s_balancing
 {
   char         state;
@@ -57,5 +60,4 @@ int get_highter_temperature(int *ptemperature, char modules);
 
 void balancing_during_charge(t_balancing *pb, unsigned long *pvbat, char elements, int *ptemperature);
 
-void balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elements, int *ptemperature);
-
+char balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elements, int *ptemperature);

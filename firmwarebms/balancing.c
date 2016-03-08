@@ -1,3 +1,4 @@
+//#include "stdio.h"
 
 #include "env.h"
 #include "main.h"
@@ -49,14 +50,14 @@ void balancing_during_charge(t_balancing *pb, unsigned long *pvbat, char element
   setled_balancing(0);
 }
 
-void get_voltage_differences(unsigned long *pvbat, char elements, int *pvlow_index, int *pvdiffmax_index)
+void get_voltage_extremes(unsigned long *pvbat, char elements, int *pvlow_index, int *pvmax_index)
 {
   int           i;
   unsigned long minV, maxV;
 
   minV = 100000L;
   maxV = 0;
-  *pvdiffmax_index = *pvlow_index = 0;
+  *pvmax_index = *pvlow_index = 0;
   for (i = 0; i < elements; i++)
     {
       if (pvbat[i] < minV)
@@ -67,8 +68,8 @@ void get_voltage_differences(unsigned long *pvbat, char elements, int *pvlow_ind
       if (pvbat[i] > maxV)
 	{
 	  maxV = pvbat[i];
-	  *pvdiffmax_index = i;
-	}      
+	  *pvmax_index = i;
+	}
     }
 }
 
@@ -132,7 +133,7 @@ void balancing_with_temperature_control(int vlow_index, unsigned long *pvbat,
   for (i = 0; i < b; i++)
     {
       if (sorted[i] != vlow_index)
-	if (pvbat[sorted[i]] - pvbat[vlow_index] > 10L)
+	if (pvbat[sorted[i]] - pvbat[vlow_index] >= BALANCED_THRESHOLD)
 	  {
 	    balancing_reg = balancing_reg | (1 << sorted[i]);
 	  }
@@ -141,13 +142,15 @@ void balancing_with_temperature_control(int vlow_index, unsigned long *pvbat,
 }
 
 // Only called when the charger has finished charging, or is not charging
-void balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elements, int *ptemperature)
+char balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elements, int *ptemperature)
 {
-  int Vdiffmax;
-  int lowVi;
-  int hiVi;
-  int highter_temperature;
+  int  Vdiffmax;
+  int  lowVi;
+  int  hiVi;
+  int  highter_temperature;
+  char balanced;
 
+  balanced = 0;
   switch (pb->state)
     {
     case BALANCING_STATE_IDLE:
@@ -156,14 +159,16 @@ void balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elemen
 	//
 	// Check if the batteries are unbalanced
 	//
-	get_voltage_differences(pvbat, elements, &pb->vlow_index, &pb->vdiffmax_index);
+	get_voltage_extremes(pvbat, elements, &pb->vlow_index, &pb->vdiffmax_index);
 	Vdiffmax = pvbat[pb->vdiffmax_index] - pvbat[pb->vlow_index];
 	Vdiffmax = Vdiffmax < 0? -Vdiffmax : Vdiffmax;
-	if (Vdiffmax > 50L) // 50mV value between batteries of the pack
+	if (Vdiffmax > UNBALANCED_THRESHOLD) // 30mV max value between the batteries of the pack
 	  {
 	    setled_balancing(1);
 	    pb->state = BALANCING_STATE_BWHILE_CHARGING_STOPED;
 	  }
+	else
+	  balanced = 1;
       }
       break;
     case BALANCING_STATE_CHARGING_CSPEED:
@@ -185,11 +190,11 @@ void balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elemen
 	    break;
 	  }
 	// Balanced?
-	get_voltage_differences(pvbat, elements, &lowVi, &hiVi);
+	get_voltage_extremes(pvbat, elements, &lowVi, &hiVi);
 	Vdiffmax = pvbat[hiVi] - pvbat[pb->vlow_index];
 	Vdiffmax = Vdiffmax < 0? -Vdiffmax : Vdiffmax;
-	if (Vdiffmax < 10L ||                // 10mV value between batteries of the pack
-	    pvbat[lowVi] <= g_edat.bat_minv) // Do not bleed a battery to death
+	if (Vdiffmax < BALANCED_THRESHOLD ||  // 10mV value between the batteries of the pack
+	    pvbat[lowVi] <= g_edat.bat_minv)  // Do not bleed a battery to death
 	  {
 	    stop_any_balancing();
 	    pb->state = BALANCING_STATE_IDLE;
@@ -197,7 +202,7 @@ void balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elemen
 	  }
 	// If the lowest battery is not the one setup when entering the state
 	// then return to IDLE. 4mV tolerance
-	if (pvbat[pb->vlow_index] > pvbat[lowVi] + 4)
+	if (pvbat[pb->vlow_index] > pvbat[lowVi] + 4L)
 	  {
 	    stop_any_balancing();
 	    pb->state = BALANCING_STATE_IDLE;
@@ -224,5 +229,6 @@ void balancing_charger_stoped(t_balancing *pb, unsigned long *pvbat, char elemen
       break;
     }
   setled_balancing(pb->state == BALANCING_STATE_BWHILE_CHARGING_STOPED);
+  return balanced;
 }
 

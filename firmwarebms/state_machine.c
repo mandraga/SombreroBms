@@ -1,3 +1,4 @@
+//#include "stdio.h"
 
 #include "env.h"
 #include "main.h"
@@ -17,15 +18,15 @@ extern t_eeprom_battery     g_bat[MAXBATTERY];
 extern t_ad7280_state       g_ad7280;
 extern t_balancing          g_balancing;
 
-// Checks that every voltage is over a value, like 15% under the max value
-char all_under_threshold(void)
+// Checks that every voltage is over a value, like 10% under the max value
+char all_under_max_Vbat_threshold(void)
 {
   unsigned long threshold;
   int           i, ret;
 
   ret = 1;
   threshold  = g_edat.bat_maxv;
-  threshold -= (g_edat.bat_maxv - g_edat.bat_minv) / 10; // 10%
+  threshold -= (g_edat.bat_maxv - g_edat.bat_minv) >> 3; // v/8 less than 10%
   for (i = 0; i < g_edat.bat_elements; i++)
     {
       if (g_appdata.vbat[i] >= threshold)
@@ -37,7 +38,7 @@ char all_under_threshold(void)
 }
 
 // Returns 1 if a battery element is above or equal the max vbat value
-char battery_full(void)
+char battery_element_overcharge(void)
 {
   int i, ret;
 
@@ -68,6 +69,7 @@ char check_VBAT(void)
 	  ret = 1;
 	}
     }
+  // FIXME cli() sei()
   g_appdata.total_vbat = sum;
   return ret;
 }
@@ -81,14 +83,16 @@ void change_state_of_charge(void)
   g_appdata.c_discharge_accumulator += g_appdata.c_discharge;
   AH_value = g_appdata.c_discharge_accumulator / INTERVALS_PER_HOUR;
   // Reduce the state of charge
-  if (AH_value > 0)
+  if (AH_value > 0 && g_appdata.state_of_charge > 0)
     {
-      g_appdata.state_of_charge -= AH_value;
-      g_appdata.c_discharge_accumulator = g_appdata.c_discharge_accumulator % INTERVALS_PER_HOUR;
+      if (g_appdata.state_of_charge > AH_value)
+	{
+	  g_appdata.c_discharge_accumulator = g_appdata.c_discharge_accumulator % INTERVALS_PER_HOUR;
+	  g_appdata.state_of_charge -= AH_value;
+	}
+      else
+	g_appdata.state_of_charge = 0;
     }
-  // Average discharge current on the vehicle or on whatever uses the pack
-  // (63 * avg + c) / 64;
-  g_appdata.average_discharge = (g_appdata.average_discharge * 63 + g_appdata.c_discharge) >> 6;
 }
 
 // Check everything else, and store min and max and events in the eeprom
@@ -155,8 +159,10 @@ void State_machine()
       break;
     case STATE_CHARGEON:
       {
-	balancing_charger_stoped(&g_balancing, g_appdata.vbat, g_edat.bat_elements,
-				 g_appdata.temperature);
+	char balanced;
+
+	balanced = balancing_charger_stoped(&g_balancing, g_appdata.vbat, g_edat.bat_elements,
+					    g_appdata.temperature);
 	// First check if the car runs, stop everything then because the device is pluged
 	if (g_appdata.c_discharge > DISCHARGE_THRESHOLD)
 	  {
@@ -168,63 +174,65 @@ void State_machine()
 	if (chargeron == 0)
 	  {
 	    g_appdata.idle_counter = 0;
-	    g_appdata.app_state = STATE_RELAPSE;
+	    g_appdata.app_state = STATE_RELAX;
 	    break;
 	  }
 	// If a battery is low, go to CHARGING
 	// And no battery is full
-	if (all_under_threshold() && !battery_full())
+	if ((balanced &&
+	     all_under_max_Vbat_threshold() &&
+	     g_appdata.total_vbat < g_edat.full_chargeV) || VBAT_low)
 	  {
 	    g_appdata.charging_started = 1; // Used ot display a progress animation on the gauge
 	    if (g_appdata.prev_idle)
 	      {
-		inc_charge_cylces_EEPROM();
+		inc_charge_cylces_EEPROM(); // Charge cycles ++
 		g_appdata.prev_idle = 0;
 	      }
 	    g_appdata.charge_time_count_tenth = g_appdata.charge_time_count = 0;
 	    g_appdata.app_state = STATE_CHARGING;
 	    break;
 	  }
-	/*
-	if (g_appdata.c_discharge >= g_edat.max_current)
-	  {
-	    g_appdata.app_state = STATE_CHARGING;
-	  }
-	*/
       }
       break;
     case STATE_CHARGING:
       {
 	update_local_charging_time();
-	// Does nothing but go back to no balancing
+	// Does nothing but goes back to no balancing
 	balancing_during_charge(&g_balancing, g_appdata.vbat, g_edat.bat_elements,
 				g_appdata.temperature);
 	// First check if the car runs, stop everything then because the device is pluged
 	if (g_appdata.c_discharge > DISCHARGE_THRESHOLD)
 	  {
-	    stop_any_balancing();
 	    g_appdata.idle_counter = 0;
+	    stop_any_balancing();
 	    g_appdata.app_state = STATE_CURRENT_SECURITY;
 	    break;
 	  }
+	// The charger is unpluged during charge
 	if (chargeron == 0)
 	  {
-	    // FIXME state of charge problem
-	    update_battery_charge_values_EEPROM(); // When a battey is at Vmax, store the charging time
+	    // FIXME state of charge does not change here
+	    update_battery_charge_values_EEPROM(); // If the charger is unpluged here, store the charging time
 	    update_charge_time_minutes_EEPROM(g_appdata.charge_time_count);
 	    g_appdata.idle_counter = 0;
-	    g_appdata.app_state = STATE_RELAPSE;
+	    g_appdata.app_state = STATE_CHARGEON;
 	    break;
 	  }
-	if (battery_full())
+	// Stop charging and balance, the battery is not full yet, but an element is overcharged
+	if (battery_element_overcharge())
+	  {
+	    g_appdata.app_state = STATE_CHARGEON;
+	  }
+	// The battery is full and probably balanced
+	if (g_appdata.total_vbat > g_edat.full_chargeV)
 	  {
 	    update_battery_charge_values_EEPROM(); // When a battey is at Vmax, store the charging time
 	    update_charge_time_minutes_EEPROM(g_appdata.charge_time_count);
 	    g_appdata.charging_started = 0;
-	    g_appdata.average_discharge = 0;
 	    g_appdata.c_discharge = 0;
 	    g_appdata.c_discharge_accumulator = 0;
-	    g_appdata.state_of_charge = g_edat.full_charge;
+	    g_appdata.state_of_charge = g_edat.full_charge; // Set the SOC to the full value
 	    g_appdata.app_state = STATE_CHARGEON;
 	    break;
 	  }
@@ -232,13 +240,14 @@ void State_machine()
       break;
     case STATE_IDLE:
       {
-	if (chargeron != 0)
+	if (chargeron)
 	  {
 	    g_appdata.prev_idle = 1;
 	    g_appdata.app_state = STATE_CHARGEON;
 	  }
 	else
 	  {
+	    // A battery is under the minimal value
 	    if (VBAT_low)
 	      {
 		update_battery_low_events_EEPROM();
@@ -252,7 +261,8 @@ void State_machine()
       break;
     case STATE_RUN:
       {
-	change_state_of_charge();
+	change_state_of_charge(); // SOC update
+	//
 	if (chargeron)
 	  {
 	    g_appdata.idle_counter = 0;
@@ -268,11 +278,11 @@ void State_machine()
 	if (g_appdata.c_discharge < DISCHARGE_THRESHOLD / 2)
 	  {
 	    g_appdata.idle_counter = 0;
-	    g_appdata.app_state = STATE_RELAPSE;
+	    g_appdata.app_state = STATE_RELAX;
 	  }
       }
       break;
-    case STATE_RELAPSE:
+    case STATE_RELAX:
       {
 	if (chargeron != 0)
 	  {
@@ -314,7 +324,7 @@ void State_machine()
 	if (!VBAT_low)
 	  {
 	    g_appdata.idle_counter = 0;
-	    g_appdata.app_state = STATE_RELAPSE;
+	    g_appdata.app_state = STATE_RELAX;
 	    break;
 	  }
       }
@@ -327,7 +337,7 @@ void State_machine()
 	// 10 seconds to figure out whats happening
 	if (g_appdata.idle_counter > 10 * SAMPLING_PER_SECOND)
 	  {
-	    g_appdata.app_state = STATE_RELAPSE;
+	    g_appdata.app_state = STATE_RELAX;
 	  }
       }
       break;      

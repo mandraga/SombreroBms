@@ -434,7 +434,7 @@ char change_TX_state(char TXstate)
 	  case STATE_RUN:
 	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: run\n"));
 	    break;
-	  case STATE_RELAPSE:
+	  case STATE_RELAX:
 	    snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("State: relax\n"));
 	    break;
 	  case STATE_SECURITY:

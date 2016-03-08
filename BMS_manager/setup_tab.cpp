@@ -266,8 +266,8 @@ void create_setup_tab(int x, int y, int w, int h, void *pdata)
     i++;
     papp_data->input_capacityAH = new Fl_Int_Input(start, YPOS, buttonw, buttonh, "Capacity AH");
     papp_data->input_FullpackV = new Fl_Float_Input(start, YPOS, buttonw, buttonh, "Full Voltage (charger stops + 100% charge)");
-    papp_data->input_maxV = new Fl_Float_Input(start, YPOS, buttonw, buttonh, "Maximum battery V");
-    papp_data->input_minV = new Fl_Float_Input(start, YPOS, buttonw, buttonh, "Minimum battery V");
+    papp_data->input_maxV = new Fl_Float_Input(start, YPOS, buttonw, buttonh, "Maximum battery V (during charge)");
+    papp_data->input_minV = new Fl_Float_Input(start, YPOS, buttonw, buttonh, "Minimum battery V (during discharge)");
     papp_data->input_minT = new Fl_Int_Input(start, YPOS, buttonw, buttonh, "Min tempereature (like -5°C)");
     papp_data->input_minT->value("-1");
     papp_data->input_maxT = new Fl_Int_Input(start, YPOS, buttonw, buttonh, "Max tempereature (like 40°C)");

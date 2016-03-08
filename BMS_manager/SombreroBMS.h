@@ -81,6 +81,7 @@ class CSombreroBMS
  public:
   t_report m_report;
   t_params m_params;
+  bool     m_checked[MAX_BAT_ELEMENTS];
  private:
   std::vector<t_batmeasurement> m_Vbat_history;
   t_batmeasurement m_tmpmeasure;

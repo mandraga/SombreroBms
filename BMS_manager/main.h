@@ -3,6 +3,15 @@ void close_function(void *pdata);
 void set_button(Fl_Button *pb, void* puser_data);
 void cancel_callback(Fl_Widget *pwi, void *pdata);
 
+#define MAXVBATRADIOB 18
+
+typedef struct s_radio_VBat
+{
+  int          num;
+  char         check_labels[8];
+  void        *appdata;
+}              t_radio_VBat;
+
 typedef struct                  s_app_data
 {
   std::string                   path;
@@ -12,7 +21,8 @@ typedef struct                  s_app_data
   TTF_Font                     *pfont;
   Fl_Window                    *pwindow;
   //
-  //Fl_Check_Button              *pcheckbox_do_not;
+  Fl_Check_Button              *pcheckbox_Vbat[MAXVBATRADIOB];
+  t_radio_VBat                  radiodat[MAXVBATRADIOB];
   Fl_Button                    *but_ser_apply;
   Fl_Choice                    *serialport_choice;
   std::vector<std::string>      vserial_ports;

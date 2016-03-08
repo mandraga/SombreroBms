@@ -37,7 +37,7 @@
 #define STATE_CHARGING 2  // same plus charging
 #define STATE_IDLE     3  // Idle, does nothing
 #define STATE_RUN      4  // Run, the current is beingused and state of charge updated
-#define STATE_RELAPSE  5  // After run, wait for the battery voltage to spatbilise (lithium behaviour)
+#define STATE_RELAX    5  // After run, wait for the battery voltage to spatbilise (lithium behaviour)
 #define STATE_SECURITY 6  // Undervoltage or overvoltage or error like trying to start when charging
 #define STATE_CURRENT_SECURITY 7  // Over current or too much current during charge
 #define STATE_CRITICAL_FAILURE 8  // Stops here, no way to get out but a reset
@@ -66,7 +66,7 @@ typedef struct  s_eeprom_data
   int           bat_tmax;            // temperature °C
   int           bat_tmin;
   char          bat_elements;
-  unsigned long full_charge;         // AH
+  int           full_charge;         // AH
   unsigned long full_chargeV;        // mV when the pack voltage reaches this value, the charger is stoped and the charge is set at 100%
   int           max_current;         // Amp
   char          serial_number[10];   //  8 bytes             plus 0 end of string
@@ -92,16 +92,15 @@ typedef struct  s_pack_variable_data
   unsigned int  uptime_days;
   unsigned int  uptime_minutes;
   unsigned int  tseconds;                 // Tenth of seconds
-  unsigned long average_discharge;
-  unsigned long c_discharge;              // Discharge, last value mA
-  unsigned long c_discharge_accumulator;  // Accumulates mA per hour
   int           max_discharge;            // Discharge current in Amperes
-  unsigned long state_of_charge;          // mili Ampere Hour
+  unsigned long c_discharge;              // Discharge, last value mA
+  unsigned int  state_of_charge;          // SOC mili Ampere Hour
   unsigned long vbat[MAXBATTERY];         // Batterey milivolts, last value
   unsigned long total_vbat;               // Pack voltage in mv
   int           temperature[MAXMODULES];  // °C
   char          app_state;                // State machine variable
   // Internal variables
+  unsigned long c_discharge_accumulator;  // Accumulates mA per hour
   char          charging_started;         // Once started it must finish
   int           charge_time_count_tenth;  // 1/10 second
   int           charge_time_count;        // Minutes

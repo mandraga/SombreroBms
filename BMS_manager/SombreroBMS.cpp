@@ -7,8 +7,12 @@
 
 CSombreroBMS::CSombreroBMS()
 {
+  int i;
+
   memset(&m_report, 0, sizeof(t_report));
   memset(&m_params, 0, sizeof(t_params));
+  for (i = 0; i < MAX_BAT_ELEMENTS; i++)
+    m_checked[i] = true;
 }
 
 CSombreroBMS::~CSombreroBMS()

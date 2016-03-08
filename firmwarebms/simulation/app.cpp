@@ -398,8 +398,8 @@ void display_state(char *str)
     case STATE_RUN:
       snprintf(str, TRSTRINGSZ, ("State: run"));
       break;
-    case STATE_RELAPSE:
-      snprintf(str, TRSTRINGSZ, ("State: relapse"));
+    case STATE_RELAX:
+      snprintf(str, TRSTRINGSZ, ("State: relax"));
       break;
     case STATE_SECURITY:
       snprintf(str, TRSTRINGSZ, ("State: security"));

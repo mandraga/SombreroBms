@@ -37,7 +37,7 @@ void Cfake_battery::add_charge(float mAmps, float mSeconds)
 {
   if (m_dead)
     return ;
-  m_charge += mAmps * mSeconds / (float)(60 * 60 * 1000);
+  m_charge += (double)(mAmps * mSeconds) / (double)(60 * 60 * 1000);
   if (m_charge > m_capacity * 1.1)
     m_dead = true;
 }
@@ -46,6 +46,6 @@ void Cfake_battery::shunt(float mAmps, float mSeconds)
 {
   if (m_dead)
     return ;
-  m_charge -= mAmps * mSeconds / (float)(60 * 60 * 1000);
+  m_charge -= (double)(mAmps * mSeconds) / (double)(60 * 60 * 1000);
 }
 
