@@ -45,7 +45,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 10
 Title ""
-Date "26 feb 2016"
+Date "9 mar 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -255,7 +255,7 @@ Text Label 6300 6500 0    60   ~ 0
 BUZZER
 Text Label 7550 6850 2    60   ~ 0
 GND
-Text Label 7550 5900 0    60   ~ 0
+Text Label 6300 5900 0    60   ~ 0
 3V
 Text Label 5850 3900 2    60   ~ 0
 RESET/
@@ -659,7 +659,7 @@ Wire Wire Line
 Wire Wire Line
 	7750 6100 7850 6100
 Wire Wire Line
-	7850 5900 7550 5900
+	7300 5900 7850 5900
 Wire Wire Line
 	9450 5700 9850 5700
 Wire Wire Line
@@ -1037,4 +1037,17 @@ Wire Wire Line
 	8550 1200 9000 1200
 Text Label 8550 1200 2    60   ~ 0
 SDO
+$Comp
+L R R?
+U 1 1 56DFFC81
+P 7050 5900
+F 0 "R?" V 7130 5900 40  0000 C CNN
+F 1 "1K" V 7057 5901 40  0000 C CNN
+F 2 "~" V 6980 5900 30  0000 C CNN
+F 3 "~" H 7050 5900 30  0000 C CNN
+	1    7050 5900
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	6800 5900 6300 5900
 $EndSCHEMATC
