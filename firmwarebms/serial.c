@@ -10,9 +10,12 @@
 #include "serial.h"
 
 // Program space string macro replacement for the simulation
+#include <avr/pgmspace.h>
+/*
 #ifndef PSTR
 #define PSTR(A) ((char*)A)
 #endif
+*/
 
 extern t_pack_variable_data g_appdata;
 extern t_eeprom_data        g_edat;
@@ -37,7 +40,7 @@ void init_serial_vars(void)
 // It starts at the '-' of "set_param -valuename value" and checks if valuename is
 // refvalue. Returns 0 if not. And if equal it fills the pointer to the argument in
 // *pstr and returns 1.
-char check_valuename(char *refvalue, char *command_buffer, char index, char **pstr)
+char check_valuename(const char *refvalue, char *command_buffer, char index, char **pstr)
 {
   char reflen;
   char remainlen;
@@ -128,6 +131,7 @@ void process_serial_command(void)
 {
   // Send the first line of the report message, the interrupt at the end of the byte
   // transmission will send the other lines.
+#define SPAREBYTES
   if (strcmp(PSTR("get_report\n"), g_serial.inbuffer) == 0)
     {
       snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("bmsReportBegin\n"));
@@ -135,7 +139,11 @@ void process_serial_command(void)
     }
   if (strcmp(PSTR("ping\n"), g_serial.inbuffer) == 0)
     {
+#ifdef SPAREBYTES
+      snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("SomBMS\n"));
+#else
       snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("Sombrero BMS C2015-2016 Vreemdelabs.com\n"));
+#endif
       g_serial.TXstate = SER_STATE_SEND_PING1;
     }
   if (strcmp(PSTR("get_params\n"), g_serial.inbuffer) == 0)
@@ -223,6 +231,12 @@ char change_TX_state(char TXstate)
       // Response to "ping" command
     case SER_STATE_SEND_PING1:
       {
+#ifdef SPAREBYTES
+	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("Fi\n"));
+	nextState = SER_STATE_SEND_PING3;
+      }
+      break;
+#else
 	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("Firmware Version: %d.%d\n"), FIRMWARE_VERSION, FIRMWARE_SUBVERSION);
 	nextState = SER_STATE_SEND_PING2;
       }
@@ -233,6 +247,7 @@ char change_TX_state(char TXstate)
 	nextState = SER_STATE_SEND_PING3;
       }
       break;
+#endif //SPAREBYTES
     case SER_STATE_SEND_PING3:
       {
 	g_serial.outbuffer[0] = g_serial.outCRC;

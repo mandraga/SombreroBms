@@ -261,7 +261,8 @@ void CGL2Dprimitives::my_ortho(float left, float right, float bottom, float top,
   float        *pf;
 
   // glOrtho
-  glm::detail::tmat4x4<float> projectionm = glm::ortho(left, right, bottom, top, nearval, farval);
+  //glm::detail::tmat4x4<float> 
+  glm::mat4 projectionm = glm::ortho(left, right, bottom, top, nearval, farval);
   pf = glm::value_ptr(projectionm);
   for (i = 0; i < sizeof(m_projection_matrix) / sizeof(float); i++)
     {

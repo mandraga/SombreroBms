@@ -174,6 +174,7 @@ int ad7280_read(t_ad7280_state *st, unsigned char devaddr, unsigned char addr)
 // This is a conversion read
 int ad7280_read_channel(t_ad7280_state *st, unsigned devaddr, unsigned addr)
 {
+/*
   unsigned long tmp;
 
   ad7280_write(devaddr, AD7280A_READ, 0, addr << 2);
@@ -200,6 +201,8 @@ int ad7280_read_channel(t_ad7280_state *st, unsigned devaddr, unsigned addr)
     return 1;
   // Return the conversion value
   return (tmp >> 11) & 0xFFF;
+*/
+  return 0;
 }
 
 /*
@@ -421,7 +424,7 @@ char ad7280_set_balance(t_ad7280_state *st, unsigned long balancing)
       rb = ad7280_read(st, i, AD7280A_CELL_BALANCE);
       if (rb != st->cb_mask[i])
 	{
-	  add_error_log_EEPROM(ERROR_CODE_BALANCING_FAILED);
+	  //add_error_log_EEPROM(ERROR_CODE_BALANCING_FAILED);
 	  // Clear the balancing register
 	  ad7280_write(i, AD7280A_CELL_BALANCE, 0, 0);
 	  return 1;

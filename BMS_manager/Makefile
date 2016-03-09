@@ -43,8 +43,8 @@ LIBS += `sdl2-config --libs`
 LIBS += -lSDL2_ttf -lSDL2_image 
 LIBS += -lWs2_32
 endif
-#LIBS += -lpthread
-LIBS +=  -ltinyxml
+LIBS += -lpthread
+LIBS += -ltinyxml
 LIBS += ./meshloader/meshloader.a
 LIBS += `fltk-config --use-images --use-gl --ldflags`
 

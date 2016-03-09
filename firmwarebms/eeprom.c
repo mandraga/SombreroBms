@@ -78,12 +78,12 @@ void read_bat_values_from_EEPROM(t_eeprom_battery *pbats, int elements)
 
 void write_cfg_to_EEPROM(void)
 {
+#if 0
   int           i;
   unsigned char c;
   unsigned char *ptr;
   
   ptr = (unsigned char*)&g_edat;
-#if 1
   for (i = 0; i < sizeof(g_edat); i++)
     {
       c = eeprom_read_byte((uint8_t*)0x01 + i);
@@ -97,16 +97,17 @@ void write_cfg_to_EEPROM(void)
 }
 
 void write_bat_values_to_EEPROM(t_eeprom_battery *pbats, int elements)
-{
+{  
+  //#if ((sizeof (g_edat) + 5 + (sizeof(t_eeprom_battery) * MAXBATTERY)) > 510)
+  // Not enough EEPROM memory
+  //#endif
+#if 0
   int           i, j;
   int           offset;
   unsigned char c;
   unsigned char *ptr;
-  
-  //#if ((sizeof (g_edat) + 5 + (sizeof(t_eeprom_battery) * MAXBATTERY)) > 510)
-  // Not enough EEPROM memory
-  //#endif
-#if 1
+
+sxsx
   for (i = 0; i < elements; i++)
     {
       // Pass the g_edat structure and add 4 bytes to be sure.
@@ -129,6 +130,7 @@ void write_bat_values_to_EEPROM(t_eeprom_battery *pbats, int elements)
 // The first byte is the index of the value that will be written or rewritten.
 void add_error_log_EEPROM(char code)
 {
+  /*
   char next_index;
 
   next_index = eeprom_read_byte((uint8_t*)ERROR_LOG_START);
@@ -138,5 +140,6 @@ void add_error_log_EEPROM(char code)
   next_index++;
   next_index = next_index >= ERROR_LOG_SIZE ? 0 : next_index;
   eeprom_write_byte((uint8_t*)(ERROR_LOG_START), next_index);
+  */
 }
 

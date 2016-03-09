@@ -46,8 +46,9 @@ F_CPU = 3686400
 # Bootloader
 # Please adjust if using a different AVR
 # 0x0e00*2=0x1C00 for ATmega8  512 words Boot Size
-# Atmega128 0xFE00 512W
-BOOTLOADER_ADDRESS = F000
+# Atmega128 0xF000 512W
+# Atymega168PA 0xE00
+BOOTLOADER_ADDRESS = 0xE00
 
 
 # Output format. (can be srec, ihex, binary)

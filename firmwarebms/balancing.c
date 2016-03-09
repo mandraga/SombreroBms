@@ -29,6 +29,7 @@ void stop_any_balancing(void)
 // So do not be too serious about it.
 void balancing_during_charge(t_balancing *pb, unsigned long *pvbat, char elements, int *ptemperature)
 {
+  /*
   switch (pb->state)
     {
     case BALANCING_STATE_IDLE:
@@ -47,6 +48,9 @@ void balancing_during_charge(t_balancing *pb, unsigned long *pvbat, char element
       }
       break;
     }
+  */
+  pb->state = BALANCING_STATE_IDLE;
+  stop_any_balancing();
   setled_balancing(0);
 }
 
