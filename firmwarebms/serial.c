@@ -10,12 +10,13 @@
 #include "serial.h"
 
 // Program space string macro replacement for the simulation
+#ifndef _SIMULATION
 #include <avr/pgmspace.h>
-/*
+#else
 #ifndef PSTR
 #define PSTR(A) ((char*)A)
-#endif
-*/
+#endif  //PSTR
+#endif  //_SIMULATION
 
 extern t_pack_variable_data g_appdata;
 extern t_eeprom_data        g_edat;
