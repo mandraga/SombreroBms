@@ -43,7 +43,6 @@
 # MCU name
 #MCU = atmega168pa
 MCU = atmega168pa
-DUDEMCU = m168p
 
 # Processor frequency.
 #     This will define a symbol, F_CPU, in all source code files equal to the 
@@ -81,7 +80,8 @@ OBJDIR = .
 
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = $(TARGET).c AD7280A.c serial.c state_machine.c init.c adc.c inout.c eeprom.c eeprom_functions.c thermistor.c balancing.c spi.c uart.c
+#SRC = $(TARGET).c AD7280A.c serial.c state_machine.c init.c adc.c inout.c eeprom.c eeprom_functions.c thermistor.c balancing.c spi.c uart.c
+SRC = $(TARGET).c stubs.c ../uart.c ../serial.c
 
 # List C++ source files here. (C dependencies are automatically generated.)
 CPPSRC = 
@@ -298,7 +298,7 @@ AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 
 #AVRDUDE_CUSTOM_BAUDRATE = -b 38400
 
-AVRDUDE_FLAGS = -p $(DUDEMCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
+AVRDUDE_FLAGS = -p $(MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
 AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)
 AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
@@ -390,12 +390,9 @@ GENDEPFLAGS = -MMD -MP -MF .dep/$(@F).d
 
 # Combine all necessary flags and optional flags.
 # Add target processor to flags.
-ALL_CFLAGS = -mmcu=$(MCU) -I. $(CFLAGS) $(GENDEPFLAGS)
+ALL_CFLAGS = -mmcu=$(MCU) -I. -I../ $(CFLAGS) $(GENDEPFLAGS)
 ALL_CPPFLAGS = -mmcu=$(MCU) -I. -x c++ $(CPPFLAGS) $(GENDEPFLAGS)
 ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
-
-
-
 
 
 # Default target.

@@ -45,7 +45,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 7 10
 Title ""
-Date "9 mar 2016"
+Date "24 mar 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -62,17 +62,6 @@ F 1 "HRS1K" H 6000 3700 60  0000 C CNN
 F 2 "~" H 6350 3800 60  0000 C CNN
 F 3 "~" H 6350 3800 60  0000 C CNN
 	1    6350 3800
-	1    0    0    -1  
-$EndComp
-$Comp
-L BC550 Q14
-U 1 1 5613C3ED
-P 5350 3850
-F 0 "Q14" H 5350 3701 40  0000 R CNN
-F 1 "BC550" H 5350 4000 40  0000 R CNN
-F 2 "TO92" H 5250 3952 29  0000 C CNN
-F 3 "" H 5350 3850 60  0000 C CNN
-	1    5350 3850
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
@@ -158,4 +147,15 @@ Wire Wire Line
 Connection ~ 4800 3000
 Text HLabel 4050 3000 0    60   Input ~ 0
 3V
+$Comp
+L BC850 Q?
+U 1 1 56F45D98
+P 5350 3850
+F 0 "Q?" H 5350 3701 40  0000 R CNN
+F 1 "BC850" H 5350 4000 40  0000 R CNN
+F 2 "SOT-23" H 5250 3952 29  0000 C CNN
+F 3 "" H 5350 3850 60  0000 C CNN
+	1    5350 3850
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC

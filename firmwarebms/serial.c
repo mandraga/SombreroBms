@@ -595,7 +595,8 @@ void serial_RX_Ir(char received)
       break;
     case SER_STATE_WAIT_ENDOF_MESSAGE:
       {
-	process_serial_command();
+	if (received == 0)
+	  process_serial_command();
       }
     default:
       {

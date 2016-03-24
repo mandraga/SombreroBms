@@ -81,7 +81,7 @@ LICENSE:
 /*
  *  Uncomment to leave bootloader and jump to application after programming.
  */
-#define ENABLE_LEAVE_BOOTLADER           
+#define ENABLE_LEAVE_BOOTLADER
 
 /* 
  * Pin "PROG_PIN" on port "PROG_PORT" has to be pulled low
@@ -105,7 +105,7 @@ LICENSE:
  * define CPU frequency in Mhz here if not defined in Makefile 
  */
 #ifndef F_CPU
-#define F_CPU 1843200UL
+#define F_CPU 3686400UL
 #endif
 
 /*
@@ -142,7 +142,7 @@ LICENSE:
  * Calculate the address where the bootloader starts from FLASHEND and BOOTSIZE
  * (adjust BOOTSIZE below and BOOTLOADER_ADDRESS in Makefile if you want to change the size of the bootloader)
  */
-#define BOOTSIZE 4096
+#define BOOTSIZE 512
 #define APP_END  (FLASHEND -(2*BOOTSIZE) + 1)
 
 
@@ -173,7 +173,9 @@ LICENSE:
 #elif defined (__AVR_AT90CAN64__)
 	#define SIGNATURE_BYTES 0x1E9681
 #elif defined (__AVR_AT90CAN128__)
-	#define SIGNATURE_BYTES 0x1E9781    
+	#define SIGNATURE_BYTES 0x1E9781
+#elif defined (__AVR_ATmega168P__)
+	#define SIGNATURE_BYTES 0x1E940B
 #elif defined (__AVR_ATmega168PA__)
 	#define SIGNATURE_BYTES 0x1E940B
 #else
@@ -344,7 +346,8 @@ static unsigned char recchar(char *ptimeout)
   return UART_DATA_REG;
 }
 
-
+#define CTS PC3
+ 
 int main(void) __attribute__ ((OS_main));
 int main(void)
 {
@@ -368,11 +371,12 @@ int main(void)
 #ifndef REMOVE_BOOTLOADER_LED
 	    /* PROG_PIN pulled low, indicate with LED that bootloader is active */
 	    PROGLED_DDR  |= (1<<PROGLED_PIN);
-	    //PROGLED_PORT &= ~(1<<PROGLED_PIN);
-	    PROGLED_PORT |= (1<<PROGLED_PIN);
-	    //	    DDRD = 1 << 7;
-	    //PORTD = 1 << 7;
+	    PROGLED_PORT &= ~(1<<PROGLED_PIN);
 #endif
+	    // Enable clear to send
+	    DDRC = 1 << PC3;
+	    PORTD = 0;
+
 	    /*
 	     * Init UART
 	     * set baudrate and enable USART receiver and transmiter without interrupts 
@@ -385,14 +389,14 @@ int main(void)
 	    UART_BAUD_RATE_HIGH = 0;     
 #endif       
 	    UART_BAUD_RATE_LOW = UART_BAUD_SELECT(BAUDRATE,F_CPU);
-	    UART_CONTROL_REG   = (1 << UART_ENABLE_RECEIVER) | (1 << UART_ENABLE_TRANSMITTER); 
+	    UART_CONTROL_REG   = (1 << UART_ENABLE_RECEIVER) | (1 << UART_ENABLE_TRANSMITTER);
 
 	    /* main loop */
 	    while(!isLeave)                             
-	      {   
+	      {
 		/*
 		 * Collect received bytes to a complete message
-		 */            
+		 */
 		msgParseState = ST_START;
 	        while ( msgParseState != ST_PROCESS )
 		  {
@@ -410,7 +414,7 @@ int main(void)
 			    checksum = MESSAGE_START^0;
 			  }
 			break;
-			
+
 		      case ST_GET_SEQ_NUM:
 			if ( (c == 1) || (c == seqNum) )
 			  {
@@ -850,7 +854,7 @@ int main(void)
 	      }//for
 	    
 #ifndef REMOVE_BOOTLOADER_LED
-	    PROGLED_DDR  &= ~(1<<PROGLED_PIN);   // set to default
+	    PROGLED_DDR  |= (1<<PROGLED_PIN);   // set to default
 #endif
 	    }
 skip_to_main_program:

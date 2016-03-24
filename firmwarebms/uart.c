@@ -19,7 +19,6 @@ void uart_init(unsigned int baudrate)
   UCSR0B = (1 << RXCIE0) | (1 << TXCIE0) | (1 << RXEN0) | (1 << TXEN0);
   // Set frame format: asynchronous, 8data, no parity, 1 stop bit
   UCSR0C = (3 << UCSZ00);
-  init_serial_vars();
 }
 
 // Only used for debug purposes

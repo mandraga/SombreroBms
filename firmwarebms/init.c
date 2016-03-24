@@ -80,14 +80,14 @@ void init()
 {
   // IO ports
   // Port B:
-  DDRB  = 0x00 | (1 << CSBAT) | (1 << BUZZER) | (1 << PD) | (1 << MOSI) | (1 << SCLK);
-  PORTB = 0x00 | (1 << CSBAT) | (0 << BUZZER) | (1 << PD) | (0 << MOSI) | (0 << SCLK);
+  DDRB  = 0x00 |  (1 << STOP_CHARGER) | (1 << RELON) | (1 << MOSI) | (1 << SCLK);
+  PORTB = 0x00 |  (1 << STOP_CHARGER) | (1 << RELON) | (0 << MOSI) | (0 << SCLK);
   // Port C:
-  DDRC  = 0x00 | (1 << CNVSTART) | (1 << CTS) | (1 << RELON);
-  PORTC = 0x00 | (1 << CNVSTART) | (0 << CTS) | (0 << RELON);
+  DDRC  = 0x00 | (1 << GAUGE) | (1 << CTS) | (1 << CNVSTART);
+  PORTC = 0x00 | (1 << GAUGE) | (0 << CTS) | (1 << CNVSTART);
   // Port D:
-  DDRD  = 0x00 | (1 << TXD) | (1 << CSDAC) | (1 << STOP_CHARGER) | (1 << LED_BALANCING) | (1 << LED_ERROR);
-  PORTD = 0x00 | (1 << TXD) | (1 << CSDAC) | (1 << STOP_CHARGER) | (1 << LED_BALANCING) | (1 << LED_ERROR);
+  DDRD  = 0x00 | (1 << TXD) | (1 << CSBAT) | (1 << PDOWN) | (1 << LED_ERROR) | (1 << LED_BALANCING) | (1 << BUZZER);
+  PORTD = 0x00 | (1 << TXD) | (1 << CSBAT) | (1 << PDOWN) | (1 << LED_ERROR) | (1 << LED_BALANCING) | (0 << BUZZER);
 
   // Wait 50ms
   _delay_ms(50);
@@ -99,6 +99,7 @@ void init()
   //g_appdata.charging_started = 0;
 
   // Init UART
+  init_serial_vars();
   uart_init(UART_BAUD_SELECT(BAUDRATE, F_CPU));
   uart_puts("startig the shit\n");
 

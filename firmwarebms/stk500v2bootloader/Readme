@@ -1,0 +1,16 @@
+Fuse configuration for the atmega168pa:
+
+LB: 0xD7 Crystal with BOD
+HB: 0xDD 2.7V brown out detection level
+EB: 0x02 Boot block uses 512Words 1024Bytes
+
+Command line used to program them:
+
+avrdude -c stk200 -P m168p -U lfuse:w:0xD7:h
+avrdude -c stk200 -P m168p -U hfuse:w:0xDD:h
+avrdude -c stk200 -P m168p -U efuse:w:0x02:h
+
+Command line to read the fuses:
+
+avrdude -c stk200 -P m168p -U lfuse:r:dumpfile
+

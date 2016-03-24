@@ -122,9 +122,9 @@ void set_gauge_out(unsigned long SOC, unsigned long fullcharge, char bat_low, ch
   if (gauge_out_state == GAUGE_OUT_STATE_TRANSMIT)
     {
       if (gauge_out_value == 1 || gauge_out_value <= 0)
-	CBI(PORTD, CSDAC);
+	CBI(PORTD, GAUGE);
       else
-	CBI(PORTD, CSDAC);
+	CBI(PORTD, GAUGE);
       gauge_out_value--;
       if (gauge_out_value <= 0)
 	gauge_out_state = GAUGE_OUT_STATE_UPDATE;

@@ -14,3 +14,4 @@ void get_IBAT(t_pack_variable_data *pappdata);
 int  get_charger_ON(void);
 
 void set_gauge_out(unsigned long SOC, unsigned long fullcharge, char bat_low, char charging, char failure);
+

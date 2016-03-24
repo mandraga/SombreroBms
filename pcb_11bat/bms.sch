@@ -45,7 +45,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 10
 Title ""
-Date "9 mar 2016"
+Date "24 mar 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -162,17 +162,6 @@ Text Label 9000 2650 2    60   ~ 0
 ALERT
 Text Label 9000 3000 2    60   ~ 0
 GND
-$Comp
-L BC550 Q1
-U 1 1 55EC6773
-P 7650 6500
-F 0 "Q1" H 7650 6351 40  0000 R CNN
-F 1 "BC550" H 7650 6650 40  0000 R CNN
-F 2 "TO92" H 7550 6602 29  0000 C CNN
-F 3 "" H 7650 6500 60  0000 C CNN
-	1    7650 6500
-	1    0    0    -1  
-$EndComp
 $Comp
 L C C8
 U 1 1 55EC68AB
@@ -407,7 +396,7 @@ F3 "5V" O R 4300 1050 60
 F4 "GND" I L 2800 1400 60 
 F5 "3V" O R 4300 1300 60 
 $EndSheet
-Text Label 4950 3400 0    60   ~ 0
+Text Label 4950 3300 0    60   ~ 0
 CSFLASH/
 Text Label 8550 750  2    60   ~ 0
 CSFLASH/
@@ -1010,7 +999,7 @@ F7 "GND" I R 9800 1100 60
 $EndSheet
 Wire Wire Line
 	4650 3300 4950 3300
-Text Label 4950 3300 0    60   ~ 0
+Text Label 4950 3400 0    60   ~ 0
 GAUGEOUT
 $Sheet
 S 7650 2900 650  600 
@@ -1050,4 +1039,15 @@ F 3 "~" H 7050 5900 30  0000 C CNN
 $EndComp
 Wire Wire Line
 	6800 5900 6300 5900
+$Comp
+L BC850 Q?
+U 1 1 56F45BFA
+P 7650 6500
+F 0 "Q?" H 7650 6351 40  0000 R CNN
+F 1 "BC850" H 7650 6650 40  0000 R CNN
+F 2 "SOT-23" H 7550 6602 29  0000 C CNN
+F 3 "" H 7650 6500 60  0000 C CNN
+	1    7650 6500
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC

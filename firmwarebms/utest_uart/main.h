@@ -3,33 +3,33 @@
 #define CBI(port, bit) ((port) &= ~(1 << (bit)))
 
 // PORTB
-#define STOP_CHARGER  PB0
-#define CHARGER_ON    PB1
-#define RELON         PB2
-#define MOSI          PB3
-#define MISO          PB4
-#define SCLK          PB5
-#define OSC1          PB6
-#define OSC2          PB7
+#define CSBAT  PB0
+#define BUZZER PB1
+#define PD     PB2
+#define MOSI   PB3
+#define MISO   PB4
+#define SCLK   PB5
+#define OSC1   PB6
+#define OSC2   PB7
 
 // PORTC
-#define NC0           PC0
-#define GAUGE         PC1
-#define RTS           PC2
-#define CTS           PC3
-#define NC4           PC4
-#define CNVSTART      PC5
-#define RESET         PC6
+#define CNVSTART  PC0
+#define NC1       PC1
+#define NC2       PC2
+#define RTS       PC3
+#define CTS       PC4
+#define RELON     PC5
+#define RESET     PC6
 
 // PORTD
 #define RXD           PD0
 #define TXD           PD1
 #define ALERT         PD2
-#define CSBAT         PD3
-#define PDOWN         PD4
-#define LED_ERROR     PD5
+#define CHARGER_ON    PD3
+#define CSDAC         PD4
+#define STOP_CHARGER  PD5
 #define LED_BALANCING PD6
-#define BUZZER        PD7
+#define LED_ERROR     PD7
 
 // Main state machine
 #define STATE_START    0
