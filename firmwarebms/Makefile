@@ -274,6 +274,7 @@ LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 # to get a full listing.
 #
 AVRDUDE_PROGRAMMER = stk500v2
+#AVRDUDE_PROGRAMMER = avrisp2
 
 # com1 = serial port. Use lpt1 to connect to parallel port.
 AVRDUDE_PORT = /dev/ttyUSB0    # programmer connected to serial device
@@ -302,8 +303,8 @@ AVRDUDE_FLAGS = -p $(DUDEMCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
 AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)
 AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
-AVRDUDE_FLAGS += $(AVRDUDE_CUSTOM_BAUDRATE)
-AVRDUDE_FLAGS += -D
+	AVRDUDE_FLAGS += $(AVRDUDE_CUSTOM_BAUDRATE)
+AVRDUDE_FLAGS += -D -v
 
 
 #---------------- Debugging Options ----------------

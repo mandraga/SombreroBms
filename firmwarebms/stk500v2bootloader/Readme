@@ -1,8 +1,13 @@
+Bootloader code.
+
+Note that it does not seem to work with the avrdude 6.01 from 2013 but works
+with the 6.3 from 2016.
+
 Fuse configuration for the atmega168pa:
 
 LB: 0xD7 Crystal with BOD
 HB: 0xDD 2.7V brown out detection level
-EB: 0x02 Boot block uses 512Words 1024Bytes
+EB: 0x02 Boot block uses the last 512Words 1024Bytes
 
 Command line used to program them:
 

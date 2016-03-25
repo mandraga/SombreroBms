@@ -229,7 +229,7 @@ LICENSE:
 #define UART_BAUD_RATE_HIGH      UBRR1H
 #endif
 #define	UART_STATUS_REG	         UCSR1A
-#define	UART_CONTROL_REG	     UCSR1B
+#define	UART_CONTROL_REG	 UCSR1B
 #define	UART_ENABLE_TRANSMITTER	 TXEN1
 #define	UART_ENABLE_RECEIVER	 RXEN1
 #define	UART_TRANSMIT_COMPLETE	 TXC1
@@ -852,11 +852,7 @@ int main(void)
 	        seqNum++;
 		
 	      }//for
-	    
-#ifndef REMOVE_BOOTLOADER_LED
-	    PROGLED_DDR  |= (1<<PROGLED_PIN);   // set to default
-#endif
-	    }
+	  }
 skip_to_main_program:
 	  /*    
 sendchar('T');
@@ -864,6 +860,9 @@ sendchar('E');
 sendchar('S');
 sendchar('T');
 	  */
+#ifndef REMOVE_BOOTLOADER_LED
+	  PROGLED_DDR |= (1<<PROGLED_PIN);   // set to default
+#endif
 	/*
 	 * Now leave bootloader
 	 */
