@@ -99,7 +99,7 @@ LICENSE:
  */
 #define PROGLED_PORT PORTD
 #define PROGLED_DDR  DDRD
-#define PROGLED_PIN  7
+#define PROGLED_PIN  5
 
 /*
  * define CPU frequency in Mhz here if not defined in Makefile 
