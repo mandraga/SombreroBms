@@ -347,7 +347,7 @@ static unsigned char recchar(char *ptimeout)
 }
 
 #define CTS PC3
- 
+
 int main(void) __attribute__ ((OS_main));
 int main(void)
 {
@@ -656,13 +656,15 @@ int main(void)
 	            }
 		    break;
 		    
-		  case CMD_READ_LOCK_ISP:            
-		    msgLength = 4;
-	            msgBuffer[1] = STATUS_CMD_OK;
-	            msgBuffer[2] = boot_lock_fuse_bits_get( GET_LOCK_BITS );
-	            msgBuffer[3] = STATUS_CMD_OK;	                                                
+		  case CMD_READ_LOCK_ISP:
+		    {
+		      msgLength = 4;
+		      msgBuffer[1] = STATUS_CMD_OK;
+		      msgBuffer[2] = boot_lock_fuse_bits_get( GET_LOCK_BITS );
+		      msgBuffer[3] = STATUS_CMD_OK;
+		    }
 		    break;
-		    
+
 		  case CMD_READ_FUSE_ISP:
 		    {                    
 		      unsigned char fuseBits;                    
@@ -719,10 +721,11 @@ int main(void)
 		  case CMD_PROGRAM_FLASH_ISP:
 		  case CMD_PROGRAM_EEPROM_ISP:                
 		    {
-		      unsigned int  size = (((unsigned int)msgBuffer[1])<<8) | msgBuffer[2];
+//-----------------------------------------------------------
+		      unsigned int  size = (((unsigned int)msgBuffer[1]) << 8) | msgBuffer[2];
 		      unsigned char *p = msgBuffer+10;
 		      unsigned int  data;
-		      unsigned char highByte, lowByte;                    
+		      //unsigned char highByte, lowByte;                    
 		      address_t     tempaddress = address;
 		      
 		      
@@ -731,19 +734,20 @@ int main(void)
 			  // erase only main section (bootloader protection)
 			  if  (  eraseAddress < APP_END )
 			    {
-			      boot_page_erase(eraseAddress);	// Perform page erase
-			      boot_spm_busy_wait();		// Wait until the memory is erased.
-			      eraseAddress += SPM_PAGESIZE;    // point to next page to be erase
+			      boot_page_erase_safe(eraseAddress);	// Perform page erase
+			      //boot_spm_busy_wait();		// Wait until the memory is erased.
+			      eraseAddress += SPM_PAGESIZE;     // point to next page to be erase
 			    }
 			  
 			  /* Write FLASH */
 			  do {
-			    lowByte   = *p++;
-			    highByte  = *p++;
-			    
-			    data =  (highByte << 8) | lowByte;
-			    boot_page_fill(address,data);
-			    
+			    //lowByte   = *p++;
+			    //highByte  = *p++;
+
+			    data = (p[1] << 8) | p[0];
+			    p += 2;
+			    boot_page_fill_safe(address, data);
+
 			    address = address + 2;  	// Select next word in memory
 			    size -= 2;			// Reduce number of bytes to write by two    
 			  } while(size);			// Loop until all bytes written
@@ -769,14 +773,15 @@ int main(void)
 			  } while(size);					// Loop until all bytes written    		            
     		        }
 		      msgLength = 2;
-		      msgBuffer[1] = STATUS_CMD_OK;    		        
+		      msgBuffer[1] = STATUS_CMD_OK;
+//----------------------------------------------------------------
 		    }
 		    break;
 		    
 		  case CMD_READ_FLASH_ISP:
 		  case CMD_READ_EEPROM_ISP:                                                
 		    {
-		      unsigned int  size = (((unsigned int)msgBuffer[1])<<8) | msgBuffer[2];
+		      unsigned int  size = (((unsigned int)msgBuffer[1]) << 8) | msgBuffer[2];
 		      unsigned char *p = msgBuffer+1;
 		      msgLength = size+3;
 		      
@@ -786,7 +791,7 @@ int main(void)
 			  unsigned int data;
 			  
 			  // Read FLASH
-			  do {                            
+			  do {
 #if defined(RAMPZ)
 			    data = pgm_read_word_far(address);
 #else
@@ -794,7 +799,7 @@ int main(void)
 #endif
 			    *p++ = (unsigned char)data;         //LSB
 			    *p++ = (unsigned char)(data >> 8);	//MSB  
-			    address    += 2;  	 // Select next word in memory
+			    address += 2;  	                // Select next word in memory
 			    size -= 2;
 			  }while (size);
 			}
@@ -804,9 +809,9 @@ int main(void)
 			  do {
 			    EEARL = address;			// Setup EEPROM address
 			    EEARH = ((address >> 8));
-			    address++;					// Select next EEPROM byte
+			    address++;				// Select next EEPROM byte
 			    EECR |= (1<<EERE);			// Read EEPROM
-			    *p++ = EEDR;				// Send EEPROM data
+			    *p++ = EEDR;		        // Send EEPROM data
 			    size--;    			        
 			  }while(size);
 			}
@@ -867,7 +872,7 @@ sendchar('T');
 	 * Now leave bootloader
 	 */
 #ifndef REMOVE_PROG_PIN_PULLUP	
-	PROG_PORT &= ~(1<<PROG_PIN);    // set to default
+//	PROG_PORT &= ~(1<<PROG_PIN);    // set to default
 #endif	
 	boot_rww_enable();              // enable application section
 	

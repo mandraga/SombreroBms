@@ -43,6 +43,7 @@
 # MCU name
 #MCU = atmega168pa
 MCU = atmega168pa
+DUDEMCU = m168p
 
 # Processor frequency.
 #     This will define a symbol, F_CPU, in all source code files equal to the 
@@ -298,7 +299,7 @@ AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 
 #AVRDUDE_CUSTOM_BAUDRATE = -b 38400
 
-AVRDUDE_FLAGS = -p $(MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
+AVRDUDE_FLAGS = -p $(DUDEMCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
 AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)
 AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
