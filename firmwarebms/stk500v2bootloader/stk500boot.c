@@ -70,6 +70,8 @@ LICENSE:
 #include <avr/pgmspace.h>
 #include "command.h"
 
+#include "flash_m168p.h"
+
 /*
  * Uncomment the following lines to save code space 
  */
@@ -348,11 +350,17 @@ static unsigned char recchar(char *ptimeout)
 
 #define CTS PC3
 
+// Flash programming routine in assembler from a .S file
+#define USE_ASM_M168PA
+
+
 int main(void) __attribute__ ((OS_main));
 int main(void)
 {
     address_t       address = 0;
-    address_t       eraseAddress = 0;	
+#ifndef USE_ASM_M168PA
+    address_t       eraseAddress = 0;
+#endif
     unsigned char   msgParseState;
     unsigned int    i = 0;
     unsigned char   checksum = 0;
@@ -703,7 +711,9 @@ int main(void)
 		    break;
 #endif
 		  case CMD_CHIP_ERASE_ISP:
+#ifndef USE_ASM_M168PA
 		    eraseAddress = 0;
+#endif
 	            msgLength = 2;
 	            msgBuffer[1] = STATUS_CMD_OK;
 		    break;
@@ -721,16 +731,19 @@ int main(void)
 		  case CMD_PROGRAM_FLASH_ISP:
 		  case CMD_PROGRAM_EEPROM_ISP:                
 		    {
-//-----------------------------------------------------------
 		      unsigned int  size = (((unsigned int)msgBuffer[1]) << 8) | msgBuffer[2];
 		      unsigned char *p = msgBuffer+10;
-		      unsigned int  data;
-		      //unsigned char highByte, lowByte;                    
-		      address_t     tempaddress = address;
-		      
 		      
 		      if ( msgBuffer[0] == CMD_PROGRAM_FLASH_ISP )
 			{
+//-----------------------------------------------------------
+#ifdef USE_ASM_M168PA
+			  wr_flash_page_m168pa(address, p, size);
+#else
+			  unsigned int  data;
+			  address_t     tempaddress = address;
+			  //unsigned char highByte, lowByte;
+
 			  // erase only main section (bootloader protection)
 			  if  (  eraseAddress < APP_END )
 			    {
@@ -738,7 +751,7 @@ int main(void)
 			      //boot_spm_busy_wait();		// Wait until the memory is erased.
 			      eraseAddress += SPM_PAGESIZE;     // point to next page to be erase
 			    }
-			  
+
 			  /* Write FLASH */
 			  do {
 			    //lowByte   = *p++;
@@ -750,11 +763,13 @@ int main(void)
 
 			    address = address + 2;  	// Select next word in memory
 			    size -= 2;			// Reduce number of bytes to write by two    
-			  } while(size);			// Loop until all bytes written
-			  
+			  } while(size);		// Loop until all bytes written
+
 			  boot_page_write(tempaddress);
 			  boot_spm_busy_wait();	
-			  boot_rww_enable();				// Re-enable the RWW section                    
+			  boot_rww_enable();				// Re-enable the RWW section
+#endif //USE_ASM_M168PA
+//----------------------------------------------------------------
     		        }
 		      else
     		        {
@@ -774,7 +789,6 @@ int main(void)
     		        }
 		      msgLength = 2;
 		      msgBuffer[1] = STATUS_CMD_OK;
-//----------------------------------------------------------------
 		    }
 		    break;
 		    
