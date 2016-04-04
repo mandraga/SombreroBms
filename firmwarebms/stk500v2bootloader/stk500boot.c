@@ -70,7 +70,7 @@ LICENSE:
 #include <avr/pgmspace.h>
 #include "command.h"
 
-#include "flash_m168p.h"
+#include "flash_m.h"
 
 /*
  * Uncomment the following lines to save code space 
@@ -85,7 +85,7 @@ LICENSE:
  */
 #define ENABLE_LEAVE_BOOTLADER
 
-/* 
+/*
  * Pin "PROG_PIN" on port "PROG_PORT" has to be pulled low
  * (active low) to start the bootloader 
  * uncomment #define REMOVE_PROG_PIN_PULLUP if using an external pullup
@@ -107,14 +107,16 @@ LICENSE:
  * define CPU frequency in Mhz here if not defined in Makefile 
  */
 #ifndef F_CPU
+	#error "Define the clock in the Makefile"
 #define F_CPU 3686400UL
 #endif
 
 /*
  * define which UART channel will be used, if device with two UARTs is used
  */
-//#define USE_USART1        // undefined means use USART0
-
+#if defined (__AVR_ATmega128__)
+#define USE_USART1        // undefined means use USART0
+#endif
 
 /*
  * UART Baudrate, AVRStudio AVRISP only accepts 115200 bps
@@ -145,9 +147,11 @@ LICENSE:
  * (adjust BOOTSIZE below and BOOTLOADER_ADDRESS in Makefile if you want to change the size of the bootloader)
  */
 #define BOOTSIZE 512
+//#define BOOTSIZE 4096
 #define APP_END  (FLASHEND -(2*BOOTSIZE) + 1)
 
-
+// Flash programming routine in assembler from a .S file
+#define USE_ASM_PAGE_FLASH
 
 /*
  * Signature bytes are not available in avr-gcc io_xxx.h
@@ -350,15 +354,11 @@ static unsigned char recchar(char *ptimeout)
 
 #define CTS PC3
 
-// Flash programming routine in assembler from a .S file
-#define USE_ASM_M168PA
-
-
 int main(void) __attribute__ ((OS_main));
 int main(void)
 {
     address_t       address = 0;
-#ifndef USE_ASM_M168PA
+#ifndef USE_ASM_PAGE_FLASH
     address_t       eraseAddress = 0;
 #endif
     unsigned char   msgParseState;
@@ -371,6 +371,7 @@ int main(void)
     unsigned char   isLeave = 0;
     char            timeout;
 
+    cli();
 	/*
 	 * Branch to bootloader or application code ?
 	 */	
@@ -379,11 +380,12 @@ int main(void)
 #ifndef REMOVE_BOOTLOADER_LED
 	    /* PROG_PIN pulled low, indicate with LED that bootloader is active */
 	    PROGLED_DDR  |= (1<<PROGLED_PIN);
-	    PROGLED_PORT &= ~(1<<PROGLED_PIN);
+	    //	    PROGLED_PORT &= ~(1<<PROGLED_PIN);
+	    PROGLED_PORT = (1 << PROGLED_PIN);
 #endif
 	    // Enable clear to send
-	    DDRC = 1 << PC3;
-	    PORTD = 0;
+	    //DDRC = 1 << PC3;
+	    //PORTD = 0;
 
 	    /*
 	     * Init UART
@@ -398,6 +400,15 @@ int main(void)
 #endif       
 	    UART_BAUD_RATE_LOW = UART_BAUD_SELECT(BAUDRATE,F_CPU);
 	    UART_CONTROL_REG   = (1 << UART_ENABLE_RECEIVER) | (1 << UART_ENABLE_TRANSMITTER);
+
+	    /*
+	    while(1)
+	      {
+		sendchar('T');
+		sendchar('E');
+		sendchar('S');
+		sendchar('T');
+		}*/
 
 	    /* main loop */
 	    while(!isLeave)                             
@@ -566,82 +577,114 @@ int main(void)
 #ifndef REMOVE_CMD_SPI_MULTI
 		  case CMD_SPI_MULTI:
 		    {
-		      unsigned char answerByte = 0;
-		      
-		      // only Read Signature Bytes implemented, return dummy value for other instructions
-		      if ( msgBuffer[4]== 0x30 )
-			{						
-			  unsigned char signatureIndex = msgBuffer[6];						
-			  
+		      unsigned char answerByte;
+
+		      if ( msgBuffer[4] == 0x30 )
+			{
+			  unsigned char signatureIndex = msgBuffer[6];
+
 			  if ( signatureIndex == 0 )
-			    answerByte = (SIGNATURE_BYTES >>16) & 0x000000FF;
+			    {
+			      answerByte = (SIGNATURE_BYTES >> 16) & 0x000000FF;
+			    }
 			  else if ( signatureIndex == 1 )
-			    answerByte = (SIGNATURE_BYTES >> 8) & 0x000000FF;
+			    {
+			      answerByte = (SIGNATURE_BYTES >> 8) & 0x000000FF;
+			    }
 			  else
-			    answerByte = SIGNATURE_BYTES & 0x000000FF;
-			}					
+			    {
+			      answerByte = SIGNATURE_BYTES & 0x000000FF;
+			    }
+			}
+		      else 
+			if ( msgBuffer[4] & 0x50 )
+			  {
+			    // Issue 544: stk500v2 bootloader doesn't support reading fuses
+			    // I cant find the docs that say what these are supposed to be but this was figured out by trial and error
+			    // answerByte = boot_lock_fuse_bits_get(GET_LOW_FUSE_BITS);
+			    // answerByte = boot_lock_fuse_bits_get(GET_HIGH_FUSE_BITS);
+			    // answerByte = boot_lock_fuse_bits_get(GET_EXTENDED_FUSE_BITS);
+			    if (msgBuffer[4] == 0x50)
+			      {
+				answerByte = boot_lock_fuse_bits_get(GET_LOW_FUSE_BITS);
+			      }
+			    else if (msgBuffer[4] == 0x58)
+			      {
+				answerByte = boot_lock_fuse_bits_get(GET_HIGH_FUSE_BITS);
+			      }
+			    else
+			      {
+				answerByte = 0;
+			      }
+			  }
+			else
+			  {
+			    answerByte = 0; // for all others command are not implemented, return dummy value for AVRDUDE happy <Worapoht>
+			  }
 		      msgLength = 7;
 		      msgBuffer[1] = STATUS_CMD_OK;
-		      msgBuffer[2] = 0;					
-		      msgBuffer[3] = msgBuffer[4];  // Instruction Byte 1
-		      msgBuffer[4] = msgBuffer[5];  // Instruction Byte 2
-		      msgBuffer[5] = answerByte;	                
+		      msgBuffer[2] = 0;
+		      msgBuffer[3] = msgBuffer[4];
+		      msgBuffer[4] = msgBuffer[5];
+		      msgBuffer[5] = answerByte;
 		      msgBuffer[6] = STATUS_CMD_OK;
 		    }
 		    break;
 #endif
 		  case CMD_SIGN_ON:
-		    msgLength = 11;		        
-		    msgBuffer[1]  = STATUS_CMD_OK;
-		    msgBuffer[2]  = 8;
-		    msgBuffer[3]  = 'A';
-		    msgBuffer[4]  = 'V';
-		    msgBuffer[5]  = 'R';
-		    msgBuffer[6]  = 'I';
-		    msgBuffer[7]  = 'S';
-		    msgBuffer[8]  = 'P';
-		    msgBuffer[9]  = '_';
-		    msgBuffer[10] = '2';
+		    {
+		      msgLength = 11;
+		      msgBuffer[1]  = STATUS_CMD_OK;
+		      msgBuffer[2]  = 8;
+		      msgBuffer[3]  = 'A';
+		      msgBuffer[4]  = 'V';
+		      msgBuffer[5]  = 'R';
+		      msgBuffer[6]  = 'I';
+		      msgBuffer[7]  = 'S';
+		      msgBuffer[8]  = 'P';
+		      msgBuffer[9]  = '_';
+		      msgBuffer[10] = '2';
+		    }
 		    break;
-		    
-	        case CMD_GET_PARAMETER:
-		  {
-		    unsigned char value;
-	            
-		    switch(msgBuffer[1])
-		      {
-		      case PARAM_BUILD_NUMBER_LOW:
-			value = CONFIG_PARAM_BUILD_NUMBER_LOW;
-			break;				    
-		      case PARAM_BUILD_NUMBER_HIGH:
-			value = CONFIG_PARAM_BUILD_NUMBER_HIGH;
-			break;				    
-		      case PARAM_HW_VER:
-			value = CONFIG_PARAM_HW_VER;
-			break;				    
-		      case PARAM_SW_MAJOR:
-			value = CONFIG_PARAM_SW_MAJOR;
-			break;
-		      case PARAM_SW_MINOR:
-			value = CONFIG_PARAM_SW_MINOR;
-			break;				
-		      default:
-			value = 0;
-			break;
-		      }
-		    msgLength = 3;		        
-		    msgBuffer[1] = STATUS_CMD_OK;
-		    msgBuffer[2] = value;
-		  }
-		  break;
-	          
+
+		  case CMD_GET_PARAMETER:
+		    {
+		      unsigned char value;
+		      
+		      switch(msgBuffer[1])
+			{
+			case PARAM_BUILD_NUMBER_LOW:
+			  value = CONFIG_PARAM_BUILD_NUMBER_LOW;
+			  break;				    
+			case PARAM_BUILD_NUMBER_HIGH:
+			  value = CONFIG_PARAM_BUILD_NUMBER_HIGH;
+			  break;				    
+			case PARAM_HW_VER:
+			  value = CONFIG_PARAM_HW_VER;
+			  break;				    
+			case PARAM_SW_MAJOR:
+			  value = CONFIG_PARAM_SW_MAJOR;
+			  break;
+			case PARAM_SW_MINOR:
+			  value = CONFIG_PARAM_SW_MINOR;
+			  break;				
+			default:
+			  value = 0;
+			  break;
+			}
+		      msgLength = 3;
+		      msgBuffer[1] = STATUS_CMD_OK;
+		      msgBuffer[2] = value;
+		    }
+		    break;
+
 		  case CMD_LEAVE_PROGMODE_ISP:
 #ifdef ENABLE_LEAVE_BOOTLADER
 	            isLeave = 1;
 #endif
 		  case CMD_ENTER_PROGMODE_ISP:    	            
 		  case CMD_SET_PARAMETER:	        
-		    msgLength = 2;		        
+		    msgLength = 2;
 		    msgBuffer[1] = STATUS_CMD_OK;
 		    break;
 		    
@@ -672,10 +715,10 @@ int main(void)
 		      msgBuffer[3] = STATUS_CMD_OK;
 		    }
 		    break;
-
+		    
 		  case CMD_READ_FUSE_ISP:
 		    {                    
-		      unsigned char fuseBits;                    
+		      unsigned char fuseBits;
 		      
 		      if ( msgBuffer[2] == 0x50 )
 			{
@@ -687,11 +730,11 @@ int main(void)
 		      else 
 			{
 			  fuseBits = boot_lock_fuse_bits_get( GET_HIGH_FUSE_BITS );
-			}                    
+			}
 		      msgLength = 4;    
 		      msgBuffer[1] = STATUS_CMD_OK;
 		      msgBuffer[2] = fuseBits;	                
-		      msgBuffer[3] = STATUS_CMD_OK;	                                    
+		      msgBuffer[3] = STATUS_CMD_OK;
 		    }
 		    break;
 		    
@@ -711,21 +754,26 @@ int main(void)
 		    break;
 #endif
 		  case CMD_CHIP_ERASE_ISP:
-#ifndef USE_ASM_M168PA
-		    eraseAddress = 0;
+		    {
+#ifndef USE_ASM_PAGE_FLASH
+		      eraseAddress = 0;
 #endif
-	            msgLength = 2;
-	            msgBuffer[1] = STATUS_CMD_OK;
+		      msgLength = 2;
+		      //msgBuffer[1] = STATUS_CMD_OK;
+		      msgBuffer[1] = STATUS_CMD_FAILED; // Issue 543
+		    }
 		    break;
 		    
 		  case CMD_LOAD_ADDRESS:
+		    {
 #if defined(RAMPZ)
-		    address = ( ((address_t)(msgBuffer[1])<<24)|((address_t)(msgBuffer[2])<<16)|((address_t)(msgBuffer[3])<<8)|(msgBuffer[4]) )<<1;
+		      address = (((address_t)(msgBuffer[1]) << 24) | ((address_t)(msgBuffer[2]) << 16) | ((address_t)(msgBuffer[3]) << 8) | (msgBuffer[4])) << 1;
 #else
-		    address = ( ((msgBuffer[3])<<8)|(msgBuffer[4]) )<<1;  //convert word to byte address
+		      address = (((msgBuffer[3]) << 8) | (msgBuffer[4])) << 1;  //convert word to byte address
 #endif
-		    msgLength = 2;
-		    msgBuffer[1] = STATUS_CMD_OK;
+		      msgLength = 2;
+		      msgBuffer[1] = STATUS_CMD_OK;
+		    }
 		    break;
 		    
 		  case CMD_PROGRAM_FLASH_ISP:
@@ -733,33 +781,37 @@ int main(void)
 		    {
 		      unsigned int  size = (((unsigned int)msgBuffer[1]) << 8) | msgBuffer[2];
 		      unsigned char *p = msgBuffer+10;
-		      
+
+#ifdef __AVR_ATmega128__
+		      if ((address >> 16) != 0)
+			RAMPZ = 0x01;
+		      else
+			RAMPZ = 0x00;
+#endif
 		      if ( msgBuffer[0] == CMD_PROGRAM_FLASH_ISP )
 			{
 //-----------------------------------------------------------
-#ifdef USE_ASM_M168PA
+#ifdef USE_ASM_PAGE_FLASH
 			  wr_flash_page_m168pa(address, p, size);
 #else
 			  unsigned int  data;
 			  address_t     tempaddress = address;
-			  //unsigned char highByte, lowByte;
 
 			  // erase only main section (bootloader protection)
 			  if  (  eraseAddress < APP_END )
 			    {
 			      boot_page_erase_safe(eraseAddress);	// Perform page erase
-			      //boot_spm_busy_wait();		// Wait until the memory is erased.
+			      boot_spm_busy_wait();		// Wait until the memory is erased.
 			      eraseAddress += SPM_PAGESIZE;     // point to next page to be erase
 			    }
 
 			  /* Write FLASH */
 			  do {
-			    //lowByte   = *p++;
-			    //highByte  = *p++;
 
-			    data = (p[1] << 8) | p[0];
+			    data = ((unsigned int)p[1] << 8) | p[0];
 			    p += 2;
-			    boot_page_fill_safe(address, data);
+			    boot_page_fill(address, data);
+			    boot_spm_busy_wait();		// Wait until the memory is erased.
 
 			    address = address + 2;  	// Select next word in memory
 			    size -= 2;			// Reduce number of bytes to write by two    
@@ -768,7 +820,7 @@ int main(void)
 			  boot_page_write(tempaddress);
 			  boot_spm_busy_wait();	
 			  boot_rww_enable();				// Re-enable the RWW section
-#endif //USE_ASM_M168PA
+#endif //USE_ASM_PAGE_FLASH
 //----------------------------------------------------------------
     		        }
 		      else
@@ -815,7 +867,8 @@ int main(void)
 			    *p++ = (unsigned char)(data >> 8);	//MSB  
 			    address += 2;  	                // Select next word in memory
 			    size -= 2;
-			  }while (size);
+			  }
+			  while (size);
 			}
 		      else
 			{
@@ -826,7 +879,7 @@ int main(void)
 			    address++;				// Select next EEPROM byte
 			    EECR |= (1<<EERE);			// Read EEPROM
 			    *p++ = EEDR;		        // Send EEPROM data
-			    size--;    			        
+			    size--;
 			  }while(size);
 			}
 		      *p++ = STATUS_CMD_OK;
@@ -837,8 +890,8 @@ int main(void)
 	            msgLength = 2;   
 	            msgBuffer[1] = STATUS_CMD_FAILED;
 	            break;
-		  }                             
-		
+		  }
+
 		/*
 		 * Now send answer message back
 		 */
@@ -848,11 +901,11 @@ int main(void)
 	        sendchar(seqNum);
 	        checksum ^= seqNum;
 	        
-	        c = ((msgLength>>8)&0xFF);
+	        c = ((msgLength >> 8) & 0xFF);
 	        sendchar(c);
 	        checksum ^= c;
 	        
-	        c = msgLength&0x00FF;
+	        c = msgLength & 0x00FF;
 	        sendchar(c);
 	        checksum ^= c;
 	        
@@ -860,14 +913,14 @@ int main(void)
 	        checksum ^= TOKEN;
 		
 		p = msgBuffer;
-		while ( msgLength )
-		  {                
+		while (msgLength)
+		  {
 		    c = *p++;
 		    sendchar(c);
-		    checksum ^=c;
-		    msgLength--;               
-		  }                   
-	        sendchar(checksum);	        
+		    checksum ^= c;
+		    msgLength--;
+		  }
+	        sendchar(checksum);
 	        seqNum++;
 		
 	      }//for
@@ -880,13 +933,14 @@ sendchar('S');
 sendchar('T');
 	  */
 #ifndef REMOVE_BOOTLOADER_LED
-	  PROGLED_DDR |= (1<<PROGLED_PIN);   // set to default
+	  //PROGLED_DDR |= (1<<PROGLED_PIN);   // set to default
+	  PROGLED_PORT &= ~(1<<PROGLED_PIN);
 #endif
 	/*
 	 * Now leave bootloader
 	 */
 #ifndef REMOVE_PROG_PIN_PULLUP	
-//	PROG_PORT &= ~(1<<PROG_PIN);    // set to default
+	  //	PROG_PORT &= ~(1<<PROG_PIN);    // set to default
 #endif	
 	boot_rww_enable();              // enable application section
 	
@@ -906,3 +960,4 @@ sendchar('T');
 	 */
 	for(;;);
 }
+

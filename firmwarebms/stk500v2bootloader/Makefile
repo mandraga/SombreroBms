@@ -41,14 +41,28 @@ MCU = atmega168pa
 #     processor frequency. You can then use this symbol in your source code to 
 #     calculate timings. Do NOT tack on a 'UL' at the end, this will be done
 #     automatically to create a 32-bit value in your source code.
+#     Typical values are:
+#         F_CPU =  1000000
+#         F_CPU =  1843200
+#         F_CPU =  2000000
+#         F_CPU =  3686400
+#         F_CPU =  4000000
+#         F_CPU =  7372800
+#         F_CPU =  8000000
+#         F_CPU = 11059200
+#         F_CPU = 14745600
+#         F_CPU = 16000000
+#         F_CPU = 18432000
+#         F_CPU = 20000000
 F_CPU = 3686400
 
 # Bootloader
 # Please adjust if using a different AVR
 # 0x0e00*2=0x1C00 for ATmega8  512 words Boot Size
-# Atmega128 0xF000 512W
-# Atymega168PA 0xE00
-BOOTLOADER_ADDRESS = 0xE00
+# Atmega128   0xF000 4096W but avrgcc takes bytes so 1E000
+# Atmega168PA 0xE00        but avrgcc takes bytes so  1C00
+# Atmega32    0x3800W
+BOOTLOADER_ADDRESS = 0x1C00
 
 
 # Output format. (can be srec, ihex, binary)
@@ -70,8 +84,8 @@ SRC = $(TARGET).c
 #     Even though the DOS/Win* filesystem matches both .s and .S the same,
 #     it will preserve the spelling of the filenames, and gcc itself does
 #     care about how the name is spelled on its command-line.
-ASRC = flash_m168p.S
-
+ASRC = flash_m.S
+#ASRC =
 
 # Optimization level, can be [0, 1, 2, 3, s]. 
 #     0 = turn off optimization. s = optimize for size.
@@ -143,7 +157,7 @@ ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs
 PRINTF_LIB_MIN = -Wl,-u,vfprintf -lprintf_min
 
 # Floating point printf version (requires MATH_LIB = -lm below)
-PRINTF_LIB_FLOAT = -Wl,-u,vfprintf -lprintf_flt
+PRINTF_LIB_FLOAT = -Wl,-u,vfprintf -lprintf_flt 
 
 # If this is left blank, then it will use the Standard printf version.
 PRINTF_LIB = 
