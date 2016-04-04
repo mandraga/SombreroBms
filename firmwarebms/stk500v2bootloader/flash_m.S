@@ -79,7 +79,6 @@
 		spm
 
 	Wait_spm2:
-		nop
 		lds  temp1, SPMCSR
 		sbrc temp1, SELFPRGEN
 	rjmp Wait_spm2
@@ -116,9 +115,6 @@ wr_flash_page_m168pa:
 		push r0
 		push r28	;
 		push r29
-	
-		clr r24
-		clr r25
 
 		;
 		movw YL, r22   ; Y = ram_buffer (29:28) = (23:22)
