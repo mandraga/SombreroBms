@@ -380,8 +380,8 @@ int main(void)
 #ifndef REMOVE_BOOTLOADER_LED
 	    /* PROG_PIN pulled low, indicate with LED that bootloader is active */
 	    PROGLED_DDR  |= (1<<PROGLED_PIN);
-	    //	    PROGLED_PORT &= ~(1<<PROGLED_PIN);
-	    PROGLED_PORT = (1 << PROGLED_PIN);
+       	    PROGLED_PORT &= ~(1<<PROGLED_PIN);
+	    //PROGLED_PORT = (1 << PROGLED_PIN);
 #endif
 	    // Enable clear to send
 	    //DDRC = 1 << PC3;
@@ -933,8 +933,8 @@ sendchar('S');
 sendchar('T');
 	  */
 #ifndef REMOVE_BOOTLOADER_LED
-	  //PROGLED_DDR |= (1<<PROGLED_PIN);   // set to default
-	  PROGLED_PORT &= ~(1<<PROGLED_PIN);
+	  PROGLED_DDR |= (1<<PROGLED_PIN);   // set to default
+	  //PROGLED_PORT &= ~(1<<PROGLED_PIN);
 #endif
 	/*
 	 * Now leave bootloader

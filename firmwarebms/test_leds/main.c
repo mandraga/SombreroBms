@@ -36,7 +36,7 @@ void init(void)
   // IO ports
   // Port B:
   DDRB  = 0x00 |  (1 << STOP_CHARGER) | (1 << RELON) | (1 << MOSI) | (1 << SCLK);
-  PORTB = 0x00 |  (1 << STOP_CHARGER) | (1 << RELON) | (0 << MOSI) | (0 << SCLK);
+  PORTB = 0x00 |  (1 << STOP_CHARGER) | (0 << RELON) | (0 << MOSI) | (0 << SCLK);
   // Port C:
   DDRC  = 0x00 | (1 << GAUGE) | (1 << CTS) | (1 << CNVSTART);
   PORTC = 0x00 | (1 << GAUGE) | (0 << CTS) | (1 << CNVSTART);
