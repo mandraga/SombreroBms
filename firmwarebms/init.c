@@ -43,7 +43,6 @@ void INT0_init(void)
   //SBI(GICR, INT0);
 }
 
-// INT0 interrupt, for SPDIF change/error handling
 ISR(INT0_vect)
 {
   // Interrupt disabled

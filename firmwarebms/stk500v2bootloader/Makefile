@@ -59,8 +59,8 @@ F_CPU = 3686400
 # Bootloader
 # Please adjust if using a different AVR
 # 0x0e00*2=0x1C00 for ATmega8  512 words Boot Size
-# Atmega128   0xF000 4096W but avrgcc takes bytes so 1E000
-# Atmega168PA 0x1E00        but avrgcc takes bytes so 3C00
+# Atmega128   0xF000 4096W but avrgcc takes bytes so 0x1E000
+# Atmega168PA 0x1E00  512W but avrgcc takes bytes so 0x3C00
 # Atmega32    0x3800W
 BOOTLOADER_ADDRESS = 0x3C00
 

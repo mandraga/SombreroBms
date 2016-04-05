@@ -1,6 +1,7 @@
 
 #include "env.h"
 #include "AD7280A.h"
+#include "main.h"
 
 void set_install_date_EEPROM(char *str)
 {
@@ -47,6 +48,16 @@ int get_highter_temperature(int *ptemperature, char modules)
 }
 
 char ad7280_get_balance(t_ad7280_state *st, char channel)
+{
+  return 0;
+}
+
+int ad7280_get_VBAT(t_ad7280_state *st, unsigned long *pvbat, int *ptemp)
+{
+  return 0;
+}
+
+unsigned int get_adc7(void)
 {
   return 0;
 }

@@ -82,7 +82,7 @@ OBJDIR = .
 
 # List C source files here. (C dependencies are automatically generated.)
 #SRC = $(TARGET).c AD7280A.c serial.c state_machine.c init.c adc.c inout.c eeprom.c eeprom_functions.c thermistor.c balancing.c spi.c uart.c
-SRC = $(TARGET).c stubs.c ../uart.c ../serial.c
+SRC = $(TARGET).c stubs.c ../inout.c
 
 # List C++ source files here. (C dependencies are automatically generated.)
 CPPSRC = 

@@ -141,7 +141,6 @@ LICENSE:
 #define CONFIG_PARAM_SW_MINOR	       	0x0A
 
 
-
 /*
  * Calculate the address where the bootloader starts from FLASHEND and BOOTSIZE
  * (adjust BOOTSIZE below and BOOTLOADER_ADDRESS in Makefile if you want to change the size of the bootloader)

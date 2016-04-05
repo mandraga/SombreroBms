@@ -42,7 +42,7 @@ void init(void)
   PORTC = 0x00 | (1 << GAUGE) | (0 << CTS) | (1 << CNVSTART);
   // Port D:
   DDRD  = 0x00 | (1 << TXD) | (1 << CSBAT) | (1 << PDOWN) | (1 << LED_ERROR) | (1 << LED_BALANCING) | (1 << BUZZER);
-  PORTD = 0x00 | (1 << TXD) | (1 << CSBAT) | (1 << PDOWN) | (1 << LED_ERROR) | (1 << LED_BALANCING) | (0 << BUZZER);
+  PORTD = 0x00 | (1 << TXD) | (1 << CSBAT) | (0 << PDOWN) | (1 << LED_ERROR) | (1 << LED_BALANCING) | (0 << BUZZER);
 
   // Wait 50ms
   _delay_ms(50);

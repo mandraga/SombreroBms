@@ -26,17 +26,17 @@ void setled_error(char state)
 void set_buzer(char buzer)
 {
   if (buzer)
-    SBI(PORTB, BUZZER);
+    SBI(PORTD, BUZZER);
   else
-    CBI(PORTB, BUZZER);
+    CBI(PORTD, BUZZER);
 }
 
 void set_main_relay(char cutmains)
 {
   if (cutmains)
-    SBI(PORTC, RELON);
+    SBI(PORTB, RELON);
   else
-    CBI(PORTC, RELON);
+    CBI(PORTB, RELON);
 }
 
 void set_charger_disabled(char charger_off)

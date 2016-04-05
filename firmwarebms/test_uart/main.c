@@ -23,6 +23,7 @@
 #include "uart.h"
 #include "serial.h"
 #include "AD7280A.h"
+#include "inout.h"
 
 t_pack_variable_data g_appdata;
 t_eeprom_data        g_edat;
@@ -39,14 +40,14 @@ void init()
 {
   // IO ports
   // Port B:
-  DDRB  = 0x00 | (1 << CSBAT) | (1 << BUZZER) | (1 << PD) | (1 << MOSI) | (1 << SCLK);
-  PORTB = 0x00 | (1 << CSBAT) | (0 << BUZZER) | (1 << PD) | (0 << MOSI) | (0 << SCLK);
+  DDRB  = 0x00 | (1 << STOP_CHARGER) | (1 << RELON) | (1 << MOSI) | (1 << SCLK);
+  PORTB = 0x00 | (0 << STOP_CHARGER) | (0 << RELON) | (0 << MOSI) | (0 << SCLK);
   // Port C:
-  DDRC  = 0x00 | (1 << CNVSTART) | (1 << CTS) | (1 << RELON);
-  PORTC = 0x00 | (1 << CNVSTART) | (0 << CTS) | (0 << RELON);
+  DDRC  = 0x00 | (1 << GAUGE) | (1 << CTS) | (1 << CNVSTART);
+  PORTC = 0x00 | (1 << GAUGE) | (0 << CTS) | (1 << CNVSTART);
   // Port D:
-  DDRD  = 0x00 | (1 << TXD) | (1 << CSDAC) | (1 << STOP_CHARGER) | (1 << LED_BALANCING) | (1 << LED_ERROR);
-  PORTD = 0x00 | (1 << TXD) | (1 << CSDAC) | (1 << STOP_CHARGER) | (1 << LED_BALANCING) | (1 << LED_ERROR);
+  DDRD  = 0x00 | (1 << TXD) | (1 << CSBAT) | (1 << PDOWN) | (1 << LED_ERROR) | (1 << LED_BALANCING) | (1 << BUZZER);
+  PORTD = 0x00 | (1 << TXD) | (1 << CSBAT) | (0 << PDOWN) | (1 << LED_ERROR) | (1 << LED_BALANCING) | (0 << BUZZER);
 
   // Wait 50ms
   _delay_ms(50);
@@ -61,6 +62,9 @@ void init()
   init_serial_vars();
   uart_init(UART_BAUD_SELECT(BAUDRATE, F_CPU));
   uart_puts("startig the shit\n");
+
+  // Interrupts enables
+  sei();
 }
 
 int main(void)
@@ -90,11 +94,14 @@ int main(void)
 	  break;
 	};
       g_serial.inindex = strlen(g_serial.inbuffer);
+      g_serial.RXstate = SER_STATE_IDLE;
+      g_serial.TXstate = SER_STATE_IDLE;
       process_serial_command();
       e++;
       e = e >= 3? 0 : e;
       //
       led_toggle = led_toggle ^ 1;
+      setled_balancing(led_toggle);
     }
 }
 
