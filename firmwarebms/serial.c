@@ -26,20 +26,7 @@ extern t_eeprom_data        g_edat;
 extern t_eeprom_battery     g_bat[MAXBATTERY];
 extern t_ad7280_state       g_ad7280;
 
-t_serialport g_serial;
-
-void init_serial_vars(void)
-{
-  g_serial.RXstate = SER_STATE_IDLE;
-  g_serial.TXstate = SER_STATE_IDLE;
-  g_serial.inbuffer[0] = '\n';
-  g_serial.inindex = 0;
-  g_serial.inCRC = 0;
-  g_serial.outbuffer[0] = '\n';
-  g_serial.outindex = 0;
-  g_serial.outCRC = 0;
-  g_serial.outsize = 0;
-}
+extern t_serialport g_serial;
 
 // It starts at the '-' of "set_param -valuename value" and checks if valuename is
 // refvalue. Returns 0 if not. And if equal it fills the pointer to the argument in
@@ -428,7 +415,7 @@ char change_TX_state(char TXstate)
 	int charge_percent;
 
 	charge_percent = 100L * g_appdata.state_of_charge / g_edat.full_charge;
-	snprintf(g_serial.outbuffer, TRSTRINGSZ, PSTR("chrg: %d\n"), charge_percent);
+	snprintf_P(g_serial.outbuffer, TRSTRINGSZ, PSTR("chrg: %d\n"), charge_percent);
 	nextState = SER_STATE_SEND_REPORT_CHRGMA;
       }
       break;
@@ -577,18 +564,18 @@ void serial_RX_Ir(char received)
     case SER_STATE_IDLE:
     case SER_STATE_RECEIVE:
       {
+	if (g_serial.inindex >= RCVSTRINGSZ)
+	  {
+	    g_serial.inCRC = 0;
+	    g_serial.inindex = 0;
+	    g_serial.RXstate = SER_STATE_IDLE;
+	  }
 	g_serial.inbuffer[g_serial.inindex++] = received;
 	g_serial.inCRC = g_serial.inCRC ^ received;
 	if (received == '\n')
 	  {
 	    g_serial.inbuffer[g_serial.inindex] = 0; // Add an end to form a string
 	    g_serial.RXstate = SER_STATE_CRC;
-	  }
-	if (g_serial.inindex >= RCVSTRINGSZ)
-	  {
-	    g_serial.inCRC = 0;
-	    g_serial.inindex = 0;
-	    g_serial.RXstate = SER_STATE_IDLE;
 	  }
       }
       break;

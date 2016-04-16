@@ -101,6 +101,8 @@
 					AD7280A_CELL_VOLTAGE_1 + 1)
 
 #define AD7280A_DEVADDR_MASTER		0
+#define AD7280A_DEVADDR_STACK_1		0x10 // First device in the stack
+#define AD7280A_DEVADDR_STACK_2		0x08
 #define AD7280A_DEVADDR_ALL		0x1F
 
 // 5-bit device address is sent LSB first
@@ -113,7 +115,7 @@
  * and setting the address all parts bit to 0 is recommended
  * So the TXVAL is AD7280A_DEVADDR_ALL + CRC
  */
-#define AD7280A_READ_TXVAL	0xF800030A
+#define AD7280A_READ_TXVAL	0xF800030AL
 
 /*
  * AD7280 CRC
@@ -125,6 +127,17 @@
 #define HIGHBIT		(1 << (POLYNOM_ORDER - 1))
 
 #define AD7280_VREG_MV  5200L
+
+/*
+ * Error codes
+ *
+ *
+ */
+#define ERR_MODULE_ALL_ZERO -51
+#define ERR_MODULE_CRC      -52
+#define ERR_MODULE_CONTROL  -53
+#define ERR_MODULE_COUNT    -54
+
 
 typedef struct   s_ad7280_state
 {
@@ -139,12 +152,23 @@ typedef struct   s_ad7280_state
   unsigned char	 cb_mask[MAXMODULES];  // Cell balance masks
 }                t_ad7280_state;
 
+char ad7280_check_crc(unsigned long val);
+void ad7280_delay(void);
+char __ad7280_read32(unsigned long *val);
+void ad7280_write_raw(unsigned long  data_32);
+void ad7280_write(unsigned char  devaddr, unsigned char  regaddr,
+		  unsigned char  all, unsigned char val);
+int  ad7280_read(t_ad7280_state *st, unsigned char devaddr, unsigned char addr);
+
 int  init_AD7820A(t_ad7280_state *st);
 int  ad7280_get_VBAT(t_ad7280_state *st, unsigned long *pvbat, int *ptemp);
 char ad7280_set_balance(t_ad7280_state *st, unsigned long balancing);
 char ad7280_get_balance(t_ad7280_state *st, char channel);
 
+unsigned long AD7280Adac_CELL_2_mv(unsigned long cnv);
+unsigned long AD7280Adac_AUX_2_mv(unsigned long cnv);
+char ad7280_read_all_channels(t_ad7280_state *st, unsigned int *array, int channel_count);
+int ad7280_read_ADC_selftest(t_ad7280_state *st, unsigned int *pvalues, int modules);
+
 #endif /* IIO_ADC_AD7280_H_ */
-
-
 

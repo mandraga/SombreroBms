@@ -1,0 +1,92 @@
+PCBNEW-LibModule-V1  lun. 28 sept. 2015 18:04:46 CEST
+# encoding utf-8
+Units mm
+$INDEX
+MSOP8E
+SSOP8
+$EndINDEX
+$MODULE MSOP8E
+Po 0 0 0 15 56096179 00000000 ~~
+Li MSOP8E
+Sc 0
+AR 
+Op 0 0 0
+At SMD
+T0 1.3 2.4 1.016 1.016 0 0.1524 N V 21 N "MSOP8E"
+T1 1.3 -1.85 0.762 0.508 0 0.1524 N I 21 N "Val**"
+DS 0 -3.1 2.9 -3.1 0.15 21
+DS 2.9 -3.1 2.9 -0.25 0.15 21
+DS 2.9 -0.25 0 -0.25 0.15 21
+DS 0 -0.25 0 -3.1 0.15 21
+DC 0.584 -0.834 0.584 -1.088 0.1524 21
+$PAD
+Sh "9" R 1.88 1.68 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 1.5 -1.65
+$EndPAD
+$PAD
+Sh "1" R 0.42 0.889 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 0.5 0.45
+$EndPAD
+$PAD
+Sh "2" R 0.42 0.889 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 1.15 0.45
+$EndPAD
+$PAD
+Sh "3" R 0.42 0.889 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 1.8 0.45
+$EndPAD
+$PAD
+Sh "4" R 0.42 0.889 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 2.45 0.45
+$EndPAD
+$PAD
+Sh "5" R 0.42 0.889 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 2.45 -3.8
+$EndPAD
+$PAD
+Sh "6" R 0.42 0.889 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 1.8 -3.8
+$EndPAD
+$PAD
+Sh "7" R 0.42 0.889 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 1.15 -3.8
+$EndPAD
+$PAD
+Sh "8" R 0.42 0.889 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 0.5 -3.8
+$EndPAD
+$SHAPE3D
+Na "smd/cms_so8.wrl"
+Sc 0.25 0.25 0.25
+Of 0 0 0
+Ro 0 0 0
+$EndSHAPE3D
+$EndMODULE MSOP8E
+$EndLIBRARY

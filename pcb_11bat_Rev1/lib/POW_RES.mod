@@ -1,0 +1,36 @@
+PCBNEW-LibModule-V1  lun. 04 janv. 2016 14:58:17 CET
+# encoding utf-8
+Units mm
+$INDEX
+POW_RES
+$EndINDEX
+$MODULE POW_RES
+Po 0 0 0 15 568A7A75 00000000 ~~
+Li POW_RES
+Sc 0
+AR 
+Op 0 0 0
+T0 12 -4 1 1 0 0.15 N V 21 N "POW_RES"
+T1 12.5 -10 1 1 0 0.15 N V 21 N "VAL**"
+DS 3 -4.5 1 -4.5 0.15 21
+DS 28 -4.5 30 -4.5 0.15 21
+DS 3 0 28 0 0.15 21
+DS 28 0 28 -9 0.15 21
+DS 28 -9 3 -9 0.15 21
+DS 3 -9 3 0 0.15 21
+$PAD
+Sh "2" C 2.54 2.54 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po 31 -4.5
+$EndPAD
+$PAD
+Sh "1" C 2.54 2.54 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po 0 -4.5
+$EndPAD
+$EndMODULE POW_RES
+$EndLIBRARY

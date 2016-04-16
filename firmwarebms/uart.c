@@ -8,7 +8,20 @@
 #include "uart.h"
 #include "serial.h"
 
-extern t_serialport g_serial;
+t_serialport g_serial;
+
+void init_serial_vars(void)
+{
+  g_serial.RXstate = SER_STATE_IDLE;
+  g_serial.inbuffer[0] = 0;
+  g_serial.inindex = 0;
+  g_serial.inCRC = 0;
+  g_serial.TXstate = SER_STATE_IDLE;
+  g_serial.outbuffer[0] = 0;
+  g_serial.outindex = 0;
+  g_serial.outCRC = 0;
+  g_serial.outsize = 0;
+}
 
 void uart_init(unsigned int baudrate)
 {
@@ -26,7 +39,20 @@ void uart_puts(char *str)
 {
   if (g_serial.RXstate == SER_STATE_IDLE)
     {
-      snprintf(g_serial.outbuffer, TRSTRINGSZ, "%s", str);
+      strncpy(g_serial.outbuffer, str, TRSTRINGSZ);
+      g_serial.TXstate = SER_STATE_SEND_DEBUG;
+      g_serial.outsize = strlen(g_serial.outbuffer);
+      g_serial.outindex = 0;
+      // Start the transmission
+      send_first_byte();
+    }
+}
+
+void uart_puts_P(const char *str)
+{
+  if (g_serial.RXstate == SER_STATE_IDLE)
+    {
+      strncpy_P(g_serial.outbuffer, str, TRSTRINGSZ);
       g_serial.TXstate = SER_STATE_SEND_DEBUG;
       g_serial.outsize = strlen(g_serial.outbuffer);
       g_serial.outindex = 0;
@@ -48,7 +74,8 @@ ISR(USART_RX_vect, ISR_BLOCK)
 ISR(USART_TX_vect, ISR_BLOCK)
 {
   // The last byte was sent, send another one if available
-  if (g_serial.outindex < g_serial.outsize)
+  if (g_serial.outindex < g_serial.outsize &&
+      g_serial.outindex < TRSTRINGSZ)
     {
       // Put data into buffer, sends the data
       g_serial.outCRC = g_serial.outCRC ^ g_serial.outbuffer[g_serial.outindex];
@@ -74,6 +101,8 @@ void send_first_byte()
   if (g_serial.outindex < g_serial.outsize)
     {
       g_serial.outCRC = byte = g_serial.outbuffer[g_serial.outindex++];
+      // Wait for the buffer to be ready
+      while ((UCSR0A & (1 << UDRE0)) == 0);
       UDR0 = byte;
     }
 }

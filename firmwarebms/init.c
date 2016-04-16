@@ -9,9 +9,9 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
+#include <avr/pgmspace.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <avr/signal.h>
 #include <avr/eeprom.h>
 #include <avr/sleep.h>
 #define __DELAY_BACKWARD_COMPATIBLE__ 
@@ -32,6 +32,7 @@ extern t_pack_variable_data g_appdata;
 extern t_eeprom_data        g_edat;
 extern t_eeprom_battery     g_bat[MAXBATTERY];
 extern t_ad7280_state       g_ad7280;
+extern t_serialport         g_serial;
 
 /*
 void INT0_init(void)
@@ -73,14 +74,24 @@ void enter_idle_mode(void)
 }
 */
 
+// Catch all ISR
+ISR(BADISR_vect)
+{
+  for (;;) UDR0='!';
+}
+
 // Called at start, sets the IO port direction, defaults the variables, 
 // Initialises the SPI devices and configures the interrupts
 void init()
 {
+  // Reset condition flag
+  //char byte;
+  //byte = MCUSR;
+
   // IO ports
   // Port B:
   DDRB  = 0x00 |  (1 << STOP_CHARGER) | (1 << RELON) | (1 << MOSI) | (1 << SCLK);
-  PORTB = 0x00 |  (1 << STOP_CHARGER) | (1 << RELON) | (0 << MOSI) | (0 << SCLK);
+  PORTB = 0x00 |  (0 << STOP_CHARGER) | (0 << RELON) | (0 << MOSI) | (0 << SCLK); // | (1 << MISO);
   // Port C:
   DDRC  = 0x00 | (1 << GAUGE) | (1 << CTS) | (1 << CNVSTART);
   PORTC = 0x00 | (1 << GAUGE) | (0 << CTS) | (1 << CNVSTART);
@@ -95,22 +106,30 @@ void init()
   memset(&g_appdata, 0, sizeof(g_appdata));
   // Start point
   g_appdata.app_state = STATE_START;
-  //g_appdata.charging_started = 0;
 
   // Init UART
   init_serial_vars();
   uart_init(UART_BAUD_SELECT(BAUDRATE, F_CPU));
-  uart_puts("startig the shit\n");
 
   // Init SPI
   init_spi_master();
 
+  sei(); // For the uart
+
+  uart_puts("Init.\n");
+  _delay_ms(1000);
+
   // Init the SPI device AD7820A
   if (init_AD7820A(&g_ad7280))
     {
-      uart_puts("AD7820A failed\n");
-      while (1);
+      setled_error(1);
+      while (1)
+	{
+	  _delay_ms(1000);
+	  uart_puts_P(PSTR("AD7820A init failed\n"));
+	}
     }
+
   // Initialises the ADC channel 7
   init_adc();
 

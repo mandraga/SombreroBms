@@ -27,8 +27,8 @@
 #define ALERT         PD2
 #define CSBAT         PD3
 #define PDOWN         PD4
-#define LED_ERROR     PD5
-#define LED_BALANCING PD6
+#define LED_BALANCING PD5
+#define LED_ERROR     PD6
 #define BUZZER        PD7
 
 // Main state machine
@@ -41,11 +41,6 @@
 #define STATE_SECURITY 6  // Undervoltage or overvoltage or error like trying to start when charging
 #define STATE_CURRENT_SECURITY 7  // Over current or too much current during charge
 #define STATE_CRITICAL_FAILURE 8  // Stops here, no way to get out but a reset
-
-#define BAUDRATE       9600
-#ifndef F_CPU
-#define F_CPU       3686000
-#endif
 
 void _delay_ms_S(int millisecond);
 

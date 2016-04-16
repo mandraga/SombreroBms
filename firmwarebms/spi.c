@@ -11,7 +11,7 @@ void set_SPI_pol(char pol)
 {
   if (pol == CS7280APOL)
     {
-      // Mode 1 CPOL = 0, SPHA = 2
+      // Mode 1 CPOL = 0, SPHA = 1
       CBI(SPCR, CPOL);
       SBI(SPCR, CPHA);
     }
@@ -37,25 +37,31 @@ void select_device(char device)
     }
   // CHIP select low
   if (device == SPICS7280A)
-    CBI(PORTB, CSBAT);
+    CBI(PORTD, CSBAT);
   else
-    SBI(PORTB, CSBAT);
-  //_delay_ms(1);
+    SBI(PORTD, CSBAT);
+  _delay_us(40);
 }
 
 int init_spi_master()
 {
-  // Nothing selected at start
-  select_device(SPINOSEL);
+  // Enable SPI in the power reduction register
+  CBI(PRR, PRSPI);
+  // SS/ must be set as ouput
+  //
   // SPIE 0 interrupt enable
   // SPE  1 spi enable
   // DORD 0 data order MSB first
   // MSTR 1 Enable SPI as a master
   // CPOL Low when idle
   // CPHA 1
-  // Prescaler F/16 (0 f/16)
-  SPCR = (0 << SPIE) | (1 << SPE) | (0 << DORD) | (1 << MSTR) | (0 << CPOL) | (0 << CPHA) | (0 << SPR1) | (1 << SPR0);
-  //SPSR = (1 << SPI2X);
+  // Prescaler F/64 (0 f/64) =  10
+  // Prescaler F/16          =  01
+  SPCR = (0 << SPIE) | (1 << SPE) | (0 << DORD) | (1 << MSTR) | (0 << CPOL) | (1 << CPHA) | (1 << SPR1) | (0 << SPR0);
+  SPSR = (0 << SPI2X); // defaults to 0
+  //
+  // Nothing selected at start
+  select_device(SPINOSEL);
   return 1;
 }
 
@@ -65,12 +71,20 @@ void SPI_Master_write(unsigned char cData)
   SPDR = cData;
   // Wait for transmission complete
   while (!(SPSR & (1 << SPIF)));
+  _delay_us(5);
 }
 
-unsigned char SPI_Master_read()
+unsigned char SPI_Master_read(unsigned char outByte)
 {
+  unsigned char result;
+
+  // Start transmission
+  SPDR = outByte;
   // Wait for transmission complete
   while (!(SPSR & (1 << SPIF)));
-  return (SPDR);
+  result = SPDR;
+  _delay_us(5);
+  // Return the slave output
+  return (result);
 }
 

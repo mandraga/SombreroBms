@@ -1,7 +1,6 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <avr/signal.h>
 #include <avr/eeprom.h>
 #include <avr/sleep.h>
 #define __DELAY_BACKWARD_COMPATIBLE__ 
