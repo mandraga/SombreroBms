@@ -38,14 +38,17 @@ LIBS:hrs1k
 LIBS:ftdichip
 LIBS:ntd5867nl
 LIBS:SPI_Flash
-LIBS:bms-cache
+LIBS:si8422
+LIBS:lt3990-3
+LIBS:tja1052i
+LIBS:nup2105l
 EELAYER 27 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 7 10
+Sheet 7 11
 Title ""
-Date "8 apr 2016"
+Date "16 apr 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -123,7 +126,7 @@ L CP1 C49
 U 1 1 5613C49C
 P 4800 3250
 F 0 "C49" H 4850 3350 50  0000 L CNN
-F 1 "10uF" H 4850 3150 50  0000 L CNN
+F 1 "10uF20V" H 4850 3150 50  0000 L CNN
 F 2 "~" H 4800 3250 60  0000 C CNN
 F 3 "~" H 4800 3250 60  0000 C CNN
 	1    4800 3250

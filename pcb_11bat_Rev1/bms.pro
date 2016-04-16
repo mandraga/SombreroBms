@@ -1,4 +1,4 @@
-update=jeu 25 fév 2016 10:46:55 CET
+update=sam. 16 avril 2016 14:59:39 CEST
 version=1
 last_client=eeschema
 [general]
@@ -106,3 +106,7 @@ LibName37=lib/hrs1k
 LibName38=lib/ftdichip
 LibName39=lib/ntd5867nl
 LibName40=lib/SPI_Flash
+LibName41=lib/si8422
+LibName42=lib/lt3990-3
+LibName43=lib/tja1052i
+LibName44=lib/nup2105l

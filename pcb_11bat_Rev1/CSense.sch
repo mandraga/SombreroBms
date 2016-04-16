@@ -38,14 +38,17 @@ LIBS:hrs1k
 LIBS:ftdichip
 LIBS:ntd5867nl
 LIBS:SPI_Flash
-LIBS:bms-cache
+LIBS:si8422
+LIBS:lt3990-3
+LIBS:tja1052i
+LIBS:nup2105l
 EELAYER 27 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 6 10
+Sheet 6 11
 Title ""
-Date "8 apr 2016"
+Date "16 apr 2016"
 Rev ""
 Comp ""
 Comment1 ""

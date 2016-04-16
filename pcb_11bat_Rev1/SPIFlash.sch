@@ -38,14 +38,17 @@ LIBS:hrs1k
 LIBS:ftdichip
 LIBS:ntd5867nl
 LIBS:SPI_Flash
-LIBS:bms-cache
+LIBS:si8422
+LIBS:lt3990-3
+LIBS:tja1052i
+LIBS:nup2105l
 EELAYER 27 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 9 10
+Sheet 9 11
 Title ""
-Date "8 apr 2016"
+Date "16 apr 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -53,72 +56,72 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-Text HLabel 3400 3050 0    60   Input ~ 0
+Text HLabel 5150 3450 0    60   Input ~ 0
 SDI
-Text HLabel 5350 3050 2    60   Output ~ 0
+Text HLabel 7100 3450 2    60   Output ~ 0
 SDO
-Text HLabel 5350 3250 2    60   Input ~ 0
+Text HLabel 7100 3650 2    60   Input ~ 0
 3V
-Text HLabel 3400 3150 0    60   Input ~ 0
+Text HLabel 5150 3550 0    60   Input ~ 0
 CLK
-Text HLabel 3400 3350 0    60   Input ~ 0
+Text HLabel 5150 3750 0    60   Input ~ 0
 CSFLASH/
-Text HLabel 5350 3150 2    60   Input ~ 0
+Text HLabel 7100 3550 2    60   Input ~ 0
 GND
 $Comp
 L M45PE16 U?
 U 1 1 56CF3943
-P 4200 3400
-F 0 "U?" H 4050 3350 60  0000 C CNN
-F 1 "M45PE16" H 4200 3250 60  0000 C CNN
-F 2 "~" H 4200 3400 60  0000 C CNN
-F 3 "~" H 4200 3400 60  0000 C CNN
-	1    4200 3400
+P 5950 3800
+F 0 "U?" H 5800 3750 60  0000 C CNN
+F 1 "M45PE16" H 5950 3650 60  0000 C CNN
+F 2 "~" H 5950 3800 60  0000 C CNN
+F 3 "~" H 5950 3800 60  0000 C CNN
+	1    5950 3800
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3400 3050 3700 3050
+	5150 3450 5450 3450
 Wire Wire Line
-	5350 3050 4900 3050
+	7100 3450 6650 3450
 Wire Wire Line
-	3400 3150 3700 3150
+	5150 3550 5450 3550
 Wire Wire Line
-	3400 3350 3700 3350
+	5150 3750 5450 3750
 Wire Wire Line
-	5350 3250 4900 3250
+	7100 3650 6650 3650
 Wire Wire Line
-	4900 3350 5100 3350
+	6650 3750 6850 3750
 Wire Wire Line
-	5100 3350 5100 3250
-Connection ~ 5100 3250
+	6850 3750 6850 3650
+Connection ~ 6850 3650
 Wire Wire Line
-	5350 3150 4900 3150
-Text Label 5050 3250 0    60   ~ 0
+	7100 3550 6650 3550
+Text Label 6800 3650 0    60   ~ 0
 3V
-Text Label 5050 3150 0    60   ~ 0
+Text Label 6800 3550 0    60   ~ 0
 GND
 Wire Wire Line
-	3700 3250 2500 3250
+	5450 3650 4250 3650
 $Comp
 L C C?
 U 1 1 56CF3989
-P 2600 3600
-F 0 "C?" H 2600 3700 40  0000 L CNN
-F 1 "0.1uF" H 2606 3515 40  0000 L CNN
-F 2 "~" H 2638 3450 30  0000 C CNN
-F 3 "~" H 2600 3600 60  0000 C CNN
-	1    2600 3600
+P 4350 4000
+F 0 "C?" H 4350 4100 40  0000 L CNN
+F 1 "0.1uF" H 4356 3915 40  0000 L CNN
+F 2 "~" H 4388 3850 30  0000 C CNN
+F 3 "~" H 4350 4000 60  0000 C CNN
+	1    4350 4000
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	2600 3400 2600 3250
-Connection ~ 2600 3250
+	4350 3800 4350 3650
+Connection ~ 4350 3650
 Wire Wire Line
-	2600 3800 2600 3950
+	4350 4200 4350 4350
 Wire Wire Line
-	2600 3950 2750 3950
-Text Label 2750 3950 0    60   ~ 0
+	4350 4350 4500 4350
+Text Label 4500 4350 0    60   ~ 0
 GND
-Text Label 2500 3250 0    60   ~ 0
+Text Label 4250 3650 0    60   ~ 0
 3V
 $EndSCHEMATC

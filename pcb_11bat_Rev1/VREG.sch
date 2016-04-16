@@ -38,14 +38,17 @@ LIBS:hrs1k
 LIBS:ftdichip
 LIBS:ntd5867nl
 LIBS:SPI_Flash
-LIBS:bms-cache
+LIBS:si8422
+LIBS:lt3990-3
+LIBS:tja1052i
+LIBS:nup2105l
 EELAYER 27 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 5 10
+Sheet 5 11
 Title ""
-Date "8 apr 2016"
+Date "16 apr 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -53,223 +56,295 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-$Comp
-L LT3010-5 U5
-U 1 1 56016DFB
-P 4800 4050
-F 0 "U5" H 4800 3950 60  0000 C CNN
-F 1 "LT3010-5" H 4850 3850 60  0000 C CNN
-F 2 "~" H 4800 4050 60  0000 C CNN
-F 3 "~" H 4800 4050 60  0000 C CNN
-	1    4800 4050
-	1    0    0    -1  
-$EndComp
-Text Label 5850 3950 0    60   ~ 0
+Text Label 4000 2950 0    60   ~ 0
 GND
-Text Label 3550 3300 0    60   ~ 0
-5V
 $Comp
 L C C46
 U 1 1 56016E96
-P 6750 3600
-F 0 "C46" H 6750 3700 40  0000 L CNN
-F 1 "1uF100V" H 6756 3515 40  0000 L CNN
-F 2 "~" H 6788 3450 30  0000 C CNN
-F 3 "~" H 6750 3600 60  0000 C CNN
-	1    6750 3600
+P 4550 2600
+F 0 "C46" H 4550 2700 40  0000 L CNN
+F 1 "1uF100V" H 4556 2515 40  0000 L CNN
+F 2 "~" H 4588 2450 30  0000 C CNN
+F 3 "~" H 4550 2600 60  0000 C CNN
+	1    4550 2600
 	1    0    0    -1  
 $EndComp
 $Comp
 L C C45
 U 1 1 56016EB4
-P 3000 3550
-F 0 "C45" H 3000 3650 40  0000 L CNN
-F 1 "1uF" H 3006 3465 40  0000 L CNN
-F 2 "~" H 3038 3400 30  0000 C CNN
-F 3 "~" H 3000 3550 60  0000 C CNN
-	1    3000 3550
+P 4200 4600
+F 0 "C45" H 4200 4700 40  0000 L CNN
+F 1 "1uF" H 4206 4515 40  0000 L CNN
+F 2 "~" H 4238 4450 30  0000 C CNN
+F 3 "~" H 4200 4600 60  0000 C CNN
+	1    4200 4600
 	1    0    0    -1  
 $EndComp
-Text Label 7300 3300 0    60   ~ 0
+Text Label 4000 2300 0    60   ~ 0
+VIN
+Text HLabel 7700 2400 2    60   Input ~ 0
 VBAT
-Text HLabel 10000 3400 2    60   Input ~ 0
-VBAT
-Text Label 3250 3850 0    60   ~ 0
+Text Label 4850 5500 0    60   ~ 0
 GND
-Text HLabel 1600 3300 0    60   Output ~ 0
-5V
-Text HLabel 1600 3850 0    60   Input ~ 0
+Text HLabel 3050 5500 0    60   Input ~ 0
 GND
 $Comp
 L C C44
 U 1 1 56017B92
-P 3850 4750
-F 0 "C44" H 3850 4850 40  0000 L CNN
-F 1 "0.1uF" H 3856 4665 40  0000 L CNN
-F 2 "~" H 3888 4600 30  0000 C CNN
-F 3 "~" H 3850 4750 60  0000 C CNN
-	1    3850 4750
+P 3850 4600
+F 0 "C44" H 3850 4700 40  0000 L CNN
+F 1 "0.1uF" H 3856 4515 40  0000 L CNN
+F 2 "~" H 3888 4450 30  0000 C CNN
+F 3 "~" H 3850 4600 60  0000 C CNN
+	1    3850 4600
 	1    0    0    -1  
 $EndComp
 $Comp
 L ZENER D5
 U 1 1 5601F9AB
-P 7200 3600
-F 0 "D5" H 7200 3700 50  0000 C CNN
-F 1 "ZENER 64V" H 7200 3500 40  0000 C CNN
-F 2 "~" H 7200 3600 60  0000 C CNN
-F 3 "~" H 7200 3600 60  0000 C CNN
-	1    7200 3600
+P 5000 2600
+F 0 "D5" H 5000 2700 50  0000 C CNN
+F 1 "ZENER 55V" H 5000 2500 40  0000 C CNN
+F 2 "~" H 5000 2600 60  0000 C CNN
+F 3 "~" H 5000 2600 60  0000 C CNN
+	1    5000 2600
 	0    -1   -1   0   
 $EndComp
-Wire Wire Line
-	1600 3300 4150 3300
-Wire Wire Line
-	4150 3600 4050 3600
-Wire Wire Line
-	4050 3600 4050 3850
-Connection ~ 4050 3750
-Wire Wire Line
-	4150 3450 4050 3450
-Wire Wire Line
-	4050 3450 4050 3300
-Connection ~ 4050 3300
-Wire Wire Line
-	6750 3950 6750 3800
-Wire Wire Line
-	6750 3400 6750 3300
-Connection ~ 6750 3300
-Wire Wire Line
-	6350 3300 6350 3750
-Wire Wire Line
-	6350 3750 5500 3750
-Connection ~ 6350 3300
-Wire Wire Line
-	3000 3350 3000 3300
-Connection ~ 3000 3300
-Wire Wire Line
-	3000 3750 3000 3850
-Wire Wire Line
-	4050 3850 1600 3850
-Connection ~ 3000 3850
-Wire Wire Line
-	7200 3300 7200 3400
-Connection ~ 7200 3300
-Wire Wire Line
-	7200 3950 7200 3800
-Connection ~ 6750 3950
-Wire Wire Line
-	5600 3450 5500 3450
-Wire Wire Line
-	5600 3600 5600 3450
-Connection ~ 5600 3600
-Text Label 5850 3600 0    60   ~ 0
-GND
-Wire Wire Line
-	5500 3600 5850 3600
-Wire Wire Line
-	4050 3750 4150 3750
 $Comp
 L EMI_FILTER2 FI?
 U 1 1 56CE826B
-P 8100 3300
-F 0 "FI?" H 8100 3400 50  0000 C CNN
-F 1 "EMI_FILTER2" H 8150 3150 50  0000 L CNN
-F 2 "~" H 8100 3300 60  0000 C CNN
-F 3 "~" H 8100 3300 60  0000 C CNN
-	1    8100 3300
+P 6000 2300
+F 0 "FI?" H 6000 2400 50  0000 C CNN
+F 1 "EMI_FILTER2" H 6050 2150 50  0000 L CNN
+F 2 "~" H 6000 2300 60  0000 C CNN
+F 3 "~" H 6000 2300 60  0000 C CNN
+	1    6000 2300
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	8100 3950 8100 3550
-Connection ~ 7200 3950
-Wire Wire Line
-	8450 3300 8800 3300
-$Comp
-L LM117E U?
-U 1 1 56CED544
-P 2800 4550
-F 0 "U?" H 2600 4750 40  0000 C CNN
-F 1 "LM117E" H 2800 4750 40  0000 L CNN
-F 2 "LLC-20" H 2800 4650 30  0000 C CIN
-F 3 "" H 2800 4550 60  0000 C CNN
-	1    2800 4550
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	1600 4500 2400 4500
-Wire Wire Line
-	2800 4800 2800 5000
-Wire Wire Line
-	3200 4500 4850 4500
-Connection ~ 2800 5000
-Text Label 1600 4500 0    60   ~ 0
-5V
 $Comp
 L C C?
 U 1 1 56CED685
-P 3500 4750
-F 0 "C?" H 3500 4850 40  0000 L CNN
-F 1 "1uF" H 3506 4665 40  0000 L CNN
-F 2 "~" H 3538 4600 30  0000 C CNN
-F 3 "~" H 3500 4750 60  0000 C CNN
-	1    3500 4750
+P 7600 4850
+F 0 "C?" H 7600 4950 40  0000 L CNN
+F 1 "0.22uF" H 7606 4765 40  0000 L CNN
+F 2 "~" H 7638 4700 30  0000 C CNN
+F 3 "~" H 7600 4850 60  0000 C CNN
+	1    7600 4850
+	1    0    0    -1  
+$EndComp
+Text Label 3650 4100 0    60   ~ 0
+3.3V
+Text HLabel 3050 4100 0    60   Output ~ 0
+3.3V
+$Comp
+L SWITCH_INV SW?
+U 1 1 56D09D61
+P 7000 2300
+F 0 "SW?" H 6800 2450 50  0000 C CNN
+F 1 "SWITCH_INV" H 6850 2150 50  0000 C CNN
+F 2 "~" H 7000 2300 60  0000 C CNN
+F 3 "~" H 7000 2300 60  0000 C CNN
+	1    7000 2300
+	1    0    0    -1  
+$EndComp
+Text Notes 5600 1950 0    60   ~ 0
+This switch protects the AD7280A stack against\nreverse currents when assembling the battery pack.
+NoConn ~ 7500 2200
+$Comp
+L LT3990-3.3 U?
+U 1 1 57127B3B
+P 6500 4900
+F 0 "U?" H 6300 4850 60  0000 C CNN
+F 1 "LT3990-3.3" H 6500 4750 60  0000 C CNN
+F 2 "~" H 6500 4900 60  0000 C CNN
+F 3 "~" H 6500 4900 60  0000 C CNN
+	1    6500 4900
 	1    0    0    -1  
 $EndComp
 $Comp
 L C C?
-U 1 1 56CED691
-P 2050 4750
-F 0 "C?" H 2050 4850 40  0000 L CNN
-F 1 "1uF" H 2056 4665 40  0000 L CNN
-F 2 "~" H 2088 4600 30  0000 C CNN
-F 3 "~" H 2050 4750 60  0000 C CNN
-	1    2050 4750
+U 1 1 57127BAB
+P 4550 4600
+F 0 "C?" H 4550 4700 40  0000 L CNN
+F 1 "22uF100V" H 4556 4515 40  0000 L CNN
+F 2 "~" H 4588 4450 30  0000 C CNN
+F 3 "~" H 4550 4600 60  0000 C CNN
+	1    4550 4600
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	2050 4550 2050 4500
-Connection ~ 2050 4500
-Wire Wire Line
-	2050 4950 2050 5000
-Connection ~ 2050 5000
-Wire Wire Line
-	3500 4500 3500 4550
-Connection ~ 3500 4500
-Wire Wire Line
-	3500 4950 3500 5000
-Connection ~ 3500 5000
-Wire Wire Line
-	3850 4550 3850 4500
-Connection ~ 3850 4500
-Wire Wire Line
-	3850 4950 3850 5000
-Text Label 1600 5000 0    60   ~ 0
-GND
-Wire Wire Line
-	3850 5000 1600 5000
-Text Label 4150 4500 0    60   ~ 0
-3V
-Text HLabel 4850 4500 2    60   Output ~ 0
-3V
+Text Label 5300 4400 0    60   ~ 0
+VIN
 $Comp
-L SWITCH_INV SW?
-U 1 1 56D09D61
-P 9300 3300
-F 0 "SW?" H 9100 3450 50  0000 C CNN
-F 1 "SWITCH_INV" H 9150 3150 50  0000 C CNN
-F 2 "~" H 9300 3300 60  0000 C CNN
-F 3 "~" H 9300 3300 60  0000 C CNN
-	1    9300 3300
+L R R?
+U 1 1 57127BF8
+P 8100 4500
+F 0 "R?" V 8180 4500 40  0000 C CNN
+F 1 "374K" V 8107 4501 40  0000 C CNN
+F 2 "~" V 8030 4500 30  0000 C CNN
+F 3 "~" H 8100 4500 30  0000 C CNN
+	1    8100 4500
+	1    0    0    -1  
+$EndComp
+$Comp
+L C C?
+U 1 1 57127C0A
+P 5450 4850
+F 0 "C?" H 5450 4950 40  0000 L CNN
+F 1 "2.2uF100V" H 5456 4765 40  0000 L CNN
+F 2 "~" H 5488 4700 30  0000 C CNN
+F 3 "~" H 5450 4850 60  0000 C CNN
+	1    5450 4850
+	1    0    0    -1  
+$EndComp
+$Comp
+L DIODE D?
+U 1 1 57127C17
+P 5350 2300
+F 0 "D?" H 5350 2400 40  0000 C CNN
+F 1 "DIODE" H 5350 2200 40  0000 C CNN
+F 2 "~" H 5350 2300 60  0000 C CNN
+F 3 "~" H 5350 2300 60  0000 C CNN
+	1    5350 2300
+	-1   0    0    1   
+$EndComp
+$Comp
+L INDUCTOR L?
+U 1 1 57127C26
+P 5050 4600
+F 0 "L?" V 5000 4600 40  0000 C CNN
+F 1 "33µH" V 5150 4600 40  0000 C CNN
+F 2 "~" H 5050 4600 60  0000 C CNN
+F 3 "~" H 5050 4600 60  0000 C CNN
+	1    5050 4600
+	1    0    0    -1  
+$EndComp
+Text Label 7600 4400 2    60   ~ 0
+BD
+Text Label 5300 3800 2    60   ~ 0
+BD
+Text Label 7600 3950 2    60   ~ 0
+GND
+Text Label 7000 5100 2    60   ~ 0
+SW
+Text Label 5300 5050 2    60   ~ 0
+SW
+Wire Wire Line
+	4550 2950 4550 2800
+Wire Wire Line
+	4550 2400 4550 2300
+Connection ~ 4550 2300
+Wire Wire Line
+	5000 2300 5000 2400
+Connection ~ 5000 2300
+Wire Wire Line
+	5000 2950 5000 2800
+Connection ~ 4550 2950
+Wire Wire Line
+	6000 2950 6000 2550
+Connection ~ 5000 2950
+Wire Wire Line
+	7700 2400 7500 2400
+Wire Wire Line
+	6500 2300 6350 2300
+Wire Wire Line
+	4000 2300 5150 2300
+Wire Wire Line
+	5650 2300 5550 2300
+Wire Wire Line
+	6000 2950 4000 2950
+Wire Wire Line
+	3050 4100 5800 4100
+Wire Wire Line
+	5650 4100 5650 4200
+Wire Wire Line
+	5650 4200 5800 4200
+Connection ~ 5650 4100
+Wire Wire Line
+	5800 5500 5800 4800
+Wire Wire Line
+	3050 5500 8100 5500
+Wire Wire Line
+	7200 4100 8100 4100
+Wire Wire Line
+	8100 4100 8100 4250
+Wire Wire Line
+	5800 4600 5450 4600
+Wire Wire Line
+	5450 4400 5450 4650
+Wire Wire Line
+	5450 5050 5450 5500
+Connection ~ 5450 5500
+Wire Wire Line
+	7200 4400 7600 4400
+Wire Wire Line
+	7200 4600 7600 4600
+Wire Wire Line
+	7600 4600 7600 4650
+Wire Wire Line
+	7600 5100 7600 5050
+Wire Wire Line
+	7000 5100 7600 5100
+Wire Wire Line
+	7200 5100 7200 4800
+Connection ~ 5050 4100
+Wire Wire Line
+	5050 3800 5300 3800
+Wire Wire Line
+	8100 5500 8100 4750
+Connection ~ 5800 5500
+Wire Wire Line
+	7200 3950 7600 3950
+Wire Wire Line
+	5050 3800 5050 4300
+Wire Wire Line
+	4550 4100 4550 4400
+Wire Wire Line
+	4550 4800 4550 5500
+Connection ~ 7200 5100
+Wire Wire Line
+	5050 4900 5050 5050
+Wire Wire Line
+	5050 5050 5300 5050
+Wire Wire Line
+	4200 4100 4200 4400
+Connection ~ 4550 4100
+Wire Wire Line
+	4200 4800 4200 5500
+Connection ~ 4550 5500
+Connection ~ 4200 5500
+Wire Wire Line
+	3850 4800 3850 5500
+Connection ~ 3850 5500
+Wire Wire Line
+	3850 4400 3850 4100
+Connection ~ 3850 4100
+Wire Wire Line
+	5800 4400 5300 4400
+Connection ~ 5450 4400
+Connection ~ 5450 4600
+Wire Wire Line
+	7200 4300 7600 4300
+Text Label 7600 4300 2    60   ~ 0
+PG
+Connection ~ 4200 4100
+$Comp
+L R R?
+U 1 1 57128302
+P 3450 4650
+F 0 "R?" V 3530 4650 40  0000 C CNN
+F 1 "100K" V 3457 4651 40  0000 C CNN
+F 2 "~" V 3380 4650 30  0000 C CNN
+F 3 "~" H 3450 4650 30  0000 C CNN
+	1    3450 4650
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	7750 3300 5500 3300
+	3450 4100 3450 4400
+Connection ~ 3450 4100
 Wire Wire Line
-	5500 3950 8100 3950
+	3450 4900 3450 5000
 Wire Wire Line
-	10000 3400 9800 3400
-Text Notes 8450 2900 0    60   ~ 0
-This switch protects the AD7280A stack against\nreverse currents when assembling the battery pack.
-NoConn ~ 9800 3200
+	3450 5000 3150 5000
+Text Label 3150 5000 2    60   ~ 0
+PG
 $EndSCHEMATC
