@@ -39,16 +39,18 @@ LIBS:ftdichip
 LIBS:ntd5867nl
 LIBS:SPI_Flash
 LIBS:si8422
-LIBS:lt3990-3
 LIBS:tja1052i
 LIBS:nup2105l
+LIBS:lt3990-3
+LIBS:inductor-coilcraft
+LIBS:bms-cache
 EELAYER 27 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 9 11
 Title ""
-Date "16 apr 2016"
+Date "17 apr 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -58,7 +60,7 @@ Comment4 ""
 $EndDescr
 Text HLabel 5150 3450 0    60   Input ~ 0
 SDI
-Text HLabel 7100 3450 2    60   Output ~ 0
+Text HLabel 8050 3450 2    60   Output ~ 0
 SDO
 Text HLabel 7100 3650 2    60   Input ~ 0
 3V
@@ -69,10 +71,10 @@ CSFLASH/
 Text HLabel 7100 3550 2    60   Input ~ 0
 GND
 $Comp
-L M45PE16 U?
+L M45PE16 U10
 U 1 1 56CF3943
 P 5950 3800
-F 0 "U?" H 5800 3750 60  0000 C CNN
+F 0 "U10" H 5800 3750 60  0000 C CNN
 F 1 "M45PE16" H 5950 3650 60  0000 C CNN
 F 2 "~" H 5950 3800 60  0000 C CNN
 F 3 "~" H 5950 3800 60  0000 C CNN
@@ -82,7 +84,7 @@ $EndComp
 Wire Wire Line
 	5150 3450 5450 3450
 Wire Wire Line
-	7100 3450 6650 3450
+	8050 3450 7600 3450
 Wire Wire Line
 	5150 3550 5450 3550
 Wire Wire Line
@@ -103,10 +105,10 @@ GND
 Wire Wire Line
 	5450 3650 4250 3650
 $Comp
-L C C?
+L C C56
 U 1 1 56CF3989
 P 4350 4000
-F 0 "C?" H 4350 4100 40  0000 L CNN
+F 0 "C56" H 4350 4100 40  0000 L CNN
 F 1 "0.1uF" H 4356 3915 40  0000 L CNN
 F 2 "~" H 4388 3850 30  0000 C CNN
 F 3 "~" H 4350 4000 60  0000 C CNN
@@ -124,4 +126,19 @@ Text Label 4500 4350 0    60   ~ 0
 GND
 Text Label 4250 3650 0    60   ~ 0
 3V
+$Comp
+L R R75
+U 1 1 5714A559
+P 7350 3450
+F 0 "R75" V 7430 3450 40  0000 C CNN
+F 1 "1K" V 7357 3451 40  0000 C CNN
+F 2 "~" V 7280 3450 30  0000 C CNN
+F 3 "~" H 7350 3450 30  0000 C CNN
+	1    7350 3450
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	7100 3450 6650 3450
+Text Label 6800 3450 0    60   ~ 0
+FSDO
 $EndSCHEMATC
