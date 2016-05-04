@@ -35,7 +35,6 @@ LIBS:ad7280a
 LIBS:myopto
 LIBS:ina197
 LIBS:hrs1k
-LIBS:ftdichip
 LIBS:ntd5867nl
 LIBS:SPI_Flash
 LIBS:si8422
@@ -43,6 +42,9 @@ LIBS:tja1052i
 LIBS:nup2105l
 LIBS:lt3990-3
 LIBS:inductor-coilcraft
+LIBS:tle4266
+LIBS:ft232rq
+LIBS:lm2936
 LIBS:bms-cache
 EELAYER 27 0
 EELAYER END
@@ -50,7 +52,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 6 11
 Title ""
-Date "17 apr 2016"
+Date "2 may 2016"
 Rev ""
 Comp ""
 Comment1 ""

@@ -1,6 +1,6 @@
-update=dim. 17 avril 2016 17:53:32 CEST
+update=mer. 04 mai 2016 14:57:42 CEST
 version=1
-last_client=pcbnew
+last_client=cvpcb
 [general]
 version=1
 [eeschema]
@@ -49,27 +49,24 @@ LibName34=lib/ad7280a
 LibName35=lib/myopto
 LibName36=lib/ina197
 LibName37=lib/hrs1k
-LibName38=lib/ftdichip
-LibName39=lib/ntd5867nl
-LibName40=lib/SPI_Flash
-LibName41=lib/si8422
-LibName42=lib/tja1052i
-LibName43=lib/nup2105l
-LibName44=lib/lt3990-3
-LibName45=lib/inductor-coilcraft
-[cvpcb]
-version=1
-NetIExt=net
-[cvpcb/libraries]
-EquName1=devcms
+LibName38=lib/ntd5867nl
+LibName39=lib/SPI_Flash
+LibName40=lib/si8422
+LibName41=lib/tja1052i
+LibName42=lib/nup2105l
+LibName43=lib/lt3990-3
+LibName44=lib/inductor-coilcraft
+LibName45=lib/tle4266
+LibName46=lib/ft232rq
+LibName47=lib/lm2936
 [pcbnew]
 version=1
 LastNetListRead=bms.net
 UseCmpFile=1
 PadDrill="    0,000000"
 PadDrillOvalY="    0,000000"
-PadSizeH="    0,500000"
-PadSizeV="    1,000000"
+PadSizeH="    2,200000"
+PadSizeV="    2,200000"
 PcbTextSizeV="    1,000000"
 PcbTextSizeH="    1,000000"
 PcbTextThickness="    0,300000"
@@ -82,7 +79,6 @@ DrawSegmentWidth="    0,200000"
 BoardOutlineThickness="    0,150000"
 ModuleOutlineThickness="    0,150000"
 [pcbnew/libraries]
-LibDir=
 LibName1=sockets
 LibName2=connect
 LibName3=discret
@@ -102,13 +98,22 @@ LibName16=valves
 LibName17=lib/LQFP48
 LibName18=lib/uMAX-uSOP_10
 LibName19=lib/CMSSW
-LibName20=lib/SC6
-LibName21=lib/myopto
-LibName22=lib/buzzer
-LibName23=lib/micro_USB_Molex
-LibName24=lib/TE_REL_PE014
-LibName25=lib/filter_NFE61HT102
-LibName26=lib/POW_RES
-LibName27=lib/pin2mm
-LibName28=lib/inductor-coilcraft
-LibName29=lib/MSOP16E
+LibName20=lib/myopto
+LibName21=lib/buzzer
+LibName22=lib/micro_USB_Molex
+LibName23=lib/TE_REL_PE014
+LibName24=lib/POW_RES
+LibName25=lib/pin2mm
+LibName26=lib/MSOP16E
+LibName27=lib/inductor-coilcraft
+LibName28=lib/filter_NFE61H
+LibName29=lib/filter_NFE61HT102
+LibName30=lib/testp
+LibName31=lib/NSOP8
+LibName32=lib/SO8W
+LibDir=
+[cvpcb]
+version=1
+NetIExt=net
+[cvpcb/libraries]
+EquName1=devcms

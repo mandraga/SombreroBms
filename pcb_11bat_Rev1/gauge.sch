@@ -35,7 +35,6 @@ LIBS:ad7280a
 LIBS:myopto
 LIBS:ina197
 LIBS:hrs1k
-LIBS:ftdichip
 LIBS:ntd5867nl
 LIBS:SPI_Flash
 LIBS:si8422
@@ -43,6 +42,9 @@ LIBS:tja1052i
 LIBS:nup2105l
 LIBS:lt3990-3
 LIBS:inductor-coilcraft
+LIBS:tle4266
+LIBS:ft232rq
+LIBS:lm2936
 LIBS:bms-cache
 EELAYER 27 0
 EELAYER END
@@ -50,7 +52,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 10 11
 Title ""
-Date "17 apr 2016"
+Date "2 may 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -77,12 +79,8 @@ Text Label 7650 4650 0    60   ~ 0
 GND
 Text Label 7650 4450 0    60   ~ 0
 GaugeValue
-Wire Wire Line
-	6900 4450 8300 4450
-Wire Wire Line
-	6700 4650 8300 4650
 Text HLabel 4200 3050 0    60   Input ~ 0
-VBAT
+VCOM
 Text HLabel 4200 3350 0    60   Input ~ 0
 GAUGEOUT
 $Comp
@@ -133,9 +131,7 @@ F 3 "~" H 6900 3600 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	6900 3850 6900 4450
-Wire Wire Line
-	6700 4200 6900 4200
+	6700 4200 7500 4200
 Connection ~ 6900 4200
 $Comp
 L R R76
@@ -169,4 +165,12 @@ Wire Wire Line
 Connection ~ 4400 4650
 Text Notes 4200 4350 2    60   ~ 0
 Test Led\n
+Wire Wire Line
+	6700 4650 8300 4650
+Wire Wire Line
+	6900 4200 6900 3850
+Wire Wire Line
+	7500 4450 8300 4450
+Wire Wire Line
+	7500 4200 7500 4450
 $EndSCHEMATC

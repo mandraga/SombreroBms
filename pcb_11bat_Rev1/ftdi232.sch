@@ -35,7 +35,6 @@ LIBS:ad7280a
 LIBS:myopto
 LIBS:ina197
 LIBS:hrs1k
-LIBS:ftdichip
 LIBS:ntd5867nl
 LIBS:SPI_Flash
 LIBS:si8422
@@ -43,6 +42,9 @@ LIBS:tja1052i
 LIBS:nup2105l
 LIBS:lt3990-3
 LIBS:inductor-coilcraft
+LIBS:tle4266
+LIBS:ft232rq
+LIBS:lm2936
 LIBS:bms-cache
 EELAYER 27 0
 EELAYER END
@@ -50,7 +52,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 8 11
 Title ""
-Date "17 apr 2016"
+Date "2 may 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -143,17 +145,6 @@ Text Label 4650 2800 0    60   ~ 0
 3V3OUT
 Text Label 3050 2850 0    60   ~ 0
 USBGND
-$Comp
-L FT232RQ U8
-U 1 1 5613AD71
-P 6050 3700
-F 0 "U8" H 6050 3700 60  0000 C CNN
-F 1 "FT232RQ" H 6050 3700 60  0000 C CNN
-F 2 "" H 6050 3700 60  0000 C CNN
-F 3 "" H 6050 3700 60  0000 C CNN
-	1    6050 3700
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	6950 2900 8100 2900
 Wire Wire Line
@@ -190,16 +181,16 @@ USBVCC
 Wire Wire Line
 	2950 3600 3150 3600
 Wire Wire Line
-	5950 5000 5950 5150
+	5850 5000 5850 5150
 Wire Wire Line
-	6350 5000 6350 5150
-Connection ~ 6350 5150
+	6250 5000 6250 5150
+Connection ~ 6250 5150
 Wire Wire Line
-	6150 5000 6150 5150
-Connection ~ 6150 5150
+	6050 5000 6050 5150
+Connection ~ 6050 5150
 Wire Wire Line
-	5750 5150 5750 5000
-Connection ~ 5950 5150
+	5650 5150 5650 5000
+Connection ~ 5850 5150
 Text Label 7450 1650 0    60   ~ 0
 USBVCC
 Wire Wire Line
@@ -262,7 +253,7 @@ Wire Wire Line
 Wire Wire Line
 	4000 4600 4000 5000
 Wire Wire Line
-	5750 5150 6850 5150
+	5650 5150 6750 5150
 NoConn ~ 5150 3600
 NoConn ~ 6950 4100
 NoConn ~ 6950 4300
@@ -320,7 +311,7 @@ Text Label 4200 5000 0    60   ~ 0
 USBGND
 Text Label 7700 2300 0    60   ~ 0
 USBGND
-Text Label 6850 5150 0    60   ~ 0
+Text Label 6750 5150 0    60   ~ 0
 USBGND
 Text Label 7700 2550 0    60   ~ 0
 USBVCC
@@ -407,4 +398,18 @@ NoConn ~ 5150 4300
 Wire Wire Line
 	4200 5000 1700 5000
 Connection ~ 4000 5000
+Wire Wire Line
+	6450 5000 6450 5150
+Connection ~ 6450 5150
+$Comp
+L FT232RQ U8
+U 1 1 571CEDE2
+P 6050 3700
+F 0 "U8" H 6050 3700 60  0000 C CNN
+F 1 "FT232RQ" H 6050 3600 60  0000 C CNN
+F 2 "~" H 6050 3700 60  0000 C CNN
+F 3 "~" H 6050 3700 60  0000 C CNN
+	1    6050 3700
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC

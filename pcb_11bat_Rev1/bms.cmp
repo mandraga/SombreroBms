@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2013-jul-07)-stable date = dim. 17 avril 2016 18:19:34 CEST
+Cmp-Mod V01 Created by CvPcb (2013-jul-07)-stable date = mer. 04 mai 2016 14:57:51 CEST
 
 BeginCmp
 TimeStamp = /55ECCEF9;
@@ -316,16 +316,9 @@ IdModule  = SM0805;
 EndCmp
 
 BeginCmp
-TimeStamp = /56011C6E/56016E96;
-Reference = C46;
-ValeurCmp = 1uF100V;
-IdModule  = SM0805;
-EndCmp
-
-BeginCmp
 TimeStamp = /56011C6E/57127BAB;
 Reference = C47;
-ValeurCmp = 22uF20V;
+ValeurCmp = 22uF16V;
 IdModule  = SMDHD/VF;
 EndCmp
 
@@ -339,7 +332,7 @@ EndCmp
 BeginCmp
 TimeStamp = /56011C6E/56CED685;
 Reference = C49;
-ValeurCmp = 0.22uF;
+ValeurCmp = 0.22uF100V;
 IdModule  = SM1206;
 EndCmp
 
@@ -442,6 +435,13 @@ IdModule  = SM0805;
 EndCmp
 
 BeginCmp
+TimeStamp = /57193AA8;
+Reference = C64;
+ValeurCmp = 0.1uF;
+IdModule  = SM0805;
+EndCmp
+
+BeginCmp
 TimeStamp = /5613C94A/55ECD9D4;
 Reference = CON1;
 ValeurCmp = USB-MINI-B;
@@ -519,13 +519,6 @@ IdModule  = LED-0805;
 EndCmp
 
 BeginCmp
-TimeStamp = /57144B31/57147D86;
-Reference = D11;
-ValeurCmp = DIODE;
-IdModule  = DO_214AA;
-EndCmp
-
-BeginCmp
 TimeStamp = /56004B98;
 Reference = FB1;
 ValeurCmp = FILTER;
@@ -564,21 +557,21 @@ BeginCmp
 TimeStamp = /56011C6E/56CE826B;
 Reference = FI1;
 ValeurCmp = EMI_FILTER2;
-IdModule  = EMI_FILTER;
+IdModule  = EMI_FILTER_NFE61HT;
 EndCmp
 
 BeginCmp
 TimeStamp = /57144B31/57146655;
 Reference = FI2;
 ValeurCmp = EMI_FILTER2;
-IdModule  = EMI_FILTER;
+IdModule  = EMI_FILTER_NFE61HT;
 EndCmp
 
 BeginCmp
 TimeStamp = /57080092;
 Reference = IC1;
 ValeurCmp = ATMEGA32M1-A;
-IdModule  = QFN32;
+IdModule  = TQFP32;
 EndCmp
 
 BeginCmp
@@ -760,14 +753,14 @@ BeginCmp
 TimeStamp = /5613C94A/57126F2E;
 Reference = P23;
 ValeurCmp = TST;
-IdModule  = 1PIN_SMD;
+IdModule  = TestP;
 EndCmp
 
 BeginCmp
 TimeStamp = /5613C94A/57126F3B;
 Reference = P24;
 ValeurCmp = TST;
-IdModule  = 1PIN_SMD;
+IdModule  = TestP;
 EndCmp
 
 BeginCmp
@@ -1425,7 +1418,7 @@ BeginCmp
 TimeStamp = /56CF2100/56CF279F;
 Reference = R78;
 ValeurCmp = 10K;
-IdModule  = SM0805;
+IdModule  = SM1206;
 EndCmp
 
 BeginCmp
@@ -1527,7 +1520,7 @@ IdModule  = REL_PE014;
 EndCmp
 
 BeginCmp
-TimeStamp = /5613C94A/5613AD71;
+TimeStamp = /5613C94A/571CEDE2;
 Reference = U8;
 ValeurCmp = FT232RQ;
 IdModule  = QFN32-5x5;
@@ -1544,7 +1537,7 @@ BeginCmp
 TimeStamp = /56CF0CE3/56CF3943;
 Reference = U10;
 ValeurCmp = M45PE16;
-IdModule  = SO8E;
+IdModule  = SO8W;
 EndCmp
 
 BeginCmp
@@ -1569,10 +1562,10 @@ IdModule  = SOT23;
 EndCmp
 
 BeginCmp
-TimeStamp = /57144B31/57147A3D;
+TimeStamp = /57144B31/571D3B2D;
 Reference = U14;
-ValeurCmp = 7805;
-IdModule  = DPAK2;
+ValeurCmp = LM2936;
+IdModule  = SOT223;
 EndCmp
 
 BeginCmp

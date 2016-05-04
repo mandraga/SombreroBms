@@ -35,7 +35,6 @@ LIBS:ad7280a
 LIBS:myopto
 LIBS:ina197
 LIBS:hrs1k
-LIBS:ftdichip
 LIBS:ntd5867nl
 LIBS:SPI_Flash
 LIBS:si8422
@@ -43,6 +42,9 @@ LIBS:tja1052i
 LIBS:nup2105l
 LIBS:lt3990-3
 LIBS:inductor-coilcraft
+LIBS:tle4266
+LIBS:ft232rq
+LIBS:lm2936
 LIBS:bms-cache
 EELAYER 27 0
 EELAYER END
@@ -50,7 +52,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 2 11
 Title ""
-Date "17 apr 2016"
+Date "2 may 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -258,11 +260,11 @@ SCLK
 Text Label 6950 4450 2    60   ~ 0
 SDI
 Text Label 6950 4550 2    60   ~ 0
-SDO
+SDOOUT
 Text Label 6950 4650 2    60   ~ 0
 CS/
-Text Label 6950 4750 2    60   ~ 0
-ALERT
+Text Label 6850 4750 2    60   ~ 0
+ALERTOUT
 Text Label 4500 6250 2    60   ~ 0
 INTERPD/
 Text Label 6950 4950 2    60   ~ 0
@@ -680,4 +682,6 @@ F 3 "~" H 3100 2200 30  0000 C CNN
 	1    3100 2200
 	1    0    0    -1  
 $EndComp
+Text Label 7200 2900 0    60   ~ 0
+VSS1
 $EndSCHEMATC

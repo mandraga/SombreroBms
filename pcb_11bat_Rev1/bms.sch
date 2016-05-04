@@ -35,7 +35,6 @@ LIBS:ad7280a
 LIBS:myopto
 LIBS:ina197
 LIBS:hrs1k
-LIBS:ftdichip
 LIBS:ntd5867nl
 LIBS:SPI_Flash
 LIBS:si8422
@@ -43,6 +42,9 @@ LIBS:tja1052i
 LIBS:nup2105l
 LIBS:lt3990-3
 LIBS:inductor-coilcraft
+LIBS:tle4266
+LIBS:ft232rq
+LIBS:lm2936
 LIBS:bms-cache
 EELAYER 27 0
 EELAYER END
@@ -50,7 +52,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 11
 Title ""
-Date "17 apr 2016"
+Date "2 may 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -162,7 +164,7 @@ Text Label 5600 2250 0    60   ~ 0
 SDI
 Text Label 5600 2150 0    60   ~ 0
 SDO
-Text Label 5600 2350 0    60   ~ 0
+Text Label 5600 2650 0    60   ~ 0
 ALERT
 Text Label 9000 2650 2    60   ~ 0
 ALERT
@@ -205,7 +207,7 @@ Text Label 5600 4350 2    60   ~ 0
 RXD
 Text Label 5600 4250 2    60   ~ 0
 TXD
-Text Label 5600 2450 0    60   ~ 0
+Text Label 5600 2750 0    60   ~ 0
 CSBAT/
 Text Label 9000 2150 2    60   ~ 0
 CSBAT/
@@ -213,9 +215,9 @@ Text Label 9000 2250 2    60   ~ 0
 PD/
 Text Label 9000 2550 2    60   ~ 0
 CNVSTART/
-Text Label 5600 2550 0    60   ~ 0
+Text Label 5600 4150 0    60   ~ 0
 PD/
-Text Label 5600 2650 0    60   ~ 0
+Text Label 5600 3050 0    60   ~ 0
 CNVSTART/
 Text Label 1900 1450 0    60   ~ 0
 GND
@@ -223,17 +225,17 @@ Text Label 2050 4450 0    60   ~ 0
 GND
 Text Label 1450 3750 0    60   ~ 0
 3.3V
-Text Label 5600 3950 0    60   ~ 0
+Text Label 5600 2450 0    60   ~ 0
 LEDBALANCING
-Text Label 5600 4050 0    60   ~ 0
+Text Label 5600 2550 0    60   ~ 0
 LEDERROR
 Text Label 8050 5400 0    60   ~ 0
 LEDBALANCING
 Text Label 8050 5500 0    60   ~ 0
 LEDERROR
-Text Label 5600 4550 0    60   ~ 0
+Text Label 5600 4450 0    60   ~ 0
 CHARGER_ON/
-Text Label 5600 3650 0    60   ~ 0
+Text Label 5600 4650 0    60   ~ 0
 BUZZER
 $Comp
 L R R11
@@ -275,7 +277,7 @@ F 3 "~" H 1150 4800 60  0000 C CNN
 $EndComp
 Text Label 1400 5050 0    60   ~ 0
 GND
-Text Label 5600 4450 0    60   ~ 0
+Text Label 5600 2350 0    60   ~ 0
 CSENSE
 $Comp
 L FILTER FB1
@@ -367,7 +369,7 @@ Text Label 5550 6900 0    60   ~ 0
 CHARGER_ON/
 Text Label 5000 6000 0    60   ~ 0
 GND
-Text Label 5600 4650 0    60   ~ 0
+Text Label 5600 4550 0    60   ~ 0
 STOP_CHARGER
 Text Label 5700 5550 0    60   ~ 0
 STOP_CHARGER
@@ -393,7 +395,7 @@ F2 "VBAT" I L 3950 850 60
 F3 "GND" I L 3950 1200 60 
 F4 "3.3V" O R 5450 850 60 
 $EndSheet
-Text Label 5600 2750 0    60   ~ 0
+Text Label 5600 3150 0    60   ~ 0
 CSFLASH/
 Text Label 9300 750  2    60   ~ 0
 CSFLASH/
@@ -473,8 +475,6 @@ F 3 "" H 2950 1200 60  0000 C CNN
 	1    2950 1200
 	1    0    0    -1  
 $EndComp
-Text Label 2850 1450 0    60   ~ 0
-SHIELD
 Text Label 8450 900  0    60   ~ 0
 GND
 $Comp
@@ -508,12 +508,12 @@ CHARGER_12V
 $Comp
 L R R2
 U 1 1 5602B85F
-P 2200 6300
-F 0 "R2" V 2280 6300 40  0000 C CNN
-F 1 "1M" V 2207 6301 40  0000 C CNN
-F 2 "~" V 2130 6300 30  0000 C CNN
-F 3 "~" H 2200 6300 30  0000 C CNN
-	1    2200 6300
+P 2600 6300
+F 0 "R2" V 2680 6300 40  0000 C CNN
+F 1 "1M" V 2607 6301 40  0000 C CNN
+F 2 "~" V 2530 6300 30  0000 C CNN
+F 3 "~" H 2600 6300 30  0000 C CNN
+	1    2600 6300
 	-1   0    0    1   
 $EndComp
 Text Label 6550 800  0    60   ~ 0
@@ -567,7 +567,7 @@ Text Label 7050 1550 0    60   ~ 0
 GND
 Text Label 7050 1350 0    60   ~ 0
 RELON
-Text Label 5600 3750 0    60   ~ 0
+Text Label 5600 3450 0    60   ~ 0
 RELON
 $Sheet
 S 10050 6200 900  750 
@@ -579,7 +579,6 @@ F3 "RXD" O L 10050 6450 60
 F4 "BMSVCC" I L 10050 6600 60 
 F5 "BMSGND" I L 10050 6750 60 
 $EndSheet
-NoConn ~ -3100 0   
 $Comp
 L C C7
 U 1 1 56144221
@@ -637,15 +636,13 @@ U 56CF2100
 F0 "Gauge" 50
 F1 "gauge.sch" 50
 F2 "GND" I R 10650 5700 60 
-F3 "VBAT" I R 10650 5550 60 
-F4 "GAUGEOUT" I L 10000 5350 60 
+F3 "GAUGEOUT" I L 10000 5350 60 
+F4 "VCOM" I R 10650 5550 60 
 $EndSheet
 Text Label 9450 5350 0    60   ~ 0
 GAUGEOUT
 Text Label 10950 5700 2    60   ~ 0
 GND
-Text Label 10950 5550 2    60   ~ 0
-VBAT
 Text Label 9300 1200 2    60   ~ 0
 SDO
 $Comp
@@ -739,10 +736,10 @@ Text Label 5600 3250 0    60   ~ 0
 TXCAN
 Text Label 5600 3350 0    60   ~ 0
 RXCAN
-NoConn ~ 5300 4150
-NoConn ~ 5300 3450
-NoConn ~ 5300 3150
-NoConn ~ 5300 3050
+NoConn ~ 5300 3650
+NoConn ~ 5300 3750
+NoConn ~ 5300 3950
+NoConn ~ 5300 4050
 $Sheet
 S 6950 2550 850  850 
 U 57144B31
@@ -774,7 +771,7 @@ Wire Wire Line
 Wire Wire Line
 	9450 2000 9000 2000
 Wire Wire Line
-	5300 2350 5600 2350
+	5300 2650 5600 2650
 Wire Wire Line
 	9450 2650 9000 2650
 Wire Wire Line
@@ -786,7 +783,7 @@ Wire Wire Line
 Wire Wire Line
 	8500 6850 8500 6700
 Wire Wire Line
-	5300 4550 5600 4550
+	5300 4450 5600 4450
 Wire Wire Line
 	5300 4350 5600 4350
 Wire Wire Line
@@ -813,11 +810,11 @@ Wire Wire Line
 Wire Wire Line
 	1150 3750 1450 3750
 Wire Wire Line
-	5300 3950 5600 3950
+	5300 2450 5600 2450
 Wire Wire Line
-	5300 4050 5600 4050
+	5300 2550 5600 2550
 Wire Wire Line
-	5300 3650 5600 3650
+	5300 4650 5600 4650
 Wire Wire Line
 	7250 4250 7250 4200
 Wire Wire Line
@@ -834,9 +831,9 @@ Wire Wire Line
 Wire Wire Line
 	7250 5500 8050 5500
 Wire Wire Line
-	5300 3750 5600 3750
+	5300 3450 5600 3450
 Wire Wire Line
-	5300 2550 5600 2550
+	5300 4150 5600 4150
 Wire Wire Line
 	8050 6500 8200 6500
 Wire Wire Line
@@ -866,7 +863,7 @@ Wire Wire Line
 Wire Wire Line
 	1150 5050 1400 5050
 Wire Wire Line
-	5300 4650 5600 4650
+	5300 4550 5600 4550
 Wire Wire Line
 	2100 3400 2100 3500
 Wire Wire Line
@@ -945,37 +942,11 @@ Wire Wire Line
 Wire Wire Line
 	3950 850  3500 850 
 Wire Wire Line
-	2800 700  2600 700 
-Wire Wire Line
-	2600 700  2600 1450
-Wire Wire Line
-	2600 1450 2850 1450
-Wire Wire Line
-	2800 800  2600 800 
-Connection ~ 2600 800 
-Wire Wire Line
-	2800 900  2600 900 
-Connection ~ 2600 900 
-Wire Wire Line
-	2800 1000 2600 1000
-Connection ~ 2600 1000
-Wire Wire Line
-	2800 1100 2600 1100
-Connection ~ 2600 1100
-Wire Wire Line
-	2800 1200 2600 1200
-Connection ~ 2600 1200
-Wire Wire Line
 	8100 900  8450 900 
 Wire Wire Line
-	2200 6600 2200 6550
+	2600 6600 2600 6550
 Wire Wire Line
 	1750 6000 2900 6000
-Wire Wire Line
-	2200 6000 2200 6050
-Connection ~ 2200 6000
-Wire Wire Line
-	1450 6600 2200 6600
 Wire Wire Line
 	2900 5550 2800 5550
 Wire Wire Line
@@ -1001,15 +972,15 @@ Connection ~ 1650 3500
 Wire Wire Line
 	5300 3550 5600 3550
 Wire Wire Line
-	5300 2450 5600 2450
+	5300 2750 5600 2750
 Wire Wire Line
-	5600 2650 5300 2650
+	5600 3050 5300 3050
 Wire Wire Line
 	9500 4150 8500 4150
 Wire Wire Line
 	5450 850  5900 850 
 Wire Wire Line
-	5300 2750 5600 2750
+	5300 3150 5600 3150
 Wire Wire Line
 	10650 5550 10950 5550
 Wire Wire Line
@@ -1040,7 +1011,7 @@ Wire Wire Line
 Wire Wire Line
 	2850 2850 2850 2950
 Wire Wire Line
-	5600 4450 5300 4450
+	5600 2350 5300 2350
 Wire Wire Line
 	10050 6600 9650 6600
 Wire Wire Line
@@ -1073,4 +1044,34 @@ Wire Wire Line
 	1150 4350 1150 4600
 Wire Wire Line
 	1050 4450 1300 4450
+$Comp
+L C C64
+U 1 1 57193AA8
+P 2200 6300
+F 0 "C64" H 2200 6400 40  0000 L CNN
+F 1 "0.1uF" H 2206 6215 40  0000 L CNN
+F 2 "~" H 2238 6150 30  0000 C CNN
+F 3 "~" H 2200 6300 60  0000 C CNN
+	1    2200 6300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2600 6050 2600 6000
+Connection ~ 2600 6000
+Wire Wire Line
+	2600 6600 1450 6600
+Wire Wire Line
+	2200 6500 2200 6600
+Connection ~ 2200 6600
+Wire Wire Line
+	2200 6100 2200 5550
+Connection ~ 2200 5550
+NoConn ~ 2800 700 
+NoConn ~ 2800 800 
+NoConn ~ 2800 900 
+NoConn ~ 2800 1000
+NoConn ~ 2800 1100
+NoConn ~ 2800 1200
+Text Label 10950 5550 2    60   ~ 0
+3.3V
 $EndSCHEMATC
